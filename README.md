@@ -4,6 +4,38 @@ A cream, terracotta and soft-beige themed study app for two law modules
 (**Professional Ethics** and **Notarial Practice**, renameable in-app),
 built as a React web app with an optional real-AI backend.
 
+## 📲 Get it as an app on your laptop
+
+Burrow & Brief is a real installable app (a "PWA") — no app store, no download link
+needed, just a webpage you can turn into a desktop app in a couple of clicks. It works
+fully offline once installed (Real AI mode still needs internet, everything else doesn't).
+
+**One-time setup (about 30 seconds), done by whoever owns the GitHub repo:**
+
+1. On GitHub, open this repo → **Settings** → **Pages** (left sidebar, under "Code and automation").
+2. Under **Build and deployment → Source**, choose **GitHub Actions**, then save.
+3. That's it — pushing to this branch already triggers the included workflow
+   (`.github/workflows/deploy-pages.yml`), which builds the app and deploys it. Check the
+   **Actions** tab for progress (~1 minute the first time).
+4. Once it finishes, your app is live at:
+   `https://<your-github-username>.github.io/<this-repo-name>/`
+   (GitHub shows the exact URL at the top of the Pages settings page once it's live.)
+
+**Then, to install it on your laptop:**
+
+1. Open that URL in **Chrome** or **Edge**.
+2. Click the **install icon** in the right side of the address bar (a little monitor-with-
+   arrow icon), or open the **⋮ menu → Save and share → Install Burrow & Brief…**.
+3. Confirm — it's now a real app: its own icon on your desktop/dock/start menu, opens in
+   its own window (no browser tabs or address bar), and works offline.
+
+On a phone, the same URL works via **Add to Home Screen** in the browser menu.
+
+Don't want to touch GitHub settings? You can also just run it locally — see
+[Running the frontend locally](#running-the-frontend-locally) below, then open
+`http://localhost:4173` in Chrome/Edge after `npm run build && npm run preview` and
+install it from there the same way.
+
 ## Features
 
 - **Dashboard** — upcoming assignments, today's habits, goals in progress, your burrow at a glance, tip of the day
@@ -115,8 +147,9 @@ then point the frontend's Backend URL at `http://localhost:8080`.
 ## Project structure
 
 ```
-frontend/   React + Vite app (the whole UI, works standalone in offline mode)
-server/     Express backend that calls the Claude API (only needed for Real AI mode)
+frontend/               React + Vite app (the whole UI, works standalone in offline mode)
+server/                 Express backend that calls the Claude API (only needed for Real AI mode)
+.github/workflows/      GitHub Actions workflow that builds & deploys frontend/ to GitHub Pages
 ```
 
 ## Customizing
