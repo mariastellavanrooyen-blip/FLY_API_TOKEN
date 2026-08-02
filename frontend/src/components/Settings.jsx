@@ -1,14 +1,28 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useStore } from '../state/store.jsx'
 import { pingBackend } from '../lib/api.js'
+import { estimateStorage, clearAllFileRecords } from '../lib/db.js'
+import { formatBytes } from '../lib/extract.js'
+import ProgressBar from './ui/ProgressBar.jsx'
 
 export default function Settings() {
   const { state, dispatch } = useStore()
   const [testStatus, setTestStatus] = useState(null)
+  const [storage, setStorage] = useState(null)
   const fileRef = useRef(null)
+
+  useEffect(() => {
+    estimateStorage().then(setStorage)
+  }, [state.documents.length])
 
   function setSetting(patch) {
     dispatch({ type: 'SET_SETTINGS', payload: patch })
+  }
+
+  async function clearLibrary() {
+    if (!confirm(`Delete all ${state.documents.length} document(s) stashed in My Burrow? This can't be undone.`)) return
+    await clearAllFileRecords()
+    dispatch({ type: 'CLEAR_DOCUMENTS' })
   }
 
   async function testConnection() {
@@ -92,7 +106,13 @@ export default function Settings() {
       <div className="card">
         <div className="section-title">💾 Your data</div>
         <p className="muted" style={{ marginTop: -4 }}>
-          Everything is stored only on this device (browser local storage). Back it up before clearing your browser data.
+          Everything is stored only on this device — assignments, goals, notes and uploaded documents all persist
+          automatically between visits. Back up your data before clearing your browser storage.
+        </p>
+        <p className="muted" style={{ fontSize: '0.75rem' }}>
+          Note: the JSON backup below covers assignments, goals, notes, quizzes and habits, plus your document
+          <em> list</em> (filenames, status, progress). It does not include the uploaded file contents themselves —
+          those live in this browser's storage only, described below.
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="btn secondary" onClick={exportData}>
@@ -104,8 +124,9 @@ export default function Settings() {
           <input type="file" accept="application/json" ref={fileRef} style={{ display: 'none' }} onChange={importData} />
           <button
             className="btn danger"
-            onClick={() => {
-              if (confirm('This clears all assignments, goals, notes, quizzes and habits. Export a backup first?')) {
+            onClick={async () => {
+              if (confirm('This clears all assignments, goals, notes, quizzes, habits AND everything in My Burrow. Export a backup first?')) {
+                await clearAllFileRecords()
                 dispatch({ type: 'RESET_STATE' })
               }
             }}
@@ -113,6 +134,30 @@ export default function Settings() {
             🗑️ Reset all data
           </button>
         </div>
+      </div>
+
+      <div className="card">
+        <div className="section-title">📦 My Burrow storage</div>
+        <p className="muted" style={{ marginTop: -4 }}>
+          Uploaded documents (PDFs, Word docs, text and photos) are remembered in this browser's on-device storage,
+          separate from the rest of the app's data.
+        </p>
+        <p>
+          <strong>{state.documents.length}</strong> document{state.documents.length === 1 ? '' : 's'} stashed
+        </p>
+        {storage?.quota ? (
+          <>
+            <ProgressBar value={(storage.usage / storage.quota) * 100} />
+            <p className="muted" style={{ marginTop: 6 }}>
+              {formatBytes(storage.usage)} used of roughly {formatBytes(storage.quota)} available on this device.
+            </p>
+          </>
+        ) : (
+          <p className="muted">Storage usage isn't reported by this browser.</p>
+        )}
+        <button className="btn danger small" onClick={clearLibrary} disabled={state.documents.length === 0}>
+          🗑️ Clear My Burrow only
+        </button>
       </div>
 
       <div className="card">

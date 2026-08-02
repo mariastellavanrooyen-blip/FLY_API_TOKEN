@@ -126,6 +126,32 @@ function reducer(state, action) {
         ),
       }
 
+    // --- documents (My Burrow) ---
+    case 'ADD_DOCUMENT':
+      return { ...state, documents: [action.payload, ...state.documents] }
+    case 'UPDATE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.map((d) => (d.id === action.payload.id ? { ...d, ...action.payload } : d)),
+      }
+    case 'DELETE_DOCUMENT':
+      return { ...state, documents: state.documents.filter((d) => d.id !== action.payload.id) }
+    case 'CLEAR_DOCUMENTS':
+      return { ...state, documents: [] }
+    case 'LINK_NOTES_TO_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.map((d) =>
+          d.id === action.payload.docId
+            ? {
+                ...d,
+                status: d.status === 'new' ? 'in-progress' : d.status,
+                linkedNotesIds: [...new Set([...(d.linkedNotesIds || []), action.payload.notesId])],
+              }
+            : d,
+        ),
+      }
+
     // --- habits ---
     case 'ADD_HABIT':
       return { ...state, habits: [...state.habits, { id: uid(), createdAt: todayKey(), log: {}, ...action.payload }] }

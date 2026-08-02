@@ -534,6 +534,27 @@ label {
   border: 1px solid var(--beige-deep);
 }
 
+.upload-drop {
+  border: 3px dashed var(--beige-deep);
+  background: var(--cream-deep);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.upload-drop.drag-over {
+  border-color: var(--terracotta);
+  background: var(--beige);
+}
+
+.doc-card {
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.doc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-pop);
+}
+
 .decor-rainbow-arc {
   font-size: 2.4rem;
   line-height: 1;

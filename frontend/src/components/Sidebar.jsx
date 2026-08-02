@@ -4,6 +4,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
   { id: 'assignments', label: 'Assignments', icon: '✅' },
   { id: 'goals', label: 'Goals', icon: '🎯' },
+  { id: 'library', label: 'My Burrow', icon: '📦' },
   { id: 'modules', label: 'Modules & Assistant', icon: '🤖' },
   { id: 'notes', label: 'Notes & Quiz', icon: '📝' },
   { id: 'tips', label: 'Study Tips', icon: '💡' },

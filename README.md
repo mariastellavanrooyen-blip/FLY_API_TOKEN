@@ -6,20 +6,48 @@ built as a React web app with an optional real-AI backend.
 
 ## Features
 
-- **Dashboard** — upcoming assignments, today's habits, goals in progress, tip of the day
+- **Dashboard** — upcoming assignments, today's habits, goals in progress, your burrow at a glance, tip of the day
 - **Assignments** — per-module tracker with due dates, priority and status
 - **Goals** — target-dated goals broken into checkable milestones with a progress bar
+- **My Burrow (memory)** — upload chapter PDFs, Word docs, text files or photos of your notes;
+  the app remembers every upload, extracts its text, tracks your progress on it
+  (New / In progress / Reviewed), and lets you jump straight into generating notes/quizzes
+  from it. Persists across visits — see [My Burrow](#my-burrow-your-document-memory) below.
 - **Modules & Assistant** — edit your two modules/chapters and chat with a study assistant
-- **Notes & Quiz Generator** — paste chapter text in; get bullet notes, a glossary and an
-  auto-generated quiz (multiple choice / true-false / fill-in-the-blank) back out
+- **Notes & Quiz Generator** — paste chapter text in (or pull it straight from My Burrow);
+  get bullet notes, a glossary and an auto-generated quiz (multiple choice / true-false /
+  fill-in-the-blank) back out
 - **Study Tips** — curated legal-study tips (exam technique, case briefing, essay writing,
   ethics, notarial practice, time management), favoritable
 - **Study Timer** — Pomodoro-style focus/break timer that logs study minutes
 - **Habit Tracker** — daily habit checklist with streaks and a 35-day heatmap
-- **Settings** — profile, AI mode, data export/import/reset
+- **Settings** — profile, AI mode, storage usage, data export/import/reset
 
-Everything is stored locally in your browser (`localStorage`) — nothing leaves your
-device unless you turn on Real AI mode.
+Everything is stored locally on your device — nothing leaves your browser unless you turn
+on Real AI mode.
+
+## My Burrow — your document memory
+
+**My Burrow** is the app's built-in memory for your documents, progress and uploads. Drop in
+a chapter PDF, a `.docx`, a plain text/markdown file, or a photo of handwritten notes:
+
+- The file itself is remembered on-device in the browser's IndexedDB storage (far larger
+  capacity than the small `localStorage` quota used for the rest of the app), so it survives
+  reloads and browser restarts.
+- Text is extracted automatically — natively for `.txt`/`.md`, via `pdf.js` for PDFs, and via
+  `mammoth` for `.docx`. Photos need Real AI mode (below) to be read, using Claude's vision.
+- Each document tracks its own **progress** — New → In progress → Reviewed — and automatically
+  moves to "In progress" the first time you generate notes/quiz from it, with a running count
+  of how many note sets came from it.
+- From any document's preview you can jump straight into **Notes & Quiz** with its text
+  pre-loaded, or pick it from a dropdown there directly.
+- **Settings** shows how much on-device storage your burrow is using and lets you clear it
+  independently of the rest of your data.
+
+Note: the JSON export/import backup in Settings covers your document *list* (filenames,
+status, links) but not the file contents themselves, which live only in this browser's
+storage — export a copy of anything irreplaceable separately if you plan to clear your
+browser data.
 
 ## Two AI modes
 
@@ -50,8 +78,9 @@ npm run build   # outputs to frontend/dist
 
 ## Deploying the real-AI backend (Fly.io)
 
-`server/` is a small Express API that proxies two endpoints to the Claude API:
-`POST /api/generate` (notes + quiz) and `POST /api/chat` (assistant replies). Your
+`server/` is a small Express API that proxies three endpoints to the Claude API:
+`POST /api/generate` (notes + quiz), `POST /api/chat` (assistant replies), and
+`POST /api/describe-image` (reads text out of photos uploaded to My Burrow). Your
 Anthropic API key stays server-side and is never exposed to the browser.
 
 1. Install the [Fly.io CLI](https://fly.io/docs/flyctl/install/) and `fly auth login`.

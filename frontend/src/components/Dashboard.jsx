@@ -28,6 +28,8 @@ export default function Dashboard({ onNavigate }) {
   const overdueCount = state.assignments.filter((a) => a.status !== 'done' && daysUntil(a.dueDate) < 0).length
   const todayMinutes = state.timerSessions.filter((s) => s.date === today).reduce((sum, s) => sum + s.minutes, 0)
   const activeGoals = state.goals.filter((g) => g.milestones.some((m) => !m.done) || g.milestones.length === 0)
+  const recentDocs = [...state.documents].sort((a, b) => (b.uploadedAt || '').localeCompare(a.uploadedAt || '')).slice(0, 3)
+  const reviewedDocs = state.documents.filter((d) => d.status === 'reviewed').length
 
   function moduleName(id) {
     return state.modules.find((m) => m.id === id)?.name || '—'
@@ -60,6 +62,29 @@ export default function Dashboard({ onNavigate }) {
             View habits
           </button>
         </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="section-title">📦 My Burrow</div>
+        {state.documents.length === 0 ? (
+          <EmptyState emoji="📦" title="Nothing stashed yet" subtitle="Upload chapter PDFs, docs or photos and Burrow & Brief will remember them for you." />
+        ) : (
+          <>
+            <p className="muted" style={{ marginTop: -4 }}>
+              {state.documents.length} document{state.documents.length > 1 ? 's' : ''} remembered · {reviewedDocs} reviewed
+            </p>
+            {recentDocs.map((d) => (
+              <div className="list-row" key={d.id}>
+                <span className="grow">{d.filename}</span>
+                <span className="muted">{moduleName(d.moduleId)}</span>
+                <span className={`badge${d.status === 'reviewed' ? ' status-done' : ''}`}>{d.status === 'in-progress' ? 'In progress' : d.status === 'reviewed' ? 'Reviewed' : 'New'}</span>
+              </div>
+            ))}
+          </>
+        )}
+        <button className="btn ghost small" style={{ marginTop: 8 }} onClick={() => onNavigate('library')}>
+          Open My Burrow →
+        </button>
       </div>
 
       <div className="grid cols-2" style={{ marginTop: 16, alignItems: 'start' }}>

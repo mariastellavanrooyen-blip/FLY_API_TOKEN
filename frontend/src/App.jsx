@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import Assignments from './components/Assignments.jsx'
 import Goals from './components/Goals.jsx'
+import Library from './components/Library.jsx'
 import ModulesAssistant from './components/ModulesAssistant.jsx'
 import NotesQuiz from './components/NotesQuiz.jsx'
 import Tips from './components/Tips.jsx'
@@ -15,6 +16,7 @@ const TITLES = {
   dashboard: ['🏠', 'Dashboard'],
   assignments: ['✅', 'Assignments'],
   goals: ['🎯', 'Goals'],
+  library: ['📦', 'My Burrow'],
   modules: ['🤖', 'Modules & Assistant'],
   notes: ['📝', 'Notes & Quiz Generator'],
   tips: ['💡', 'Study Tips'],
@@ -25,8 +27,14 @@ const TITLES = {
 
 export default function App() {
   const [tab, setTab] = useState('dashboard')
+  const [pendingDoc, setPendingDoc] = useState(null)
   const { state } = useStore()
   const [icon, label] = TITLES[tab]
+
+  function sendDocToNotes(doc) {
+    setPendingDoc(doc)
+    setTab('notes')
+  }
 
   return (
     <div className="app-shell">
@@ -44,8 +52,9 @@ export default function App() {
         {tab === 'dashboard' && <Dashboard onNavigate={setTab} />}
         {tab === 'assignments' && <Assignments />}
         {tab === 'goals' && <Goals />}
+        {tab === 'library' && <Library onSendToNotes={sendDocToNotes} />}
         {tab === 'modules' && <ModulesAssistant />}
-        {tab === 'notes' && <NotesQuiz />}
+        {tab === 'notes' && <NotesQuiz pendingDoc={pendingDoc} onConsumePendingDoc={() => setPendingDoc(null)} />}
         {tab === 'tips' && <Tips />}
         {tab === 'timer' && <Timer />}
         {tab === 'habits' && <Habits />}

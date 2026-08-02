@@ -82,6 +82,32 @@ export async function generateNotesAndQuiz({ text, chapterTitle, moduleName }) {
   }
 }
 
+export async function describeImage({ base64, mediaType }) {
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: 1500,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          {
+            type: 'text',
+            text:
+              'If this image contains readable text (a textbook page, handwritten or typed notes, a slide, etc.), ' +
+              'transcribe all of it as accurately as possible, preserving structure with plain-text formatting. ' +
+              'If there is no meaningful text, briefly describe what the image shows instead. Return only the ' +
+              'transcription or description — no preamble.',
+          },
+        ],
+      },
+    ],
+  })
+
+  const block = response.content.find((b) => b.type === 'text')
+  return block ? block.text : ''
+}
+
 export async function chatReply({ message, history = [], moduleContext }) {
   const messages = [
     ...history

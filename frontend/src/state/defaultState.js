@@ -33,6 +33,7 @@ export function makeDefaultState() {
     favoriteTips: [],
     notes: [],
     quizzes: [],
+    documents: [],
     habits: [
       { id: uid(), name: 'Study 1 hour', createdAt: todayKey(), log: {} },
       { id: uid(), name: 'Review yesterday’s notes', createdAt: todayKey(), log: {} },

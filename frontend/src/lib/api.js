@@ -23,6 +23,10 @@ export async function chatRemote(backendUrl, { message, history, moduleContext }
   return post(backendUrl, '/api/chat', { message, history, moduleContext })
 }
 
+export async function describeImageRemote(backendUrl, { base64, mediaType }) {
+  return post(backendUrl, '/api/describe-image', { base64, mediaType })
+}
+
 export async function pingBackend(backendUrl) {
   const res = await fetch(`${backendUrl.replace(/\/$/, '')}/api/health`)
   if (!res.ok) throw new Error('Backend not reachable')

@@ -1,9 +1,14 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useStore } from '../state/store.jsx'
 import { generateNotesFromText, generateQuizFromNotes } from '../lib/offlineAI.js'
 import { generateNotesAndQuizRemote } from '../lib/api.js'
+import { getFileRecord } from '../lib/db.js'
 import EmptyState from './ui/EmptyState.jsx'
 import { uid, formatDate } from '../lib/utils.js'
+
+function stripExtension(name) {
+  return name?.replace(/\.[a-z0-9]+$/i, '') || ''
+}
 
 function QuizRunner({ quiz, onFinish }) {
   const [answers, setAnswers] = useState({})
@@ -80,7 +85,7 @@ function QuizRunner({ quiz, onFinish }) {
   )
 }
 
-export default function NotesQuiz() {
+export default function NotesQuiz({ pendingDoc, onConsumePendingDoc }) {
   const { state, dispatch } = useStore()
   const [moduleId, setModuleId] = useState(state.modules[0]?.id || '')
   const [chapterTitle, setChapterTitle] = useState('')
@@ -89,8 +94,45 @@ export default function NotesQuiz() {
   const [error, setError] = useState('')
   const [openNoteId, setOpenNoteId] = useState(null)
   const [openQuizId, setOpenQuizId] = useState(null)
+  const [sourceDocId, setSourceDocId] = useState(null)
+  const [docPicker, setDocPicker] = useState('')
+  const [loadingDoc, setLoadingDoc] = useState(false)
 
   const isRemote = state.settings.aiMode === 'claude' && state.settings.backendUrl
+  const usableDocs = state.documents.filter((d) => d.textLength > 0)
+
+  async function loadDocIntoForm(doc) {
+    setLoadingDoc(true)
+    try {
+      const record = await getFileRecord(doc.id)
+      setText(record?.extractedText || '')
+      setModuleId(doc.moduleId || state.modules[0]?.id || '')
+      setChapterTitle((prev) => prev || stripExtension(doc.filename))
+      setSourceDocId(doc.id)
+    } finally {
+      setLoadingDoc(false)
+    }
+  }
+
+  // Arrived here via "Generate notes & quiz from this" in My Burrow
+  useEffect(() => {
+    if (pendingDoc) {
+      loadDocIntoForm(pendingDoc)
+      setDocPicker(pendingDoc.id)
+      onConsumePendingDoc?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingDoc])
+
+  async function handleDocPickerChange(id) {
+    setDocPicker(id)
+    if (!id) {
+      setSourceDocId(null)
+      return
+    }
+    const doc = state.documents.find((d) => d.id === id)
+    if (doc) await loadDocIntoForm(doc)
+  }
 
   async function handleGenerate() {
     setError('')
@@ -107,10 +149,11 @@ export default function NotesQuiz() {
           chapterTitle: chapterTitle || 'Untitled chapter',
           moduleName,
         })
-        const notes = { id: uid(), moduleId, createdAt: new Date().toISOString(), source: 'claude', ...res.notes }
+        const notes = { id: uid(), moduleId, createdAt: new Date().toISOString(), source: 'claude', sourceDocId, ...res.notes }
         const quiz = { id: uid(), moduleId, notesId: notes.id, chapterTitle: notes.chapterTitle, attempts: [], questions: res.quiz.questions }
         dispatch({ type: 'ADD_NOTES', payload: notes })
         dispatch({ type: 'ADD_QUIZ', payload: quiz })
+        if (sourceDocId) dispatch({ type: 'LINK_NOTES_TO_DOCUMENT', payload: { docId: sourceDocId, notesId: notes.id } })
         setOpenNoteId(notes.id)
       } else {
         const notes = generateNotesFromText(text, { chapterTitle: chapterTitle || 'Untitled chapter' })
@@ -120,14 +163,17 @@ export default function NotesQuiz() {
           return
         }
         const questions = generateQuizFromNotes(notes)
-        const fullNotes = { ...notes, moduleId, source: 'offline' }
+        const fullNotes = { ...notes, moduleId, source: 'offline', sourceDocId }
         const quiz = { id: uid(), moduleId, notesId: notes.id, chapterTitle: notes.chapterTitle, attempts: [], questions }
         dispatch({ type: 'ADD_NOTES', payload: fullNotes })
         dispatch({ type: 'ADD_QUIZ', payload: quiz })
+        if (sourceDocId) dispatch({ type: 'LINK_NOTES_TO_DOCUMENT', payload: { docId: sourceDocId, notesId: notes.id } })
         setOpenNoteId(notes.id)
       }
       setText('')
       setChapterTitle('')
+      setSourceDocId(null)
+      setDocPicker('')
     } catch (err) {
       setError(`Something went wrong generating notes: ${err.message}`)
     } finally {
@@ -164,9 +210,31 @@ export default function NotesQuiz() {
             <input value={chapterTitle} onChange={(e) => setChapterTitle(e.target.value)} placeholder="e.g. Chapter 5 — Client Confidentiality" />
           </div>
         </div>
+        {usableDocs.length > 0 && (
+          <div className="field">
+            <label>📦 Or load from My Burrow</label>
+            <select value={docPicker} onChange={(e) => handleDocPickerChange(e.target.value)}>
+              <option value="">— paste text manually instead —</option>
+              {usableDocs.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.filename}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="field">
           <label>Chapter text</label>
-          <textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste chapter text here…" />
+          <textarea
+            rows={8}
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value)
+              setSourceDocId(null)
+              setDocPicker('')
+            }}
+            placeholder={loadingDoc ? 'Loading document text…' : 'Paste chapter text here…'}
+          />
         </div>
         {error && <p style={{ color: '#7a2e18' }}>{error}</p>}
         <button className="btn" onClick={handleGenerate} disabled={busy}>
