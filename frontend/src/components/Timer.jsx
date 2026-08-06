@@ -1,90 +1,86 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useStore } from '../state/store.jsx'
 import { todayKey } from '../lib/utils.js'
 
 const PRESETS = { work: 25, short: 5, long: 15 }
+const MODE_LABEL = { work: 'Deep focus', short: 'Rest up', long: 'Rest up' }
+
+function computeSecondsLeft(timer) {
+  if (timer.running && timer.endTime) {
+    return Math.max(0, Math.round((timer.endTime - Date.now()) / 1000))
+  }
+  return timer.pausedRemainingSeconds ?? timer.minutes * 60
+}
+
+function notificationSupport() {
+  return typeof Notification !== 'undefined'
+}
 
 export default function Timer() {
   const { state, dispatch } = useStore()
-  const [moduleId, setModuleId] = useState(state.modules[0]?.id || '')
-  const [mode, setMode] = useState('work')
-  const [minutes, setMinutes] = useState(PRESETS.work)
-  const [secondsLeft, setSecondsLeft] = useState(PRESETS.work * 60)
-  const [running, setRunning] = useState(false)
-  const [sessionsCompleted, setSessionsCompleted] = useState(0)
-  const intervalRef = useRef(null)
+  const timer = state.timer
+  const [, forceTick] = useState(0)
+  const [notifPermission, setNotifPermission] = useState(notificationSupport() ? Notification.permission : 'unsupported')
 
+  // Re-render once a second while running so the displayed countdown moves —
+  // the actual source of truth is timer.endTime (a timestamp), not this tick.
   useEffect(() => {
-    if (running) {
-      intervalRef.current = setInterval(() => {
-        setSecondsLeft((s) => {
-          if (s <= 1) {
-            handleComplete()
-            return 0
-          }
-          return s - 1
-        })
-      }, 1000)
-    }
-    return () => clearInterval(intervalRef.current)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running])
+    if (!timer.running) return undefined
+    const id = setInterval(() => forceTick((n) => n + 1), 1000)
+    return () => clearInterval(id)
+  }, [timer.running])
 
-  function handleComplete() {
-    clearInterval(intervalRef.current)
-    setRunning(false)
-    if (mode === 'work') {
-      dispatch({ type: 'LOG_TIMER_SESSION', payload: { date: todayKey(), minutes, moduleId } })
-      setSessionsCompleted((c) => c + 1)
+  function updateTimer(patch) {
+    dispatch({ type: 'UPDATE_TIMER', payload: patch })
+  }
+
+  async function ensureNotificationPermission() {
+    if (!notificationSupport()) return
+    if (Notification.permission === 'default') {
+      const result = await Notification.requestPermission()
+      setNotifPermission(result)
     }
-    if (typeof Audio !== 'undefined') {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)()
-        const osc = ctx.createOscillator()
-        osc.frequency.value = 660
-        osc.connect(ctx.destination)
-        osc.start()
-        setTimeout(() => {
-          osc.stop()
-          ctx.close()
-        }, 250)
-      } catch {
-        // audio unavailable — silently skip the chime
-      }
+  }
+
+  function toggleRunning() {
+    if (timer.running) {
+      const remaining = computeSecondsLeft(timer)
+      updateTimer({ running: false, endTime: null, pausedRemainingSeconds: remaining })
+    } else {
+      ensureNotificationPermission()
+      const remaining = timer.pausedRemainingSeconds ?? timer.minutes * 60
+      updateTimer({ running: true, endTime: Date.now() + remaining * 1000, pausedRemainingSeconds: null })
     }
   }
 
   function selectMode(next) {
-    setMode(next)
-    setRunning(false)
-    const mins = PRESETS[next]
-    setMinutes(mins)
-    setSecondsLeft(mins * 60)
+    updateTimer({ mode: next, minutes: PRESETS[next], running: false, endTime: null, pausedRemainingSeconds: null })
   }
 
   function reset() {
-    setRunning(false)
-    setSecondsLeft(minutes * 60)
+    updateTimer({ running: false, endTime: null, pausedRemainingSeconds: null })
   }
 
-  const totalSeconds = minutes * 60
+  const secondsLeft = computeSecondsLeft(timer)
+  const totalSeconds = timer.minutes * 60
   const pct = Math.round(((totalSeconds - secondsLeft) / totalSeconds) * 100)
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, '0')
   const ss = String(secondsLeft % 60).padStart(2, '0')
 
   const todayMinutes = state.timerSessions.filter((s) => s.date === todayKey()).reduce((sum, s) => sum + s.minutes, 0)
+  const sessionsToday = state.timerSessions.filter((s) => s.date === todayKey()).length
 
   return (
     <div className="grid cols-2" style={{ alignItems: 'start' }}>
       <div className="card" style={{ textAlign: 'center' }}>
         <div className="pill-select" style={{ justifyContent: 'center', marginBottom: 18 }}>
-          <button className={mode === 'work' ? 'active' : ''} onClick={() => selectMode('work')}>
+          <button className={timer.mode === 'work' ? 'active' : ''} onClick={() => selectMode('work')}>
             🐇 Focus (25m)
           </button>
-          <button className={mode === 'short' ? 'active' : ''} onClick={() => selectMode('short')}>
+          <button className={timer.mode === 'short' ? 'active' : ''} onClick={() => selectMode('short')}>
             🌈 Short break (5m)
           </button>
-          <button className={mode === 'long' ? 'active' : ''} onClick={() => selectMode('long')}>
+          <button className={timer.mode === 'long' ? 'active' : ''} onClick={() => selectMode('long')}>
             🥕 Long break (15m)
           </button>
         </div>
@@ -93,21 +89,21 @@ export default function Timer() {
             <div className="time">
               {mm}:{ss}
             </div>
-            <div className="muted">{mode === 'work' ? 'Deep focus' : 'Rest up'}</div>
+            <div className="muted">{MODE_LABEL[timer.mode]}</div>
           </div>
         </div>
         <div style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center' }}>
-          <button className="btn" onClick={() => setRunning((r) => !r)}>
-            {running ? '⏸ Pause' : '▶️ Start'}
+          <button className="btn" onClick={toggleRunning}>
+            {timer.running ? '⏸ Pause' : '▶️ Start'}
           </button>
           <button className="btn secondary" onClick={reset}>
             ↺ Reset
           </button>
         </div>
-        {mode === 'work' && (
+        {timer.mode === 'work' && (
           <div className="field" style={{ maxWidth: 260, margin: '20px auto 0' }}>
             <label>Studying for</label>
-            <select value={moduleId} onChange={(e) => setModuleId(e.target.value)}>
+            <select value={timer.moduleId} onChange={(e) => updateTimer({ moduleId: e.target.value })}>
               {state.modules.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
@@ -116,12 +112,27 @@ export default function Timer() {
             </select>
           </div>
         )}
+        <p className="muted" style={{ marginTop: 16, fontSize: '0.78rem' }}>
+          🕰️ Keeps running even if you switch to another tab in the app.
+        </p>
+        {notificationSupport() && notifPermission !== 'granted' && (
+          <button className="btn ghost small" style={{ marginTop: 4 }} onClick={ensureNotificationPermission}>
+            {notifPermission === 'denied'
+              ? '🔕 Notifications blocked — enable in browser settings'
+              : '🔔 Get notified when it finishes'}
+          </button>
+        )}
+        {notificationSupport() && notifPermission === 'granted' && (
+          <p className="muted" style={{ marginTop: 4, fontSize: '0.78rem' }}>
+            🔔 You'll get a notification when this finishes.
+          </p>
+        )}
       </div>
 
       <div className="card">
         <div className="section-title">📊 Today</div>
         <p>
-          <strong>{todayMinutes} minutes</strong> logged today · <strong>{sessionsCompleted}</strong> focus sessions completed this visit
+          <strong>{todayMinutes} minutes</strong> logged today · <strong>{sessionsToday}</strong> focus session{sessionsToday === 1 ? '' : 's'} today
         </p>
         <div className="section-title" style={{ marginTop: 18 }}>
           🕰️ Recent sessions

@@ -174,12 +174,20 @@ function reducer(state, action) {
     // --- timer ---
     case 'LOG_TIMER_SESSION':
       return { ...state, timerSessions: [...state.timerSessions, action.payload] }
+    case 'UPDATE_TIMER':
+      return { ...state, timer: { ...state.timer, ...action.payload } }
 
     // --- chat ---
     case 'ADD_CHAT_MESSAGE':
       return { ...state, chatHistory: [...state.chatHistory, action.payload] }
     case 'CLEAR_CHAT':
       return { ...state, chatHistory: [] }
+
+    // --- transient in-app notifications ---
+    case 'SHOW_TOAST':
+      return { ...state, uiToast: action.payload }
+    case 'DISMISS_TOAST':
+      return { ...state, uiToast: null }
 
     default:
       return state

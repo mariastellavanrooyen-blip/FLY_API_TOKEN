@@ -10,7 +10,9 @@ import Tips from './components/Tips.jsx'
 import Timer from './components/Timer.jsx'
 import Habits from './components/Habits.jsx'
 import Settings from './components/Settings.jsx'
+import Toast from './components/Toast.jsx'
 import { useStore } from './state/store.jsx'
+import { useTimerWatcher } from './lib/useTimerWatcher.js'
 
 const TITLES = {
   dashboard: ['🏠', 'Dashboard'],
@@ -31,6 +33,11 @@ export default function App() {
   const { state } = useStore()
   const [icon, label] = TITLES[tab]
 
+  // Mounted here (not inside Timer.jsx) so a running timer keeps ticking,
+  // completes, saves its session, and notifies you no matter which sidebar
+  // tab is currently open.
+  useTimerWatcher()
+
   function sendDocToNotes(doc) {
     setPendingDoc(doc)
     setTab('notes')
@@ -38,6 +45,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <Toast />
       <Sidebar active={tab} onNavigate={setTab} />
       <main className="main-area">
         <div className="topbar">

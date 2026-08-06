@@ -555,6 +555,55 @@ label {
   box-shadow: var(--shadow-pop);
 }
 
+.toast-wrap {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 100;
+  cursor: pointer;
+  animation: toast-pop 0.25s ease-out;
+}
+
+@keyframes toast-pop {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 340px;
+  background: var(--white);
+  border: 2px solid var(--terracotta-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  padding: 16px 14px;
+}
+
+.toast-card .toast-emoji {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.toast-card strong {
+  display: block;
+  color: var(--terracotta-deep);
+  margin-bottom: 2px;
+}
+
+.toast-card p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+
 .decor-rainbow-arc {
   font-size: 2.4rem;
   line-height: 1;

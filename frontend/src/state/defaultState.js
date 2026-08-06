@@ -40,5 +40,17 @@ export function makeDefaultState() {
     ],
     timerSessions: [],
     chatHistory: [],
+    // Lives in global state (not component state) on purpose: switching sidebar
+    // tabs must not unmount-and-lose a running timer. endTime is an absolute
+    // timestamp so backgrounding/throttling can't make it drift or "stop".
+    timer: {
+      mode: 'work', // 'work' | 'short' | 'long'
+      minutes: 25,
+      running: false,
+      endTime: null, // ms epoch when the timer completes, while running
+      pausedRemainingSeconds: null, // seconds left, while paused
+      moduleId: moduleA,
+    },
+    uiToast: null,
   }
 }
