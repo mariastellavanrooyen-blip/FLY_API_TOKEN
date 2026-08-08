@@ -30,6 +30,7 @@ export function makeDefaultState() {
     ],
     assignments: [],
     goals: [],
+    grades: [],
     favoriteTips: [],
     notes: [],
     quizzes: [],

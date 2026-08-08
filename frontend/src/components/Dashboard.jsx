@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { useStore } from '../state/store.jsx'
 import { TIPS } from '../lib/tipsData.js'
-import { daysUntil, formatDate, todayKey } from '../lib/utils.js'
+import { daysUntil, formatDate, todayKey, computeModuleAverage } from '../lib/utils.js'
 import ProgressBar from './ui/ProgressBar.jsx'
 import EmptyState from './ui/EmptyState.jsx'
 
@@ -115,19 +115,29 @@ export default function Dashboard({ onNavigate }) {
         </div>
 
         <div className="card">
-          <div className="section-title">🎯 Goals in progress</div>
+          <div className="section-title">🎯 Goals &amp; Grades</div>
           {activeGoals.length === 0 ? (
             <EmptyState emoji="🎯" title="No active goals" subtitle="Set one to stay focused." />
           ) : (
             activeGoals.slice(0, 4).map((g) => {
               const total = g.milestones.length
               const done = g.milestones.filter((m) => m.done).length
-              const pct = total ? Math.round((done / total) * 100) : 0
+              const milestonePct = total ? Math.round((done / total) * 100) : null
+              const currentAvg = g.moduleId ? computeModuleAverage(state.grades, g.moduleId) : null
+              const hasGradeTarget = g.targetGradePct != null && g.moduleId
+              const gradePct = hasGradeTarget && currentAvg !== null ? Math.min(100, Math.round((currentAvg / g.targetGradePct) * 100)) : null
+              const pct = milestonePct ?? gradePct ?? 0
               return (
                 <div key={g.id} style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', marginBottom: 4 }}>
                     <strong>{g.title}</strong>
-                    <span className="muted">{pct}%</span>
+                    <span className="muted">
+                      {hasGradeTarget
+                        ? currentAvg !== null
+                          ? `${currentAvg.toFixed(1)}% / ${g.targetGradePct}%`
+                          : `target ${g.targetGradePct}%`
+                        : `${pct}%`}
+                    </span>
                   </div>
                   <ProgressBar value={pct} />
                 </div>
@@ -135,7 +145,7 @@ export default function Dashboard({ onNavigate }) {
             })
           )}
           <button className="btn ghost small" style={{ marginTop: 4 }} onClick={() => onNavigate('goals')}>
-            View all goals →
+            View goals &amp; grades →
           </button>
         </div>
       </div>

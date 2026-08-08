@@ -17,7 +17,7 @@ import { useTimerWatcher } from './lib/useTimerWatcher.js'
 const TITLES = {
   dashboard: ['🏠', 'Dashboard'],
   assignments: ['✅', 'Assignments'],
-  goals: ['🎯', 'Goals'],
+  goals: ['🎯', 'Goals & Grades'],
   library: ['📦', 'My Burrow'],
   modules: ['🤖', 'Modules & Assistant'],
   notes: ['📝', 'Notes & Quiz Generator'],

@@ -39,3 +39,13 @@ export function lastNDays(n) {
 export function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n))
 }
+
+// Simple (unweighted) average of percentage scores for a module, so a quick
+// glance answers "roughly where am I sitting". Returns null when there's
+// nothing logged yet for that module.
+export function computeModuleAverage(grades, moduleId) {
+  const list = grades.filter((g) => g.moduleId === moduleId)
+  if (list.length === 0) return null
+  const total = list.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0)
+  return total / list.length
+}

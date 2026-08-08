@@ -94,6 +94,14 @@ function reducer(state, action) {
         ),
       }
 
+    // --- grades ---
+    case 'ADD_GRADE':
+      return { ...state, grades: [action.payload, ...state.grades] }
+    case 'UPDATE_GRADE':
+      return { ...state, grades: state.grades.map((g) => (g.id === action.payload.id ? { ...g, ...action.payload } : g)) }
+    case 'DELETE_GRADE':
+      return { ...state, grades: state.grades.filter((g) => g.id !== action.payload.id) }
+
     // --- tips ---
     case 'TOGGLE_TIP_FAVORITE':
       return {
