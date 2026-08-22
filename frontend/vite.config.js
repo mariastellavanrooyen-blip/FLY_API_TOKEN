@@ -12,11 +12,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
-        name: 'Burrow & Brief — Legal Studies',
-        short_name: 'Burrow & Brief',
+        name: "The Wife's Brain — Household Planner",
+        short_name: "Wife's Brain",
         description:
-          'Assignments, goals, tips, notes & quiz generation, an AI assistant, a study timer and a habit tracker for your law modules.',
-        theme_color: '#d97952',
+          'A household planner: family calendar, a two-income budget tracker with monthly reports, a recipe box, and a shopping list with trip-day reminders.',
+        theme_color: '#6f8b67',
         background_color: '#fbf3e7',
         display: 'standalone',
         start_url: './',
@@ -31,7 +31,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-        navigateFallbackDenylist: [/^\/api\//],
       },
     }),
   ],

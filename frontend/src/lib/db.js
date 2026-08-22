@@ -1,11 +1,9 @@
-// IndexedDB-backed storage for uploaded file blobs and extracted text.
-// localStorage (used for the rest of the app's state) is string-only and
-// capped around 5-10MB — nowhere near enough for real documents — so
-// uploads live here instead, keyed by the same id used in the lightweight
-// `documents` metadata list kept in the main app state.
-const DB_NAME = 'burrowbrief_files'
+// IndexedDB-backed storage for recipe photos. localStorage (used for the
+// rest of the app's state) is string-only and capped around 5-10MB, so
+// images live here instead, keyed by the recipe's id.
+const DB_NAME = 'wifesbrain_files'
 const DB_VERSION = 1
-const STORE = 'files'
+const STORE = 'images'
 
 let dbPromise = null
 
@@ -37,26 +35,25 @@ function tx(storeMode) {
   )
 }
 
-// record: { id, blob, extractedText, filename, mimeType }
-export async function putFileRecord(record) {
+export async function putImage(id, blob) {
   const { store, transaction } = await tx('readwrite')
   return new Promise((resolve, reject) => {
-    store.put(record)
+    store.put({ id, blob })
     transaction.oncomplete = () => resolve()
     transaction.onerror = () => reject(transaction.error)
   })
 }
 
-export async function getFileRecord(id) {
+export async function getImage(id) {
   const { store } = await tx('readonly')
   return new Promise((resolve, reject) => {
     const req = store.get(id)
-    req.onsuccess = () => resolve(req.result || null)
+    req.onsuccess = () => resolve(req.result?.blob || null)
     req.onerror = () => reject(req.error)
   })
 }
 
-export async function deleteFileRecord(id) {
+export async function deleteImage(id) {
   const { store, transaction } = await tx('readwrite')
   return new Promise((resolve, reject) => {
     store.delete(id)
@@ -65,7 +62,7 @@ export async function deleteFileRecord(id) {
   })
 }
 
-export async function clearAllFileRecords() {
+export async function clearAllImages() {
   const { store, transaction } = await tx('readwrite')
   return new Promise((resolve, reject) => {
     store.clear()
@@ -83,4 +80,27 @@ export async function estimateStorage() {
     }
   }
   return null
+}
+
+// Downscale + compress an uploaded photo before it ever hits storage, so a
+// dozen phone-camera recipe photos don't blow through the device quota.
+export function compressImage(file, maxDim = 900, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+      const w = Math.round(img.width * scale)
+      const h = Math.round(img.height * scale)
+      const canvas = document.createElement('canvas')
+      canvas.width = w
+      canvas.height = h
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, w, h)
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('compress failed'))), 'image/jpeg', quality)
+    }
+    img.onerror = reject
+    img.src = url
+  })
 }

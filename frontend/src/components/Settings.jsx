@@ -1,38 +1,55 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useStore } from '../state/store.jsx'
-import { pingBackend } from '../lib/api.js'
-import { estimateStorage, clearAllFileRecords } from '../lib/db.js'
-import { formatBytes } from '../lib/extract.js'
+import { estimateStorage, clearAllImages } from '../lib/db.js'
+import { notificationPermission, notificationsSupported, requestNotificationPermission } from '../lib/notify.js'
 import ProgressBar from './ui/ProgressBar.jsx'
+
+function formatBytes(n) {
+  if (!n) return '0 B'
+  const units = ['B', 'KB', 'MB', 'GB']
+  let i = 0
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024
+    i++
+  }
+  return `${n.toFixed(1)} ${units[i]}`
+}
 
 export default function Settings() {
   const { state, dispatch } = useStore()
-  const [testStatus, setTestStatus] = useState(null)
   const [storage, setStorage] = useState(null)
+  const [newCategory, setNewCategory] = useState('')
+  const [permission, setPermission] = useState(notificationPermission())
   const fileRef = useRef(null)
 
   useEffect(() => {
     estimateStorage().then(setStorage)
-  }, [state.documents.length])
+  }, [state.recipes.length])
 
   function setSetting(patch) {
     dispatch({ type: 'SET_SETTINGS', payload: patch })
   }
 
-  async function clearLibrary() {
-    if (!confirm(`Delete all ${state.documents.length} document(s) stashed in My Burrow? This can't be undone.`)) return
-    await clearAllFileRecords()
-    dispatch({ type: 'CLEAR_DOCUMENTS' })
+  async function enableNotifications() {
+    const result = await requestNotificationPermission()
+    setPermission(result)
   }
 
-  async function testConnection() {
-    setTestStatus('testing')
-    try {
-      await pingBackend(state.settings.backendUrl)
-      setTestStatus('ok')
-    } catch {
-      setTestStatus('fail')
-    }
+  function addCategory() {
+    const name = newCategory.trim()
+    if (!name) return
+    dispatch({ type: 'ADD_CATEGORY', payload: { name } })
+    setNewCategory('')
+  }
+
+  function removeCategory(name) {
+    dispatch({ type: 'DELETE_CATEGORY', payload: { name } })
+  }
+
+  async function clearRecipeImages() {
+    if (!confirm('Delete all recipe photos? Recipes themselves stay, just without pictures.')) return
+    await clearAllImages()
+    dispatch({ type: 'SHOW_TOAST', payload: { emoji: '🧹', title: 'Photos cleared', body: 'All recipe photos were removed.' } })
   }
 
   function exportData() {
@@ -40,7 +57,7 @@ export default function Settings() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `burrow-and-brief-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `wifes-brain-backup-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -64,69 +81,74 @@ export default function Settings() {
   return (
     <div className="grid cols-2" style={{ alignItems: 'start' }}>
       <div className="card">
-        <div className="section-title">👤 Profile</div>
+        <div className="section-title">👪 Household</div>
         <div className="field">
-          <label>Display name</label>
-          <input value={state.settings.displayName} onChange={(e) => setSetting({ displayName: e.target.value })} />
+          <label>App/household name</label>
+          <input value={state.settings.householdName} onChange={(e) => setSetting({ householdName: e.target.value })} />
+        </div>
+        <div className="field-row">
+          <div className="field">
+            <label>Your name (Partner A)</label>
+            <input value={state.settings.partnerAName} onChange={(e) => setSetting({ partnerAName: e.target.value })} />
+          </div>
+          <div className="field">
+            <label>Partner's name (Partner B)</label>
+            <input value={state.settings.partnerBName} onChange={(e) => setSetting({ partnerBName: e.target.value })} />
+          </div>
+        </div>
+        <div className="field">
+          <label>Currency symbol</label>
+          <input style={{ maxWidth: 100 }} value={state.settings.currencySymbol} onChange={(e) => setSetting({ currencySymbol: e.target.value })} />
         </div>
       </div>
 
       <div className="card">
-        <div className="section-title">🤖 AI assistant &amp; note generation</div>
-        <p className="muted" style={{ marginTop: -4 }}>
-          Offline mode works instantly with no setup. Real AI mode uses the Claude API through a small backend server you deploy yourself (see the README) — genuinely intelligent notes, quizzes and chat, at a small per-use cost.
-        </p>
-        <div className="pill-select" style={{ marginBottom: 12 }}>
-          <button className={state.settings.aiMode === 'offline' ? 'active' : ''} onClick={() => setSetting({ aiMode: 'offline' })}>
-            🐰 Offline (free)
-          </button>
-          <button className={state.settings.aiMode === 'claude' ? 'active' : ''} onClick={() => setSetting({ aiMode: 'claude' })}>
-            ✨ Real AI (Claude API)
-          </button>
+        <div className="section-title">🧾 Budget categories</div>
+        <p className="muted" style={{ marginTop: -4 }}>Used for tagging expenses and the report breakdown. You can also add one on the fly from the Expenses tab.</p>
+        {state.settings.expenseCategories.map((c) => (
+          <span key={c} className="badge" style={{ marginRight: 6, marginBottom: 6, display: 'inline-flex' }}>
+            {c}
+            <button className="icon-btn" style={{ padding: '0 0 0 4px' }} onClick={() => removeCategory(c)} aria-label={`Remove ${c}`}>✕</button>
+          </span>
+        ))}
+        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+          <input placeholder="New category" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addCategory()} />
+          <button className="btn secondary small" onClick={addCategory}>Add</button>
         </div>
-        {state.settings.aiMode === 'claude' && (
-          <>
-            <div className="field">
-              <label>Backend URL</label>
-              <input
-                placeholder="https://your-app.fly.dev"
-                value={state.settings.backendUrl}
-                onChange={(e) => setSetting({ backendUrl: e.target.value })}
-              />
-            </div>
-            <button className="btn secondary small" onClick={testConnection} disabled={!state.settings.backendUrl}>
-              Test connection
-            </button>
-            {testStatus === 'ok' && <span className="badge status-done" style={{ marginLeft: 8 }}>Connected ✅</span>}
-            {testStatus === 'fail' && <span className="badge status-overdue" style={{ marginLeft: 8 }}>Not reachable</span>}
-          </>
+      </div>
+
+      <div className="card">
+        <div className="section-title">🔔 Shopping-day reminders</div>
+        <p className="muted" style={{ marginTop: -4 }}>
+          When you open the app on a day you've marked as a shopping trip, you'll always see a reminder banner. Turning on browser
+          notifications adds a pop-up too — useful if you keep the app open in a background tab.
+        </p>
+        {!notificationsSupported() ? (
+          <p className="muted">This browser doesn't support notifications — the in-app banner will still work.</p>
+        ) : permission === 'granted' ? (
+          <span className="badge tone-good">Notifications on ✅</span>
+        ) : permission === 'denied' ? (
+          <span className="badge tone-bad">Blocked — enable it in your browser's site settings</span>
+        ) : (
+          <button className="btn secondary small" onClick={enableNotifications}>Enable notifications</button>
         )}
       </div>
 
       <div className="card">
         <div className="section-title">💾 Your data</div>
         <p className="muted" style={{ marginTop: -4 }}>
-          Everything is stored only on this device — assignments, goals, notes and uploaded documents all persist
-          automatically between visits. Back up your data before clearing your browser storage.
-        </p>
-        <p className="muted" style={{ fontSize: '0.75rem' }}>
-          Note: the JSON backup below covers assignments, goals, notes, quizzes and habits, plus your document
-          <em> list</em> (filenames, status, progress). It does not include the uploaded file contents themselves —
-          those live in this browser's storage only, described below.
+          Everything — calendar, budget, recipes, shopping lists — is stored only on this device. Data does <strong>not</strong> automatically
+          sync between your tablet and PC; export a backup here and import it on the other device to move it across, or after switching browsers.
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn secondary" onClick={exportData}>
-            ⬇️ Export backup
-          </button>
-          <button className="btn secondary" onClick={() => fileRef.current?.click()}>
-            ⬆️ Import backup
-          </button>
+          <button className="btn secondary" onClick={exportData}>⬇️ Export backup</button>
+          <button className="btn secondary" onClick={() => fileRef.current?.click()}>⬆️ Import backup</button>
           <input type="file" accept="application/json" ref={fileRef} style={{ display: 'none' }} onChange={importData} />
           <button
             className="btn danger"
             onClick={async () => {
-              if (confirm('This clears all assignments, goals, notes, quizzes, habits AND everything in My Burrow. Export a backup first?')) {
-                await clearAllFileRecords()
+              if (confirm('This clears everything — calendar, budget, recipes and shopping lists. Export a backup first?')) {
+                await clearAllImages()
                 dispatch({ type: 'RESET_STATE' })
               }
             }}
@@ -137,35 +159,25 @@ export default function Settings() {
       </div>
 
       <div className="card">
-        <div className="section-title">📦 My Burrow storage</div>
-        <p className="muted" style={{ marginTop: -4 }}>
-          Uploaded documents (PDFs, Word docs, text and photos) are remembered in this browser's on-device storage,
-          separate from the rest of the app's data.
-        </p>
-        <p>
-          <strong>{state.documents.length}</strong> document{state.documents.length === 1 ? '' : 's'} stashed
-        </p>
+        <div className="section-title">📷 Recipe photo storage</div>
+        <p className="muted" style={{ marginTop: -4 }}>Recipe photos are stored on-device, separately from the rest of your data (backups above don't include them).</p>
         {storage?.quota ? (
           <>
             <ProgressBar value={(storage.usage / storage.quota) * 100} />
-            <p className="muted" style={{ marginTop: 6 }}>
-              {formatBytes(storage.usage)} used of roughly {formatBytes(storage.quota)} available on this device.
-            </p>
+            <p className="muted" style={{ marginTop: 6 }}>{formatBytes(storage.usage)} used of roughly {formatBytes(storage.quota)} available on this device.</p>
           </>
         ) : (
           <p className="muted">Storage usage isn't reported by this browser.</p>
         )}
-        <button className="btn danger small" onClick={clearLibrary} disabled={state.documents.length === 0}>
-          🗑️ Clear My Burrow only
-        </button>
+        <button className="btn danger small" onClick={clearRecipeImages}>🗑️ Clear all recipe photos</button>
       </div>
 
       <div className="card">
-        <div className="section-title">🐰 About</div>
+        <div className="section-title">🍲 About</div>
         <p className="muted">
-          Burrow &amp; Brief is a lightweight, private legal-studies companion — assignments, goals, tips, notes and
-          quiz generation, an AI assistant, a study timer and a habit tracker, themed in cream, terracotta and soft
-          beige with a bunny and rainbow motif. Built for Professional Ethics and Notarial Practice.
+          The Wife's Brain is your household command centre — a shared calendar for family and kids' things, a two-income budget
+          tracker with monthly reports, a recipe box with photos, and a shopping list with trip-day reminders. Install it from your
+          browser's menu on both your tablet and PC to use it like a real app, offline.
         </p>
       </div>
     </div>
