@@ -52,6 +52,7 @@ function Overview({ math }) {
   const incomeB = math.incomeForMonth(monthKey, 'b')
   const totalIncome = incomeA + incomeB
   const totalExpenses = math.totalExpensesForMonth(monthKey)
+  const unpaidTotal = math.totalUnpaidForMonth(monthKey)
   const balance = totalIncome - totalExpenses
   const breakdown = math.categoryBreakdown(monthKey)
 
@@ -60,12 +61,16 @@ function Overview({ math }) {
       <div className="grid cols-4">
         <StatTile label={`${settings.partnerAName}'s income`} value={formatMoney(incomeA, settings.currencySymbol)} />
         <StatTile label={`${settings.partnerBName}'s income`} value={formatMoney(incomeB, settings.currencySymbol)} />
-        <StatTile label="Total spent" value={formatMoney(totalExpenses, settings.currencySymbol)} tone={totalExpenses > totalIncome ? 'bad' : undefined} />
+        <StatTile label="Paid so far" value={formatMoney(totalExpenses, settings.currencySymbol)} tone={totalExpenses > totalIncome ? 'bad' : undefined} />
         <StatTile
           label="Left over this month"
           value={formatMoney(balance, settings.currencySymbol)}
           tone={balance >= 0 ? 'good' : 'bad'}
-          sub={`of ${formatMoney(totalIncome, settings.currencySymbol)} total income`}
+          sub={
+            unpaidTotal > 0
+              ? `+ ${formatMoney(unpaidTotal, settings.currencySymbol)} still to pay`
+              : `of ${formatMoney(totalIncome, settings.currencySymbol)} total income`
+          }
         />
       </div>
       <div className="card" style={{ marginTop: 16 }}>
@@ -225,8 +230,26 @@ function ExpensesTab({ math }) {
   const [form, setForm] = useState(null)
   const [newCategory, setNewCategory] = useState('')
 
-  const expenses = math.expensesForMonth(monthKey).sort((a, b) => b.date.localeCompare(a.date))
-  const total = math.totalExpensesForMonth(monthKey)
+  // Unpaid bills float to the top (soonest due first) so the "still owe
+  // this" list reads like a to-do list; paid ones sink below it, most
+  // recently paid first, already scratched off.
+  const expenses = math
+    .expensesForMonth(monthKey)
+    .slice()
+    .sort((a, b) => {
+      const ap = math.isPaid(a)
+      const bp = math.isPaid(b)
+      if (ap !== bp) return ap ? 1 : -1
+      return ap ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)
+    })
+  const paidTotal = math.totalExpensesForMonth(monthKey)
+  const unpaidTotal = math.totalUnpaidForMonth(monthKey)
+  const unpaidCount = math.unpaidExpensesForMonth(monthKey).length
+
+  function togglePaid(ex) {
+    const nowPaid = !math.isPaid(ex)
+    dispatch({ type: 'UPDATE_EXPENSE', payload: { id: ex.id, paid: nowPaid, paidDate: nowPaid ? todayKey() : null } })
+  }
 
   function save(e) {
     e.preventDefault()
@@ -251,31 +274,54 @@ function ExpensesTab({ math }) {
         <div className="month-label">{formatMonthLabel(monthKey)}</div>
         <button className="btn ghost small" onClick={() => setMonthKey((m) => addMonths(m, 1))}>Next →</button>
       </div>
-      <p className="muted" style={{ textAlign: 'center', marginBottom: 16 }}>
-        Total spent this month: <strong style={{ color: 'var(--ink)' }}>{formatMoney(total, settings.currencySymbol)}</strong>
-      </p>
-
-      {expenses.length === 0 && <EmptyState emoji="🧾" title="No expenses logged this month" />}
-      {expenses.map((ex) => (
-        <div className="list-row" key={ex.id}>
-          <div className="grow">
-            <h4>{ex.label}</h4>
-            <span className="muted">{formatDateShort(ex.date)}</span>
-          </div>
-          <span className="badge">{ex.category}</span>
-          <strong>{formatMoney(ex.amount, settings.currencySymbol)}</strong>
-          <button className="icon-btn" onClick={() => setForm(ex)}>✏️</button>
-          <button className="icon-btn" onClick={() => dispatch({ type: 'DELETE_EXPENSE', payload: { id: ex.id } })}>🗑️</button>
+      <div className="grid cols-2" style={{ marginBottom: 16 }}>
+        <div className="stat-tile" style={{ textAlign: 'center' }}>
+          <div className="stat-label">Still to pay</div>
+          <div className="stat-value tone-bad">{formatMoney(unpaidTotal, settings.currencySymbol)}</div>
+          <div className="stat-sub">{unpaidCount} bill{unpaidCount === 1 ? '' : 's'} left to tick off</div>
         </div>
-      ))}
+        <div className="stat-tile" style={{ textAlign: 'center' }}>
+          <div className="stat-label">Already paid</div>
+          <div className="stat-value tone-good">{formatMoney(paidTotal, settings.currencySymbol)}</div>
+          <div className="stat-sub">counts toward this month's report</div>
+        </div>
+      </div>
+
+      {expenses.length === 0 && <EmptyState emoji="🧾" title="Nothing here yet" subtitle="Add your bills for the month, then tick them off as you pay each one." />}
+      {expenses.map((ex) => {
+        const paid = math.isPaid(ex)
+        return (
+          <div className="list-row" key={ex.id}>
+            <input type="checkbox" style={{ width: 20, height: 20, flexShrink: 0, accentColor: 'var(--sage)' }} checked={paid} onChange={() => togglePaid(ex)} title={paid ? 'Mark as still to pay' : 'Mark as paid'} />
+            <div className="grow">
+              <h4 style={paid ? { textDecoration: 'line-through', color: 'var(--ink-soft)' } : undefined}>{ex.label}</h4>
+              <span className="muted">{formatDateShort(ex.date)}</span>
+            </div>
+            <span className="badge">{ex.category}</span>
+            <strong style={paid ? { color: 'var(--ink-soft)' } : undefined}>{formatMoney(ex.amount, settings.currencySymbol)}</strong>
+            <button className="icon-btn" onClick={() => setForm(ex)}>✏️</button>
+            <button className="icon-btn" onClick={() => dispatch({ type: 'DELETE_EXPENSE', payload: { id: ex.id } })}>🗑️</button>
+          </div>
+        )
+      })}
 
       {!form && (
-        <button className="btn small" onClick={() => setForm({ category: settings.expenseCategories[0], label: '', amount: '', date: todayKey() })}>
-          + Add expense
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn small" onClick={() => setForm({ category: settings.expenseCategories[0], label: '', amount: '', date: todayKey(), paid: false })}>
+            + Add a bill to pay
+          </button>
+          <button className="btn secondary small" onClick={() => setForm({ category: settings.expenseCategories[0], label: '', amount: '', date: todayKey(), paid: true })}>
+            + Log something already paid
+          </button>
+        </div>
       )}
       {form && (
         <form onSubmit={save} style={{ marginTop: 12, borderTop: '2px dashed var(--beige-deep)', paddingTop: 12 }}>
+          {!form.id && (
+            <p className="muted" style={{ marginTop: -4 }}>
+              {form.paid ? "This counts as spent right away." : "This will show as \"still to pay\" until you tick it off."}
+            </p>
+          )}
           <div className="field-row">
             <div className="field">
               <label>Category</label>
@@ -299,16 +345,16 @@ function ExpensesTab({ math }) {
           </div>
           <div className="field-row">
             <div className="field">
-              <label>What was it for</label>
-              <input autoFocus value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="e.g. Weekly groceries" />
+              <label>What is it for</label>
+              <input autoFocus value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="e.g. Electricity bill" />
             </div>
             <div className="field">
-              <label>Date</label>
+              <label>{form.paid ? 'Date paid' : 'Due date'}</label>
               <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn" type="submit">{form.id ? 'Save' : 'Add expense'}</button>
+            <button className="btn" type="submit">{form.id ? 'Save' : 'Add'}</button>
             <button className="btn ghost" type="button" onClick={() => setForm(null)}>Cancel</button>
           </div>
         </form>
@@ -326,6 +372,7 @@ function ReportsTab({ math }) {
   const incomeB = math.incomeForMonth(monthKey, 'b')
   const totalIncome = incomeA + incomeB
   const totalExpenses = math.totalExpensesForMonth(monthKey)
+  const unpaidTotal = math.totalUnpaidForMonth(monthKey)
   const balance = totalIncome - totalExpenses
   const breakdown = math.categoryBreakdown(monthKey)
 
@@ -352,7 +399,7 @@ function ReportsTab({ math }) {
         <StatTile label={settings.partnerAName} value={formatMoney(incomeA, settings.currencySymbol)} />
         <StatTile label={settings.partnerBName} value={formatMoney(incomeB, settings.currencySymbol)} />
         <StatTile label="Total income" value={formatMoney(totalIncome, settings.currencySymbol)} />
-        <StatTile label="Total spent" value={formatMoney(totalExpenses, settings.currencySymbol)} />
+        <StatTile label="Paid so far" value={formatMoney(totalExpenses, settings.currencySymbol)} />
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>
@@ -363,6 +410,12 @@ function ReportsTab({ math }) {
           {formatMoney(balance, settings.currencySymbol)}
         </div>
         <p className="muted">{balance >= 0 ? "You're within budget this month." : 'Spending is ahead of income this month.'}</p>
+        {unpaidTotal > 0 && (
+          <p className="muted">
+            Doesn't yet include <strong style={{ color: 'var(--ink)' }}>{formatMoney(unpaidTotal, settings.currencySymbol)}</strong> in bills you
+            haven't ticked off as paid yet — see the Expenses tab.
+          </p>
+        )}
       </div>
 
       <div className="card">
