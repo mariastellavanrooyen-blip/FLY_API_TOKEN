@@ -17,12 +17,29 @@ export function useBudgetMath(budget) {
     function expensesForMonth(monthKey) {
       return budget.expenses.filter((e) => monthKeyOf(e.date) === monthKey)
     }
+    // Expenses added before the "bills to pay" feature existed have no
+    // `paid` field at all — treat those as already paid so nothing that
+    // was already counted in a report suddenly disappears from it.
+    function isPaid(e) {
+      return e.paid !== false
+    }
+    function paidExpensesForMonth(monthKey) {
+      return expensesForMonth(monthKey).filter(isPaid)
+    }
+    function unpaidExpensesForMonth(monthKey) {
+      return expensesForMonth(monthKey).filter((e) => !isPaid(e))
+    }
+    // "Total spent" means money that has actually left your pocket, so it
+    // only counts paid expenses — a bill you haven't paid yet isn't spent.
     function totalExpensesForMonth(monthKey) {
-      return expensesForMonth(monthKey).reduce((s, e) => s + Number(e.amount || 0), 0)
+      return paidExpensesForMonth(monthKey).reduce((s, e) => s + Number(e.amount || 0), 0)
+    }
+    function totalUnpaidForMonth(monthKey) {
+      return unpaidExpensesForMonth(monthKey).reduce((s, e) => s + Number(e.amount || 0), 0)
     }
     function categoryBreakdown(monthKey) {
       const rows = {}
-      for (const e of expensesForMonth(monthKey)) {
+      for (const e of paidExpensesForMonth(monthKey)) {
         rows[e.category] = (rows[e.category] || 0) + Number(e.amount || 0)
       }
       return Object.entries(rows)
@@ -32,6 +49,18 @@ export function useBudgetMath(budget) {
     function balanceForMonth(monthKey) {
       return incomeForMonth(monthKey, 'a') + incomeForMonth(monthKey, 'b') - totalExpensesForMonth(monthKey)
     }
-    return { recurringTotalFor, extraIncomeForMonth, incomeForMonth, expensesForMonth, totalExpensesForMonth, categoryBreakdown, balanceForMonth }
+    return {
+      recurringTotalFor,
+      extraIncomeForMonth,
+      incomeForMonth,
+      expensesForMonth,
+      paidExpensesForMonth,
+      unpaidExpensesForMonth,
+      totalExpensesForMonth,
+      totalUnpaidForMonth,
+      isPaid,
+      categoryBreakdown,
+      balanceForMonth,
+    }
   }, [budget])
 }

@@ -14,6 +14,7 @@ export default function Dashboard({ onNavigate }) {
   const incomeB = math.incomeForMonth(monthKey, 'b')
   const totalIncome = incomeA + incomeB
   const totalExpenses = math.totalExpensesForMonth(monthKey)
+  const unpaidTotal = math.totalUnpaidForMonth(monthKey)
   const balance = totalIncome - totalExpenses
 
   const upcomingEvents = useMemo(() => {
@@ -37,7 +38,10 @@ export default function Dashboard({ onNavigate }) {
         <div className="stat-tile">
           <div className="stat-label">{formatMonthLabel(monthKey)} balance</div>
           <div className={`stat-value tone-${balance >= 0 ? 'good' : 'bad'}`}>{formatMoney(balance, settings.currencySymbol)}</div>
-          <div className="stat-sub">{formatMoney(totalIncome, settings.currencySymbol)} in · {formatMoney(totalExpenses, settings.currencySymbol)} out</div>
+          <div className="stat-sub">
+            {formatMoney(totalIncome, settings.currencySymbol)} in · {formatMoney(totalExpenses, settings.currencySymbol)} out
+            {unpaidTotal > 0 ? ` · ${formatMoney(unpaidTotal, settings.currencySymbol)} still to pay` : ''}
+          </div>
         </div>
         <div className="stat-tile">
           <div className="stat-label">{settings.partnerAName}'s income</div>
