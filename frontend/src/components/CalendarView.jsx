@@ -2,12 +2,23 @@ import React, { useMemo, useState } from 'react'
 import { useStore } from '../state/store.jsx'
 import Modal from './ui/Modal.jsx'
 import EmptyState from './ui/EmptyState.jsx'
-import { calendarCells, currentMonthKey, addMonths, formatMonthLabel, todayKey, formatDate, eventCategoryMeta, EVENT_CATEGORIES } from '../lib/utils.js'
+import {
+  calendarCells,
+  currentMonthKey,
+  addMonths,
+  formatMonthLabel,
+  todayKey,
+  formatDate,
+  eventTypeMeta,
+  EVENT_TYPES,
+  examTargetDate,
+  subjectName,
+} from '../lib/utils.js'
 
 const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function emptyForm(date) {
-  return { title: '', date, time: '', category: 'household', notes: '' }
+  return { title: '', date, time: '', type: 'study', notify: true, notes: '' }
 }
 
 export default function CalendarView() {
@@ -17,6 +28,24 @@ export default function CalendarView() {
   const [form, setForm] = useState(null) // event being added/edited, or null
 
   const cells = useMemo(() => calendarCells(viewMonth), [viewMonth])
+
+  // Confirmed exam dates are automatically shown on the calendar too, as
+  // read-only chips, so you don't have to enter them twice.
+  const examEventsByDate = useMemo(() => {
+    const map = {}
+    for (const exam of state.exams) {
+      const target = examTargetDate(exam)
+      if (!target) continue
+      if (!map[target]) map[target] = []
+      map[target].push({
+        id: `exam-${exam.id}`,
+        title: exam.title,
+        subjectId: exam.subjectId,
+        approx: !exam.date,
+      })
+    }
+    return map
+  }, [state.exams])
 
   const eventsByDate = useMemo(() => {
     const map = {}
@@ -82,19 +111,23 @@ export default function CalendarView() {
           {cells.map((date, i) => {
             if (!date) return <div className="calendar-cell empty" key={i} />
             const dayEvents = eventsByDate[date] || []
+            const examChips = examEventsByDate[date] || []
             const isToday = date === todayKey()
+            const allChips = [...examChips.map((x) => ({ ...x, isExam: true })), ...dayEvents]
             return (
               <div className={`calendar-cell${isToday ? ' today' : ''}`} key={date} onClick={() => openDay(date)}>
                 <span className="day-num">{Number(date.slice(-2))}</span>
-                {dayEvents.slice(0, 2).map((ev) => {
-                  const meta = eventCategoryMeta(ev.category)
+                {allChips.slice(0, 2).map((ev) => {
+                  const meta = ev.isExam ? eventTypeMeta('exam') : eventTypeMeta(ev.type)
                   return (
                     <span className="event-chip" key={ev.id} style={{ background: meta.color }}>
+                      {ev.isExam ? '🎯 ' : ''}
                       {ev.title}
+                      {ev.approx ? ' (~)' : ''}
                     </span>
                   )
                 })}
-                {dayEvents.length > 2 && <span className="event-more">+{dayEvents.length - 2} more</span>}
+                {allChips.length > 2 && <span className="event-more">+{allChips.length - 2} more</span>}
               </div>
             )
           })}
@@ -103,9 +136,9 @@ export default function CalendarView() {
 
       <div className="card">
         <div className="section-title">📌 Coming up</div>
-        {upcoming.length === 0 && <EmptyState emoji="📅" title="Nothing on the calendar yet" subtitle="Add household or kids' events and they'll show up here." />}
+        {upcoming.length === 0 && <EmptyState emoji="📅" title="Nothing on the calendar yet" subtitle="Add study sessions, deadlines, or anything else — confirmed exam dates show up here automatically." />}
         {upcoming.map((ev) => {
-          const meta = eventCategoryMeta(ev.category)
+          const meta = eventTypeMeta(ev.type)
           return (
             <div className="list-row" key={ev.id} onClick={() => openDay(ev.date)} style={{ cursor: 'pointer' }}>
               <div className="grow">
@@ -115,7 +148,9 @@ export default function CalendarView() {
                   {ev.time ? ` · ${ev.time}` : ''}
                 </span>
               </div>
-              <span className={`badge tone-${ev.category}`}>{meta.label}</span>
+              <span className={`badge tone-${ev.type}`}>
+                {meta.emoji} {meta.label}
+              </span>
             </div>
           )
         })}
@@ -123,14 +158,30 @@ export default function CalendarView() {
 
       {dayModal && (
         <Modal title={formatDate(dayModal)} onClose={() => setDayModal(null)}>
+          {(examEventsByDate[dayModal] || []).map((ex) => (
+            <div className="list-row" key={ex.id}>
+              <div className="grow">
+                <h4>🎯 {ex.title}</h4>
+                <span className="muted">
+                  {ex.subjectId ? subjectName(state.subjects, ex.subjectId) : 'Exam'}
+                  {ex.approx ? ' · estimated date' : ''} · edit in the Exams tab
+                </span>
+              </div>
+            </div>
+          ))}
+
           {(eventsByDate[dayModal] || []).map((ev) => {
-            const meta = eventCategoryMeta(ev.category)
+            const meta = eventTypeMeta(ev.type)
             return (
               <div className="list-row" key={ev.id}>
                 <div className="grow">
                   <h4>{ev.title}</h4>
                   <span className="muted">
-                    {ev.time || 'All day'} · <span className={`badge tone-${ev.category}`}>{meta.label}</span>
+                    {ev.time || 'All day'} ·{' '}
+                    <span className={`badge tone-${ev.type}`}>
+                      {meta.emoji} {meta.label}
+                    </span>
+                    {ev.notify ? ' · 🔔 reminder on' : ''}
                   </span>
                   {ev.notes && <p className="muted" style={{ marginTop: 4 }}>{ev.notes}</p>}
                 </div>
@@ -151,10 +202,10 @@ export default function CalendarView() {
           )}
 
           {form && (
-            <form onSubmit={saveEvent} style={{ marginTop: 14, borderTop: '2px dashed var(--beige-deep)', paddingTop: 14 }}>
+            <form onSubmit={saveEvent} style={{ marginTop: 14, borderTop: '2px dashed var(--panel-deep)', paddingTop: 14 }}>
               <div className="field">
                 <label>Title</label>
-                <input autoFocus value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Emma's dentist appointment" />
+                <input autoFocus value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Revise Chapter 6" />
               </div>
               <div className="field-row">
                 <div className="field">
@@ -162,15 +213,19 @@ export default function CalendarView() {
                   <input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
                 </div>
                 <div className="field">
-                  <label>Category</label>
-                  <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                    {EVENT_CATEGORIES.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.label}
+                  <label>Type</label>
+                  <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+                    {EVENT_TYPES.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
+              <div className="checkbox-row">
+                <input type="checkbox" id="notify" checked={form.notify} onChange={(e) => setForm({ ...form, notify: e.target.checked })} />
+                <label htmlFor="notify">Pop up a reminder on this day</label>
               </div>
               <div className="field">
                 <label>Notes (optional)</label>

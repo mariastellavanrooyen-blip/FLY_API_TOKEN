@@ -1,15 +1,15 @@
-# 🍲 The Wife's Brain — Household Planner
+# 🐇 ExamReady — Exam Study Tracker
 
-A cream, sage-green and terracotta household command centre: a shared calendar for
-family and kids' things, a two-income budget tracker with monthly reports, a recipe
-box with photos, and a shopping list with trip-day reminders. Built as a React web
-app that installs like a real app on both your tablet and your PC.
+A pastel rustic (terracotta, cream & light beige) exam-prep command centre: chapter-by-chapter
+subject progress, a study session log, an adjustable calendar with pop-up reminders, an exam
+countdown you can start even before you know the exact date, and insight into which study method
+is actually paying off for you. Built as a React web app that installs like a real app on your
+phone, tablet or PC.
 
-## 📲 Get it as an app on your tablet and PC
+## 📲 Get it as an app on your phone/tablet/PC
 
-The Wife's Brain is a real installable app (a "PWA") — no app store, no download
-link needed, just a webpage you can install in a couple of clicks. It works fully
-offline once installed.
+ExamReady is a real installable app (a "PWA") — no app store, no download link needed, just a
+webpage you can install in a couple of clicks. It works fully offline once installed.
 
 **One-time setup (about 30 seconds), done by whoever owns the GitHub repo:**
 
@@ -24,66 +24,60 @@ offline once installed.
 
 **Then, to install it:**
 
-- **On your PC** (Chrome or Edge): open that URL, click the **install icon** in the
-  address bar (a little monitor-with-arrow icon), or **⋮ menu → Save and share →
-  Install…**. It becomes its own app with its own icon, no browser tabs or address bar.
-- **On your tablet** (Chrome/Safari): open the URL, then **Add to Home Screen** from
-  the browser menu. It'll sit on your home screen with its own icon and open full-screen.
+- **On your phone/tablet** (Chrome/Safari): open that URL, then **Add to Home Screen** from the
+  browser menu. It'll sit on your home screen with its own icon and open full-screen.
+- **On your PC** (Chrome or Edge): open the URL, click the **install icon** in the address bar (a
+  little monitor-with-arrow icon), or **⋮ menu → Save and share → Install…**.
 
 Don't want to touch GitHub settings? Run it locally instead — see
 [Running the app locally](#running-the-app-locally) below, then open
-`http://localhost:4173` after `npm run build && npm run preview` and install it
-from there the same way.
+`http://localhost:4173` after `npm run build && npm run preview` and install it from there.
 
 ## Features
 
-- **Dashboard** — this month's balance at a glance, upcoming calendar events, next
-  planned shopping trip, recipe count, and quick links into everything else.
-- **Calendar** — a month grid for household and kids' things: appointments, school
-  events, chores — colour-coded by category, with an upcoming list on the side.
-- **Budget** — the detailed money tracker:
-  - **Income**, split by who earns it — a regular monthly amount per partner (salary
-    etc.) plus one-off "additional income" per month (bonuses, side jobs, gifts).
-  - **Expenses**, tagged by category (Food & Groceries, Kids, Household & Bills,
-    Transport, Health, Other — fully customisable) with a running monthly total.
-  - **Reports** — pick any month to see both partners' income, total spent, the
-    balance left over, a spend-by-category breakdown, and a 6-month trend. Reports
-    are calculated live from your saved entries, so nothing is ever out of date.
-- **Recipe Box** — your brain-dump of go-to meals: a photo (tap to upload — it's
-  compressed automatically so it doesn't eat your storage), ingredients as a
-  checklist-style card, instructions, and notes. Search and filter by category.
-  Any recipe's ingredients can be sent straight to a shopping list in one tap.
-- **Shopping List** — one or more lists, each with tick-off checkboxes, a "reset
-  ticks" button so you can reuse the same list next month, and an optional planned
-  shopping-trip date. When you open the app on that date, a reminder banner appears
-  automatically (with an optional real browser notification too — see below); mark a
-  list "repeats monthly" and its date rolls forward on its own after each trip.
-- **Settings** — household/partner names, currency symbol, budget categories,
-  notification permission, data export/import/reset, and recipe-photo storage.
+- **Dashboard** — a countdown hero to your nearest exam (even a rough "sometime in October" one),
+  this week's study time against your weekly goal, how many subjects are keeping pace, subject
+  progress bars at a glance, and upcoming calendar items.
+- **Subjects** — one card per subject: how many chapters it has, the window you've given yourself
+  to finish it, a progress bar, and a pace indicator (on track / behind) worked out from your
+  target date and how many chapters you've actually completed so far.
+- **Chapter Log** — the session-by-session log: subject, chapter, date, time spent, the study
+  method you used, a 1–5★ confidence/understanding rating, and whether that chapter is now fully
+  done. This is what both the subject progress bars and the study-method insights are built from.
+- **Calendar** — an adjustable month calendar for study sessions, deadlines and anything else,
+  colour-coded by type, with an upcoming list on the side. Confirmed exam dates show up on it
+  automatically. Mark any event "pop up a reminder" and you'll get an in-app banner (plus a real
+  browser notification if you've granted permission) when that day arrives.
+- **Exams** — your exam countdowns. Don't know the exact date yet? Add just the month you're
+  expecting (October, November, …) and get a rough countdown to the 1st of that month, styled
+  differently so you know it's an estimate — swap in the real date the moment you have it, and
+  everything (dashboard, calendar, reminders) updates from that one place.
+- **Study Methods** — logs every session's method and confidence rating, then ranks methods by
+  average confidence-per-session so you can see, from your own data, which technique (active
+  recall, spaced repetition, flashcards, practice questions, and more) is actually maximizing what
+  you retain — plus quick reference notes on each technique and room to add your own.
+- **Settings** — your name, weekly study-hour goal, notification permission, data export/import/
+  reset.
 
-Everything is stored locally on-device — nothing leaves your browser, and there's no
-account or backend needed.
+Everything is stored locally on-device — nothing leaves your browser, and there's no account or
+backend needed.
 
-## About the shopping-day reminder
+## About reminders
 
-This is a plain front-end app with no server, so it can only remind you **while the
-app is open** (or backgrounded, not fully closed) — there's no push server able to
-wake a closed app. In practice that means:
+This is a plain front-end app with no server, so it can only remind you **while the app is open**
+(or backgrounded, not fully closed) — there's no push server able to wake a closed app. In
+practice that means:
 
-- Every time you open the app, it checks today's date against your lists' planned
-  trip dates and shows a banner if one matches — this always works.
-- If you also grant browser notification permission (**Settings → Shopping-day
-  reminders**), you'll get a real pop-up notification too, which is handy if you
-  keep the app open in a background tab.
+- Every time you open the app, it checks today's calendar events and your exam countdowns against
+  your reminder points, and shows a banner if something's due — this always works.
+- If you also grant browser notification permission (**Settings → Reminders**), you'll get a real
+  pop-up notification too, which is handy if you keep the app open in a background tab.
 
-## About syncing between your tablet and PC
+## About syncing between devices
 
-Data is stored only on the device it was entered on — installing the app on both
-your tablet and PC gives you the same *app*, not automatically shared *data*. To
-move your data across, use **Settings → Export backup** on one device and
-**Import backup** on the other. (Recipe photos live in separate on-device storage
-and aren't included in that backup file — re-add photos on the second device if you
-want them there too.)
+Data is stored only on the device it was entered on — installing the app on multiple devices gives
+you the same *app*, not automatically shared *data*. To move your data across, use **Settings →
+Export backup** on one device and **Import backup** on the other.
 
 ## Running the app locally
 
@@ -95,8 +89,8 @@ npm run dev
 
 Open the printed local URL (defaults to `http://localhost:5173`).
 
-To build a static production bundle (deployable to GitHub Pages, Netlify, Vercel, or
-any static host):
+To build a static production bundle (deployable to GitHub Pages, Netlify, Vercel, or any static
+host):
 
 ```bash
 cd frontend
@@ -113,8 +107,10 @@ frontend/               React + Vite app — the whole app, works fully offline
 
 ## Customizing
 
-- Rename your household, partners, currency symbol, and budget categories from
-  **Settings** — no code changes needed.
-- Theme colors are CSS variables at the top of `frontend/src/theme.css`.
-- Calendar event categories (Household / Kids / Appointment / Other) are defined in
-  `frontend/src/lib/utils.js` (`EVENT_CATEGORIES`) if you want to add more.
+- Rename the app and your name, and set your weekly study-hour goal, from **Settings** — no code
+  changes needed.
+- Theme colors (the terracotta/cream/beige palette) are CSS variables at the top of
+  `frontend/src/theme.css`.
+- Calendar/exam event types (Study session / Exam / Deadline / Other) are defined in
+  `frontend/src/lib/utils.js` (`EVENT_TYPES`), and the built-in study methods in the same file
+  (`DEFAULT_METHODS`) — you can also add custom methods from the Study Methods page.

@@ -1,48 +1,34 @@
-import { uid, todayKey } from '../lib/utils.js'
+import { todayKey, DEFAULT_METHODS } from '../lib/utils.js'
 
-export const STORAGE_KEY = 'wifesbrain_state_v1'
+export const STORAGE_KEY = 'examready_state_v1'
 
 export function makeDefaultState() {
   return {
     version: 1,
     settings: {
-      householdName: "The Wife's Brain",
-      partnerAName: 'Me',
-      partnerBName: 'Husband',
-      currencySymbol: '$',
-      expenseCategories: ['Food & Groceries', 'Kids', 'Household & Bills', 'Transport', 'Health', 'Other'],
+      appName: 'ExamReady',
+      studentName: 'Me',
+      weeklyGoalHours: 10,
+      examReminderDays: [7, 3, 1, 0], // fire a countdown nudge at these days-out
     },
-    // calendar
+    // what you're studying
+    subjects: [
+      // { id, name, totalChapters, startDate: 'YYYY-MM-DD', targetDate: 'YYYY-MM-DD'|null, createdAt }
+    ],
+    // the chapter log — one row per study session
+    chapterLogs: [
+      // { id, subjectId, chapter, date, minutes, method: methodId, confidence: 1-5, completed, notes }
+    ],
+    // exam countdowns — date can be null while only a tentative month is known
+    exams: [
+      // { id, subjectId: id|null, title, date: 'YYYY-MM-DD'|null, tentativeMonth: 'October'|null, notes }
+    ],
+    // adjustable calendar
     events: [
-      // { id, date: 'YYYY-MM-DD', time: '', title, category: 'household'|'kids'|'appointment'|'other', notes }
+      // { id, date, time, title, type: 'study'|'exam'|'deadline'|'other', notify, notifiedOn }
     ],
-    // budget — flat, filterable-by-date lists rather than pre-bucketed months
-    budget: {
-      recurringIncomes: [
-        // { id, person: 'a'|'b', label, amount } — assumed every month from now on
-      ],
-      extraIncomes: [
-        // { id, person: 'a'|'b', label, amount, date }
-      ],
-      expenses: [
-        // { id, category, label, amount, date }
-      ],
-    },
-    // recipe box
-    recipes: [
-      // { id, title, category, hasImage, ingredients: [{id, text}], instructions, notes, createdAt }
-    ],
-    // shopping lists (can have a planned trip date + repeat monthly)
-    shoppingLists: [
-      {
-        id: uid(),
-        name: 'Big monthly shop',
-        tripDate: null,
-        recurring: false,
-        lastAcknowledged: null,
-        items: [],
-      },
-    ],
+    // study methods available to log against — built-ins plus any you add
+    methods: DEFAULT_METHODS,
     createdAt: todayKey(),
     uiToast: null,
   }

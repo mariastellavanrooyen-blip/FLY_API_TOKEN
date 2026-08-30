@@ -15,7 +15,6 @@ function loadInitialState() {
       ...def,
       ...parsed,
       settings: { ...def.settings, ...parsed.settings },
-      budget: { ...def.budget, ...parsed.budget },
     }
   } catch {
     return makeDefaultState()
@@ -33,6 +32,35 @@ function reducer(state, action) {
     case 'IMPORT_STATE':
       return { ...makeDefaultState(), ...action.payload }
 
+    // --- subjects ---
+    case 'ADD_SUBJECT':
+      return { ...state, subjects: [...state.subjects, { id: uid(), ...action.payload }] }
+    case 'UPDATE_SUBJECT':
+      return { ...state, subjects: state.subjects.map((s) => (s.id === action.payload.id ? { ...s, ...action.payload } : s)) }
+    case 'DELETE_SUBJECT':
+      return {
+        ...state,
+        subjects: state.subjects.filter((s) => s.id !== action.payload.id),
+        chapterLogs: state.chapterLogs.filter((l) => l.subjectId !== action.payload.id),
+        exams: state.exams.filter((e) => e.subjectId !== action.payload.id),
+      }
+
+    // --- chapter log ---
+    case 'ADD_LOG':
+      return { ...state, chapterLogs: [{ id: uid(), ...action.payload }, ...state.chapterLogs] }
+    case 'UPDATE_LOG':
+      return { ...state, chapterLogs: state.chapterLogs.map((l) => (l.id === action.payload.id ? { ...l, ...action.payload } : l)) }
+    case 'DELETE_LOG':
+      return { ...state, chapterLogs: state.chapterLogs.filter((l) => l.id !== action.payload.id) }
+
+    // --- exams / countdowns ---
+    case 'ADD_EXAM':
+      return { ...state, exams: [...state.exams, { id: uid(), ...action.payload }] }
+    case 'UPDATE_EXAM':
+      return { ...state, exams: state.exams.map((e) => (e.id === action.payload.id ? { ...e, ...action.payload } : e)) }
+    case 'DELETE_EXAM':
+      return { ...state, exams: state.exams.filter((e) => e.id !== action.payload.id) }
+
     // --- calendar events ---
     case 'ADD_EVENT':
       return { ...state, events: [...state.events, { id: uid(), ...action.payload }] }
@@ -41,116 +69,14 @@ function reducer(state, action) {
     case 'DELETE_EVENT':
       return { ...state, events: state.events.filter((e) => e.id !== action.payload.id) }
 
-    // --- budget: recurring incomes ---
-    case 'ADD_RECURRING_INCOME':
-      return {
-        ...state,
-        budget: { ...state.budget, recurringIncomes: [...state.budget.recurringIncomes, { id: uid(), ...action.payload }] },
-      }
-    case 'UPDATE_RECURRING_INCOME':
-      return {
-        ...state,
-        budget: {
-          ...state.budget,
-          recurringIncomes: state.budget.recurringIncomes.map((i) => (i.id === action.payload.id ? { ...i, ...action.payload } : i)),
-        },
-      }
-    case 'DELETE_RECURRING_INCOME':
-      return {
-        ...state,
-        budget: { ...state.budget, recurringIncomes: state.budget.recurringIncomes.filter((i) => i.id !== action.payload.id) },
-      }
-
-    // --- budget: one-off / extra incomes ---
-    case 'ADD_EXTRA_INCOME':
-      return { ...state, budget: { ...state.budget, extraIncomes: [...state.budget.extraIncomes, { id: uid(), ...action.payload }] } }
-    case 'UPDATE_EXTRA_INCOME':
-      return {
-        ...state,
-        budget: {
-          ...state.budget,
-          extraIncomes: state.budget.extraIncomes.map((i) => (i.id === action.payload.id ? { ...i, ...action.payload } : i)),
-        },
-      }
-    case 'DELETE_EXTRA_INCOME':
-      return { ...state, budget: { ...state.budget, extraIncomes: state.budget.extraIncomes.filter((i) => i.id !== action.payload.id) } }
-
-    // --- budget: expenses ---
-    case 'ADD_EXPENSE':
-      return { ...state, budget: { ...state.budget, expenses: [...state.budget.expenses, { id: uid(), ...action.payload }] } }
-    case 'UPDATE_EXPENSE':
-      return {
-        ...state,
-        budget: { ...state.budget, expenses: state.budget.expenses.map((e) => (e.id === action.payload.id ? { ...e, ...action.payload } : e)) },
-      }
-    case 'DELETE_EXPENSE':
-      return { ...state, budget: { ...state.budget, expenses: state.budget.expenses.filter((e) => e.id !== action.payload.id) } }
-
-    // --- budget: categories ---
-    case 'ADD_CATEGORY': {
+    // --- study methods ---
+    case 'ADD_METHOD': {
       const name = action.payload.name.trim()
-      if (!name || state.settings.expenseCategories.includes(name)) return state
-      return { ...state, settings: { ...state.settings, expenseCategories: [...state.settings.expenseCategories, name] } }
+      if (!name) return state
+      return { ...state, methods: [...state.methods, { id: uid(), name, hint: action.payload.hint || '' }] }
     }
-    case 'DELETE_CATEGORY':
-      return {
-        ...state,
-        settings: { ...state.settings, expenseCategories: state.settings.expenseCategories.filter((c) => c !== action.payload.name) },
-      }
-
-    // --- recipes ---
-    case 'ADD_RECIPE':
-      return { ...state, recipes: [{ id: uid(), createdAt: new Date().toISOString(), ...action.payload }, ...state.recipes] }
-    case 'UPDATE_RECIPE':
-      return { ...state, recipes: state.recipes.map((r) => (r.id === action.payload.id ? { ...r, ...action.payload } : r)) }
-    case 'DELETE_RECIPE':
-      return { ...state, recipes: state.recipes.filter((r) => r.id !== action.payload.id) }
-
-    // --- shopping lists ---
-    case 'ADD_SHOPPING_LIST':
-      return {
-        ...state,
-        shoppingLists: [...state.shoppingLists, { id: uid(), items: [], recurring: false, tripDate: null, lastAcknowledged: null, ...action.payload }],
-      }
-    case 'UPDATE_SHOPPING_LIST':
-      return {
-        ...state,
-        shoppingLists: state.shoppingLists.map((l) => (l.id === action.payload.id ? { ...l, ...action.payload } : l)),
-      }
-    case 'DELETE_SHOPPING_LIST':
-      return { ...state, shoppingLists: state.shoppingLists.filter((l) => l.id !== action.payload.id) }
-    case 'ADD_SHOPPING_ITEMS':
-      return {
-        ...state,
-        shoppingLists: state.shoppingLists.map((l) =>
-          l.id === action.payload.listId
-            ? { ...l, items: [...l.items, ...action.payload.items.map((text) => ({ id: uid(), text, checked: false }))] }
-            : l,
-        ),
-      }
-    case 'UPDATE_SHOPPING_ITEM':
-      return {
-        ...state,
-        shoppingLists: state.shoppingLists.map((l) =>
-          l.id === action.payload.listId
-            ? { ...l, items: l.items.map((it) => (it.id === action.payload.itemId ? { ...it, ...action.payload.patch } : it)) }
-            : l,
-        ),
-      }
-    case 'DELETE_SHOPPING_ITEM':
-      return {
-        ...state,
-        shoppingLists: state.shoppingLists.map((l) =>
-          l.id === action.payload.listId ? { ...l, items: l.items.filter((it) => it.id !== action.payload.itemId) } : l,
-        ),
-      }
-    case 'RESET_SHOPPING_CHECKS':
-      return {
-        ...state,
-        shoppingLists: state.shoppingLists.map((l) =>
-          l.id === action.payload.listId ? { ...l, items: l.items.map((it) => ({ ...it, checked: false })) } : l,
-        ),
-      }
+    case 'DELETE_METHOD':
+      return { ...state, methods: state.methods.filter((m) => m.id !== action.payload.id) }
 
     // --- transient in-app notifications ---
     case 'SHOW_TOAST':

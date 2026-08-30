@@ -1,29 +1,34 @@
 :root {
-  --cream: #fbf3e7;
-  --cream-deep: #f3e6d2;
-  --beige: #ecdcc0;
-  --beige-deep: #ddc49b;
-  --sage: #7c9473;
-  --sage-deep: #5f7857;
-  --sage-soft: #c3d4ba;
-  --terracotta: #c9694a;
-  --terracotta-deep: #a84e34;
-  --terracotta-soft: #eec2ac;
+  /* rustic, pastel brand palette — terracotta, cream & light beige, with a
+     soft sage and dusty rose (flowers) as the only accent hues */
+  --paper: #fbf3e7;
+  --paper-deep: #f3e6d2;
+  --panel: #ecdcc0;
+  --panel-deep: #ddc49b;
+  --line: #ddc49b;
+  --white: #fffdf9;
   --ink: #3a342c;
   --ink-soft: #8a7460;
-  --white: #fffdf9;
-  --mustard: #e3a857;
-  --sky: #6e9bb0;
-  --danger: #c1544a;
+  --indigo: #c9694a; /* terracotta — primary brand */
+  --indigo-deep: #a84e34;
+  --indigo-soft: #eec2ac;
+  --teal: #7c9473; /* sage — secondary */
+  --teal-deep: #5f7857;
+  --teal-soft: #c3d4ba;
+  --amber: #d69a3e; /* warm mustard — warnings */
+  --amber-soft: #f3ddac;
+  --coral: #c9566f; /* dusty rose (flowers) — exams / urgency */
+  --coral-soft: #f0d3da;
   --good: #5f7857;
-  --garden: linear-gradient(90deg, #7c9473 0%, #a9c08e 25%, #e3a857 50%, #d98a5f 75%, #c9694a 100%);
+  --bad: #c9566f;
+  --focus: linear-gradient(90deg, #c9694a 0%, #d69a3e 35%, #7c9473 68%, #c9566f 100%);
   --radius-lg: 22px;
   --radius-md: 14px;
   --radius-sm: 9px;
-  --shadow-soft: 0 6px 20px rgba(95, 120, 87, 0.12);
-  --shadow-pop: 0 10px 30px rgba(95, 120, 87, 0.18);
+  --shadow-soft: 0 6px 20px rgba(168, 78, 52, 0.1);
+  --shadow-pop: 0 10px 30px rgba(168, 78, 52, 0.18);
   /* validated categorical data palette — see dataviz skill; used ONLY for
-     budget-category identity (bars/dots), never for chrome */
+     subject/method identity (bars/dots/chips), never for chrome */
   --cat-1: #2a78d6;
   --cat-2: #eb6834;
   --cat-3: #1baf7a;
@@ -47,10 +52,11 @@ body,
 body {
   margin: 0;
   font-family: 'Trebuchet MS', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--cream);
+  background: var(--paper);
   color: var(--ink);
-  background-image: radial-gradient(circle at 12% 8%, var(--beige) 0%, transparent 40%),
-    radial-gradient(circle at 92% 85%, var(--sage-soft) 0%, transparent 35%);
+  background-image: radial-gradient(circle at 10% 8%, var(--panel) 0%, transparent 40%),
+    radial-gradient(circle at 92% 88%, var(--teal-soft) 0%, transparent 36%),
+    radial-gradient(circle at 50% 50%, var(--coral-soft) 0%, transparent 55%);
   background-attachment: fixed;
 }
 
@@ -60,7 +66,7 @@ h3,
 h4 {
   font-family: Georgia, 'Iowan Old Style', serif;
   margin: 0 0 0.4em;
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
 }
 
 p {
@@ -73,11 +79,11 @@ button {
 }
 
 a {
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
 }
 
 ::selection {
-  background: var(--sage-soft);
+  background: var(--teal-soft);
 }
 
 /* ---------- layout ---------- */
@@ -90,8 +96,8 @@ a {
 .sidebar {
   width: 232px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, var(--beige) 0%, var(--cream-deep) 100%);
-  border-right: 2px dashed var(--beige-deep);
+  background: linear-gradient(180deg, var(--panel) 0%, var(--paper-deep) 100%);
+  border-right: 2px dashed var(--panel-deep);
   padding: 20px 14px;
   display: flex;
   flex-direction: column;
@@ -106,7 +112,7 @@ a {
   font-family: Georgia, serif;
   font-weight: bold;
   font-size: 1.1rem;
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
   line-height: 1.2;
 }
 
@@ -131,11 +137,11 @@ a {
 
 .nav-item:hover {
   background: var(--white);
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
 }
 
 .nav-item.active {
-  background: var(--sage);
+  background: var(--indigo);
   color: var(--white);
   box-shadow: var(--shadow-soft);
 }
@@ -147,7 +153,8 @@ a {
 .sidebar-footer {
   margin-top: auto;
   padding-top: 12px;
-  border-top: 2px dashed var(--beige-deep);
+  border-top: 2px dashed var(--panel-deep);
+  text-align: center;
 }
 
 .main-area {
@@ -172,10 +179,10 @@ a {
   font-size: 1.6rem;
 }
 
-.garden-rule {
+.accent-rule {
   height: 5px;
   border-radius: 6px;
-  background: var(--garden);
+  background: var(--focus);
   margin: 6px 0 24px;
   opacity: 0.85;
 }
@@ -185,7 +192,7 @@ a {
 .card {
   background: var(--white);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--beige-deep);
+  border: 1px solid var(--panel-deep);
   box-shadow: var(--shadow-soft);
   padding: 20px;
 }
@@ -225,7 +232,7 @@ a {
   padding: 9px 18px;
   font-weight: 700;
   font-size: 0.88rem;
-  background: var(--sage);
+  background: var(--indigo);
   color: var(--white);
   box-shadow: var(--shadow-soft);
   transition: transform 0.1s, box-shadow 0.1s;
@@ -237,23 +244,23 @@ a {
 }
 
 .btn.secondary {
-  background: var(--beige);
-  color: var(--sage-deep);
+  background: var(--panel);
+  color: var(--indigo-deep);
 }
 
 .btn.accent {
-  background: var(--terracotta);
+  background: var(--teal);
 }
 
 .btn.ghost {
   background: transparent;
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
   box-shadow: none;
-  border: 2px solid var(--beige-deep);
+  border: 2px solid var(--panel-deep);
 }
 
 .btn.danger {
-  background: var(--danger);
+  background: var(--coral);
 }
 
 .btn.small {
@@ -274,7 +281,7 @@ textarea {
   font-size: 0.92rem;
   padding: 9px 12px;
   border-radius: var(--radius-sm);
-  border: 2px solid var(--beige-deep);
+  border: 2px solid var(--panel-deep);
   background: var(--white);
   color: var(--ink);
   width: 100%;
@@ -284,7 +291,7 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--sage);
+  border-color: var(--indigo);
 }
 
 label {
@@ -305,6 +312,23 @@ label {
   gap: 10px;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--indigo);
+}
+
+.checkbox-row label {
+  margin: 0;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -313,8 +337,8 @@ label {
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
-  background: var(--beige);
-  color: var(--sage-deep);
+  background: var(--panel);
+  color: var(--indigo-deep);
 }
 
 .badge.tone-good {
@@ -322,37 +346,51 @@ label {
   color: var(--good);
 }
 .badge.tone-bad {
-  background: #f2c9bf;
-  color: var(--terracotta-deep);
+  background: var(--coral-soft);
+  color: #8a3348;
 }
-.badge.tone-kids {
-  background: #f3e1ad;
-  color: #8a6a1c;
+.badge.tone-warn {
+  background: var(--amber-soft);
+  color: #8a5f16;
 }
-.badge.tone-household {
-  background: #cfe3c0;
-  color: #45632f;
+.badge.tone-study {
+  background: var(--indigo-soft);
+  color: var(--indigo-deep);
 }
-.badge.tone-appointment {
-  background: #cfdde8;
-  color: #33566e;
+.badge.tone-exam {
+  background: var(--coral-soft);
+  color: #8a3348;
+}
+.badge.tone-deadline {
+  background: var(--amber-soft);
+  color: #8a5f16;
 }
 .badge.tone-other {
-  background: var(--beige);
-  color: var(--ink-soft);
+  background: var(--teal-soft);
+  color: var(--teal-deep);
 }
 
 .progress-track {
   height: 10px;
   border-radius: 999px;
-  background: var(--beige);
+  background: var(--panel);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: var(--garden);
+  background: var(--focus);
+}
+
+.progress-fill.tone-good {
+  background: var(--good);
+}
+.progress-fill.tone-warn {
+  background: var(--amber);
+}
+.progress-fill.tone-bad {
+  background: var(--bad);
 }
 
 .empty-state {
@@ -373,13 +411,13 @@ label {
   gap: 12px;
   padding: 12px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--beige);
+  border: 1px solid var(--panel);
   margin-bottom: 8px;
-  background: var(--cream);
+  background: var(--paper);
 }
 
 .list-row:hover {
-  border-color: var(--sage-soft);
+  border-color: var(--teal-soft);
 }
 
 .list-row .grow {
@@ -406,7 +444,7 @@ label {
 
 .pill-select button {
   border-radius: 999px;
-  border: 2px solid var(--beige-deep);
+  border: 2px solid var(--panel-deep);
   background: var(--white);
   padding: 5px 13px;
   font-size: 0.8rem;
@@ -415,36 +453,8 @@ label {
 }
 
 .pill-select button.active {
-  background: var(--sage);
-  border-color: var(--sage);
-  color: var(--white);
-}
-
-.tab-strip {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  border-bottom: 2px dashed var(--beige-deep);
-  padding-bottom: 12px;
-}
-
-.tab-strip button {
-  border-radius: var(--radius-md);
-  border: none;
-  background: transparent;
-  padding: 8px 16px;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-}
-
-.tab-strip button:hover {
-  background: var(--beige);
-}
-
-.tab-strip button.active {
-  background: var(--sage);
+  background: var(--indigo);
+  border-color: var(--indigo);
   color: var(--white);
 }
 
@@ -484,8 +494,8 @@ label {
 }
 
 .icon-btn:hover {
-  background: var(--beige);
-  color: var(--sage-deep);
+  background: var(--panel);
+  color: var(--indigo-deep);
 }
 
 /* ---------- stat tiles ---------- */
@@ -493,7 +503,7 @@ label {
 .stat-tile {
   background: var(--white);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--beige-deep);
+  border: 1px solid var(--panel-deep);
   box-shadow: var(--shadow-soft);
   padding: 18px 20px;
 }
@@ -510,7 +520,7 @@ label {
 .stat-tile .stat-value {
   font-family: Georgia, serif;
   font-size: 1.7rem;
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
   font-weight: 700;
 }
 
@@ -519,7 +529,7 @@ label {
 }
 
 .stat-tile .stat-value.tone-bad {
-  color: var(--terracotta-deep);
+  color: var(--bad);
 }
 
 .stat-tile .stat-sub {
@@ -528,7 +538,49 @@ label {
   color: var(--ink-soft);
 }
 
-/* ---------- category bar breakdown ---------- */
+/* ---------- countdown hero ---------- */
+
+.countdown-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: linear-gradient(120deg, var(--indigo) 0%, var(--indigo-deep) 55%, #7a3a26 100%);
+  color: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-pop);
+  flex-wrap: wrap;
+}
+
+.countdown-number {
+  font-family: Georgia, serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 100px;
+}
+
+.countdown-body {
+  flex: 1;
+  min-width: 220px;
+}
+
+.countdown-body .countdown-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.countdown-body .countdown-sub {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.countdown-hero.tentative {
+  background: linear-gradient(120deg, var(--teal) 0%, var(--teal-deep) 60%, #33422e 100%);
+}
+
+/* ---------- horizontal identity bars (subject progress, method compare) ---------- */
 
 .bar-row {
   display: grid;
@@ -558,7 +610,7 @@ label {
 .bar-row .bar-track {
   height: 14px;
   border-radius: 999px;
-  background: var(--cream-deep);
+  background: var(--paper-deep);
   overflow: hidden;
 }
 
@@ -585,6 +637,29 @@ label {
   }
 }
 
+/* ---------- confidence stars ---------- */
+
+.stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.stars button {
+  border: none;
+  background: transparent;
+  font-size: 1.15rem;
+  padding: 0 1px;
+  color: var(--panel-deep);
+}
+
+.stars button.filled {
+  color: var(--amber);
+}
+
+.stars.readonly {
+  pointer-events: none;
+}
+
 /* ---------- calendar ---------- */
 
 .calendar-head {
@@ -597,7 +672,7 @@ label {
 .calendar-head .month-label {
   font-family: Georgia, serif;
   font-size: 1.25rem;
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
   min-width: 190px;
   text-align: center;
 }
@@ -619,8 +694,8 @@ label {
 .calendar-cell {
   min-height: 84px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--beige);
-  background: var(--cream);
+  border: 1px solid var(--panel);
+  background: var(--paper);
   padding: 6px;
   cursor: pointer;
   display: flex;
@@ -630,7 +705,7 @@ label {
 }
 
 .calendar-cell:hover {
-  border-color: var(--sage-soft);
+  border-color: var(--teal-soft);
   background: var(--white);
 }
 
@@ -641,7 +716,7 @@ label {
 }
 
 .calendar-cell.today {
-  border-color: var(--sage);
+  border-color: var(--indigo);
   border-width: 2px;
   background: var(--white);
 }
@@ -653,7 +728,7 @@ label {
 }
 
 .calendar-cell.today .day-num {
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
 }
 
 .calendar-cell .event-chip {
@@ -672,136 +747,13 @@ label {
   color: var(--ink-soft);
 }
 
-/* ---------- recipes ---------- */
-
-.recipe-card {
-  cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
-  overflow: hidden;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.recipe-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-pop);
-}
-
-.recipe-image {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  display: block;
-  background: var(--beige);
-}
-
-.recipe-image-placeholder {
-  width: 100%;
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.4rem;
-  background: linear-gradient(135deg, var(--beige) 0%, var(--cream) 100%);
-  color: var(--beige-deep);
-}
-
-.recipe-card-body {
-  padding: 14px 16px 16px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.recipe-card-body h4 {
-  margin: 0;
-  color: var(--ink);
-  font-family: Georgia, serif;
-  font-size: 1.05rem;
-}
-
-.image-upload-box {
-  width: 100%;
-  height: 180px;
-  border: 3px dashed var(--beige-deep);
-  background: var(--cream-deep);
-  border-radius: var(--radius-md);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: var(--ink-soft);
-  cursor: pointer;
-  overflow: hidden;
-  position: relative;
-}
-
-.image-upload-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-}
-
-.ingredient-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--cream);
-  border: 1px solid var(--beige);
-  border-radius: var(--radius-sm);
-  padding: 7px 10px;
-  margin-bottom: 6px;
-  font-size: 0.88rem;
-}
-
-.ingredient-chip .grow {
-  flex: 1;
-}
-
-/* ---------- checklist rows (shopping list) ---------- */
-
-.check-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 4px;
-  border-bottom: 1px dashed var(--beige-deep);
-}
-
-.check-row:last-child {
-  border-bottom: none;
-}
-
-.check-row input[type='checkbox'] {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  accent-color: var(--sage);
-  border-radius: 4px;
-}
-
-.check-row .item-text {
-  flex: 1;
-  font-size: 0.95rem;
-}
-
-.check-row.checked .item-text {
-  text-decoration: line-through;
-  color: var(--ink-soft);
-}
-
 /* ---------- alert banner ---------- */
 
 .banner-alert {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: linear-gradient(90deg, var(--terracotta-soft) 0%, var(--mustard) 100%);
+  background: linear-gradient(90deg, var(--coral-soft) 0%, var(--amber-soft) 100%);
   border-radius: var(--radius-lg);
   padding: 16px 20px;
   margin-bottom: 20px;
@@ -825,18 +777,6 @@ label {
   margin: 2px 0 0;
   font-size: 0.85rem;
   color: var(--ink);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 30px 10px;
-  color: var(--ink-soft);
-}
-
-.upload-drop {
-  border: 3px dashed var(--beige-deep);
-  background: var(--cream-deep);
-  transition: border-color 0.15s, background 0.15s;
 }
 
 .toast-wrap {
@@ -865,7 +805,7 @@ label {
   gap: 12px;
   max-width: 340px;
   background: var(--white);
-  border: 2px solid var(--sage-soft);
+  border: 2px solid var(--teal-soft);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-pop);
   padding: 16px 14px;
@@ -878,7 +818,7 @@ label {
 
 .toast-card strong {
   display: block;
-  color: var(--sage-deep);
+  color: var(--indigo-deep);
   margin-bottom: 2px;
 }
 
@@ -893,6 +833,36 @@ label {
   line-height: 1;
 }
 
+/* ---------- method reference cards ---------- */
+
+.method-card {
+  background: var(--paper);
+  border: 1px solid var(--panel);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.method-card h4 {
+  margin: 0 0 3px;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.recommend-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(90deg, var(--teal-soft) 0%, var(--indigo-soft) 100%);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.recommend-banner .banner-emoji {
+  font-size: 1.8rem;
+}
+
 @media (max-width: 780px) {
   .app-shell {
     flex-direction: column;
@@ -902,7 +872,7 @@ label {
     flex-direction: row;
     overflow-x: auto;
     border-right: none;
-    border-bottom: 2px dashed var(--beige-deep);
+    border-bottom: 2px dashed var(--panel-deep);
   }
   .sidebar-brand {
     display: none;
@@ -918,5 +888,11 @@ label {
   }
   .calendar-cell {
     min-height: 60px;
+  }
+  .countdown-hero {
+    padding: 20px;
+  }
+  .countdown-number {
+    font-size: 2.4rem;
   }
 }

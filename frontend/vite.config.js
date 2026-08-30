@@ -12,11 +12,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
-        name: "The Wife's Brain — Household Planner",
-        short_name: "Wife's Brain",
+        name: 'ExamReady — Exam Study Tracker',
+        short_name: 'ExamReady',
         description:
-          'A household planner: family calendar, a two-income budget tracker with monthly reports, a recipe box, and a shopping list with trip-day reminders.',
-        theme_color: '#6f8b67',
+          'A pastel rustic exam-prep tracker: chapter-by-chapter subject progress, a study session log, an adjustable calendar with reminders, exam countdowns, and study-method insights.',
+        theme_color: '#c9694a',
         background_color: '#fbf3e7',
         display: 'standalone',
         start_url: './',

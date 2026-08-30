@@ -1,21 +1,38 @@
 import React, { useMemo } from 'react'
 import { useStore } from '../state/store.jsx'
 import EmptyState from './ui/EmptyState.jsx'
-import { useBudgetMath } from '../lib/budgetMath.js'
-import { formatMoney, formatDate, currentMonthKey, formatMonthLabel, todayKey, eventCategoryMeta } from '../lib/utils.js'
+import ProgressBar from './ui/ProgressBar.jsx'
+import { subjectStats } from '../lib/studyMath.js'
+import { minutesInLastDays } from '../lib/studyMath.js'
+import {
+  todayKey,
+  formatDate,
+  subjectColorVar,
+  examTargetDate,
+  daysUntil,
+  formatMinutes,
+  eventTypeMeta,
+  subjectName,
+} from '../lib/utils.js'
 
 export default function Dashboard({ onNavigate }) {
   const { state } = useStore()
   const { settings } = state
-  const math = useBudgetMath(state.budget)
-  const monthKey = currentMonthKey()
 
-  const incomeA = math.incomeForMonth(monthKey, 'a')
-  const incomeB = math.incomeForMonth(monthKey, 'b')
-  const totalIncome = incomeA + incomeB
-  const totalExpenses = math.totalExpensesForMonth(monthKey)
-  const unpaidTotal = math.totalUnpaidForMonth(monthKey)
-  const balance = totalIncome - totalExpenses
+  const nearestExam = useMemo(() => {
+    return [...state.exams]
+      .map((e) => ({ exam: e, target: examTargetDate(e) }))
+      .filter((x) => x.target && daysUntil(x.target) >= 0)
+      .sort((a, b) => a.target.localeCompare(b.target))[0]
+  }, [state.exams])
+
+  const weekMinutes = minutesInLastDays(state.chapterLogs, 7)
+  const goalMinutes = (settings.weeklyGoalHours || 0) * 60
+
+  const subjectRows = useMemo(() => state.subjects.map((s) => ({ subject: s, stats: subjectStats(s, state.chapterLogs) })), [state.subjects, state.chapterLogs])
+  const onTrackCount = subjectRows.filter((r) => r.stats.onTrack === true).length
+  const totalDone = subjectRows.reduce((s, r) => s + r.stats.done, 0)
+  const totalChapters = subjectRows.reduce((s, r) => s + r.stats.total, 0)
 
   const upcomingEvents = useMemo(() => {
     const today = todayKey()
@@ -25,52 +42,106 @@ export default function Dashboard({ onNavigate }) {
       .slice(0, 5)
   }, [state.events])
 
-  const nextTrip = useMemo(() => {
-    const today = todayKey()
-    return state.shoppingLists
-      .filter((l) => l.tripDate && l.tripDate >= today)
-      .sort((a, b) => a.tripDate.localeCompare(b.tripDate))[0]
-  }, [state.shoppingLists])
-
   return (
     <div>
-      <div className="grid cols-4">
-        <div className="stat-tile">
-          <div className="stat-label">{formatMonthLabel(monthKey)} balance</div>
-          <div className={`stat-value tone-${balance >= 0 ? 'good' : 'bad'}`}>{formatMoney(balance, settings.currencySymbol)}</div>
-          <div className="stat-sub">
-            {formatMoney(totalIncome, settings.currencySymbol)} in · {formatMoney(totalExpenses, settings.currencySymbol)} out
-            {unpaidTotal > 0 ? ` · ${formatMoney(unpaidTotal, settings.currencySymbol)} still to pay` : ''}
+      {nearestExam ? (
+        <div className={`countdown-hero${!nearestExam.exam.date ? ' tentative' : ''}`}>
+          <div className="countdown-number">{daysUntil(nearestExam.target)}</div>
+          <div className="countdown-body">
+            <div className="countdown-title">
+              days until {nearestExam.exam.title}
+              {nearestExam.exam.subjectId ? ` (${subjectName(state.subjects, nearestExam.exam.subjectId)})` : ''}
+            </div>
+            <div className="countdown-sub">
+              {nearestExam.exam.date
+                ? `Confirmed for ${formatDate(nearestExam.exam.date)}`
+                : `Estimated from "${nearestExam.exam.tentativeMonth}" — update it once the real date is out.`}
+            </div>
+          </div>
+          <button className="btn secondary small" onClick={() => onNavigate('exams')}>
+            Manage exams →
+          </button>
+        </div>
+      ) : (
+        <div className="card">
+          <EmptyState emoji="🎯" title="No exam countdown yet" subtitle="Add an exam — even with just a rough month like October or November — to start counting down." />
+          <div style={{ textAlign: 'center' }}>
+            <button className="btn" onClick={() => onNavigate('exams')}>
+              + Add an exam
+            </button>
           </div>
         </div>
+      )}
+
+      <div className="grid cols-4" style={{ marginTop: 16 }}>
         <div className="stat-tile">
-          <div className="stat-label">{settings.partnerAName}'s income</div>
-          <div className="stat-value">{formatMoney(incomeA, settings.currencySymbol)}</div>
+          <div className="stat-label">Chapters done</div>
+          <div className="stat-value">
+            {totalDone}/{totalChapters || 0}
+          </div>
+          <div className="stat-sub">across {state.subjects.length} subject{state.subjects.length === 1 ? '' : 's'}</div>
         </div>
         <div className="stat-tile">
-          <div className="stat-label">{settings.partnerBName}'s income</div>
-          <div className="stat-value">{formatMoney(incomeB, settings.currencySymbol)}</div>
+          <div className="stat-label">This week</div>
+          <div className={`stat-value${goalMinutes ? ` tone-${weekMinutes >= goalMinutes ? 'good' : 'bad'}` : ''}`}>{formatMinutes(weekMinutes)}</div>
+          <div className="stat-sub">{goalMinutes ? `goal: ${formatMinutes(goalMinutes)}` : 'set a weekly goal in Settings'}</div>
         </div>
         <div className="stat-tile">
-          <div className="stat-label">Recipes saved</div>
-          <div className="stat-value">{state.recipes.length}</div>
-          <div className="stat-sub">in your recipe box</div>
+          <div className="stat-label">On track</div>
+          <div className="stat-value">
+            {onTrackCount}/{state.subjects.length}
+          </div>
+          <div className="stat-sub">subjects keeping pace with their target date</div>
+        </div>
+        <div className="stat-tile">
+          <div className="stat-label">Sessions logged</div>
+          <div className="stat-value">{state.chapterLogs.length}</div>
+          <div className="stat-sub">total chapter-log entries</div>
         </div>
       </div>
 
       <div className="grid cols-2" style={{ marginTop: 16, alignItems: 'start' }}>
         <div className="card">
+          <div className="section-title">📗 Subject progress</div>
+          {subjectRows.length === 0 && <EmptyState emoji="📗" title="No subjects yet" subtitle="Add one to start tracking chapters." />}
+          {subjectRows.map(({ subject, stats }) => (
+            <div key={subject.id} style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', fontWeight: 600, marginBottom: 4 }}>
+                <span>
+                  <span
+                    style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: subjectColorVar(state.subjects, subject.id), marginRight: 6 }}
+                  />
+                  {subject.name}
+                </span>
+                <span className="muted">
+                  {stats.done}/{stats.total}
+                </span>
+              </div>
+              <ProgressBar value={stats.progressPct} tone={stats.daysLeft === null ? undefined : stats.onTrack ? 'good' : 'bad'} />
+            </div>
+          ))}
+          <button className="btn ghost small" style={{ marginTop: 4 }} onClick={() => onNavigate('subjects')}>
+            Open subjects →
+          </button>
+        </div>
+
+        <div className="card">
           <div className="section-title">📅 Coming up</div>
           {upcomingEvents.length === 0 && <EmptyState emoji="📅" title="Nothing on the calendar" />}
           {upcomingEvents.map((ev) => {
-            const meta = eventCategoryMeta(ev.category)
+            const meta = eventTypeMeta(ev.type)
             return (
               <div className="list-row" key={ev.id}>
                 <div className="grow">
                   <h4>{ev.title}</h4>
-                  <span className="muted">{formatDate(ev.date)}{ev.time ? ` · ${ev.time}` : ''}</span>
+                  <span className="muted">
+                    {formatDate(ev.date)}
+                    {ev.time ? ` · ${ev.time}` : ''}
+                  </span>
                 </div>
-                <span className={`badge tone-${ev.category}`}>{meta.label}</span>
+                <span className={`badge tone-${ev.type}`}>
+                  {meta.emoji} {meta.label}
+                </span>
               </div>
             )
           })}
@@ -78,35 +149,21 @@ export default function Dashboard({ onNavigate }) {
             Open calendar →
           </button>
         </div>
-
-        <div className="card">
-          <div className="section-title">🛒 Shopping</div>
-          {nextTrip ? (
-            <p>
-              Next planned trip: <strong>{formatDate(nextTrip.tripDate)}</strong> for "{nextTrip.name}" ({nextTrip.items.filter((i) => !i.checked).length} item(s) left to get).
-            </p>
-          ) : (
-            <p className="muted">No shopping trip date planned. Set one so you get a reminder banner on the day.</p>
-          )}
-          <button className="btn ghost small" onClick={() => onNavigate('shopping')}>
-            Open shopping list →
-          </button>
-        </div>
       </div>
 
       <div className="grid cols-2" style={{ marginTop: 16 }}>
         <div className="card">
-          <div className="section-title">💰 Budget</div>
-          <p className="muted">Full income split, expense log and monthly reports.</p>
-          <button className="btn small" onClick={() => onNavigate('budget')}>
-            Open budget →
+          <div className="section-title">📝 Chapter log</div>
+          <p className="muted">Log what you studied, how long it took, and how confident you feel — builds your progress report automatically.</p>
+          <button className="btn small" onClick={() => onNavigate('studylog')}>
+            Open chapter log →
           </button>
         </div>
         <div className="card">
-          <div className="section-title">📖 Recipe box</div>
-          <p className="muted">Brain-dump meals, ingredients and photos, then send them straight to the shopping list.</p>
-          <button className="btn small" onClick={() => onNavigate('recipes')}>
-            Open recipe box →
+          <div className="section-title">🧠 Study methods</div>
+          <p className="muted">See which study method is actually maximizing what you retain, based on your own logged sessions.</p>
+          <button className="btn small" onClick={() => onNavigate('methods')}>
+            Open study methods →
           </button>
         </div>
       </div>
