@@ -36,3 +36,10 @@ file and restore it later or on a new phone. Deleting the app or clearing the br
 site data erases the budget, so keep a recent backup.
 
 To build the app files yourself: `node budget/build.mjs <out-dir>` (no dependencies needed).
+
+### Publishing without the Actions workflow
+
+`docs/` holds a ready-built copy of the app, so GitHub Pages can serve it straight from
+this branch: **Settings → Pages → Source: Deploy from a branch → Branch:
+`ccr-19fa46d7-63i5jt`, folder `/docs` → Save**. After changing `budget/index.html`,
+rebuild it with `node budget/build.mjs docs/budget` and commit.
