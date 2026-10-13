@@ -37,6 +37,9 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Add Penny Plan (budget app) at /budget/
+        run: node budget/build.mjs frontend/dist/budget
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

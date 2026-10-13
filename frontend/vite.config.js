@@ -31,7 +31,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-        navigateFallbackDenylist: [/^\/api\//],
+        // budget/ is Penny Plan, a separate app with its own offline worker.
+        navigateFallbackDenylist: [/^\/api\//, /\/budget\//],
       },
     }),
   ],
