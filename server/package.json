@@ -1,0 +1,14 @@
+{
+  "name": "burrow-and-brief-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "cors": "^2.8.6",
+    "express": "^4.21.2"
+  }
+}

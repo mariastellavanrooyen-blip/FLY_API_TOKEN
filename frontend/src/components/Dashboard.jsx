@@ -1,110 +1,171 @@
 import React, { useMemo } from 'react'
 import { useStore } from '../state/store.jsx'
+import { TIPS } from '../lib/tipsData.js'
+import { daysUntil, formatDate, todayKey, computeModuleAverage } from '../lib/utils.js'
+import ProgressBar from './ui/ProgressBar.jsx'
 import EmptyState from './ui/EmptyState.jsx'
-import { useBudgetMath } from '../lib/budgetMath.js'
-import { formatMoney, formatDate, currentMonthKey, formatMonthLabel, todayKey, eventCategoryMeta } from '../lib/utils.js'
+
+function dayOfYear() {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), 0, 0)
+  return Math.floor((now - start) / 86400000)
+}
 
 export default function Dashboard({ onNavigate }) {
-  const { state } = useStore()
-  const { settings } = state
-  const math = useBudgetMath(state.budget)
-  const monthKey = currentMonthKey()
+  const { state, dispatch } = useStore()
+  const tipOfDay = TIPS[dayOfYear() % TIPS.length]
+  const today = todayKey()
 
-  const incomeA = math.incomeForMonth(monthKey, 'a')
-  const incomeB = math.incomeForMonth(monthKey, 'b')
-  const totalIncome = incomeA + incomeB
-  const totalExpenses = math.totalExpensesForMonth(monthKey)
-  const balance = totalIncome - totalExpenses
+  const upcoming = useMemo(
+    () =>
+      state.assignments
+        .filter((a) => a.status !== 'done')
+        .sort((a, b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999'))
+        .slice(0, 5),
+    [state.assignments],
+  )
 
-  const upcomingEvents = useMemo(() => {
-    const today = todayKey()
-    return state.events
-      .filter((e) => e.date >= today)
-      .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))
-      .slice(0, 5)
-  }, [state.events])
+  const overdueCount = state.assignments.filter((a) => a.status !== 'done' && daysUntil(a.dueDate) < 0).length
+  const todayMinutes = state.timerSessions.filter((s) => s.date === today).reduce((sum, s) => sum + s.minutes, 0)
+  const activeGoals = state.goals.filter((g) => g.milestones.some((m) => !m.done) || g.milestones.length === 0)
+  const recentDocs = [...state.documents].sort((a, b) => (b.uploadedAt || '').localeCompare(a.uploadedAt || '')).slice(0, 3)
+  const reviewedDocs = state.documents.filter((d) => d.status === 'reviewed').length
 
-  const nextTrip = useMemo(() => {
-    const today = todayKey()
-    return state.shoppingLists
-      .filter((l) => l.tripDate && l.tripDate >= today)
-      .sort((a, b) => a.tripDate.localeCompare(b.tripDate))[0]
-  }, [state.shoppingLists])
+  function moduleName(id) {
+    return state.modules.find((m) => m.id === id)?.name || '—'
+  }
 
   return (
     <div>
-      <div className="grid cols-4">
-        <div className="stat-tile">
-          <div className="stat-label">{formatMonthLabel(monthKey)} balance</div>
-          <div className={`stat-value tone-${balance >= 0 ? 'good' : 'bad'}`}>{formatMoney(balance, settings.currencySymbol)}</div>
-          <div className="stat-sub">{formatMoney(totalIncome, settings.currencySymbol)} in · {formatMoney(totalExpenses, settings.currencySymbol)} out</div>
+      <div className="grid cols-3">
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '1.8rem' }}>✅</div>
+          <div className="muted">Open assignments</div>
+          <h2 style={{ margin: 0 }}>{state.assignments.filter((a) => a.status !== 'done').length}</h2>
+          {overdueCount > 0 && <span className="badge status-overdue">{overdueCount} overdue</span>}
         </div>
-        <div className="stat-tile">
-          <div className="stat-label">{settings.partnerAName}'s income</div>
-          <div className="stat-value">{formatMoney(incomeA, settings.currencySymbol)}</div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '1.8rem' }}>⏱️</div>
+          <div className="muted">Minutes studied today</div>
+          <h2 style={{ margin: 0 }}>{todayMinutes}</h2>
+          <button className="btn small secondary" onClick={() => onNavigate('timer')}>
+            Start a session
+          </button>
         </div>
-        <div className="stat-tile">
-          <div className="stat-label">{settings.partnerBName}'s income</div>
-          <div className="stat-value">{formatMoney(incomeB, settings.currencySymbol)}</div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '1.8rem' }}>🔥</div>
+          <div className="muted">Habits checked in today</div>
+          <h2 style={{ margin: 0 }}>
+            {state.habits.filter((h) => h.log[today]).length}/{state.habits.length}
+          </h2>
+          <button className="btn small secondary" onClick={() => onNavigate('habits')}>
+            View habits
+          </button>
         </div>
-        <div className="stat-tile">
-          <div className="stat-label">Recipes saved</div>
-          <div className="stat-value">{state.recipes.length}</div>
-          <div className="stat-sub">in your recipe box</div>
-        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="section-title">📦 My Burrow</div>
+        {state.documents.length === 0 ? (
+          <EmptyState emoji="📦" title="Nothing stashed yet" subtitle="Upload chapter PDFs, docs or photos and Burrow & Brief will remember them for you." />
+        ) : (
+          <>
+            <p className="muted" style={{ marginTop: -4 }}>
+              {state.documents.length} document{state.documents.length > 1 ? 's' : ''} remembered · {reviewedDocs} reviewed
+            </p>
+            {recentDocs.map((d) => (
+              <div className="list-row" key={d.id}>
+                <span className="grow">{d.filename}</span>
+                <span className="muted">{moduleName(d.moduleId)}</span>
+                <span className={`badge${d.status === 'reviewed' ? ' status-done' : ''}`}>{d.status === 'in-progress' ? 'In progress' : d.status === 'reviewed' ? 'Reviewed' : 'New'}</span>
+              </div>
+            ))}
+          </>
+        )}
+        <button className="btn ghost small" style={{ marginTop: 8 }} onClick={() => onNavigate('library')}>
+          Open My Burrow →
+        </button>
       </div>
 
       <div className="grid cols-2" style={{ marginTop: 16, alignItems: 'start' }}>
         <div className="card">
-          <div className="section-title">📅 Coming up</div>
-          {upcomingEvents.length === 0 && <EmptyState emoji="📅" title="Nothing on the calendar" />}
-          {upcomingEvents.map((ev) => {
-            const meta = eventCategoryMeta(ev.category)
-            return (
-              <div className="list-row" key={ev.id}>
-                <div className="grow">
-                  <h4>{ev.title}</h4>
-                  <span className="muted">{formatDate(ev.date)}{ev.time ? ` · ${ev.time}` : ''}</span>
+          <div className="section-title">📅 Upcoming assignments</div>
+          {upcoming.length === 0 ? (
+            <EmptyState emoji="🥕" title="Nothing due — nice work!" subtitle="Add assignments to track deadlines." />
+          ) : (
+            upcoming.map((a) => {
+              const d = daysUntil(a.dueDate)
+              return (
+                <div className="list-row" key={a.id}>
+                  <div className="grow">
+                    <h4>{a.title}</h4>
+                    <div className="muted">
+                      {moduleName(a.moduleId)} {a.dueDate ? `· due ${formatDate(a.dueDate)}` : '· no due date'}
+                    </div>
+                  </div>
+                  {d !== null && d < 0 && <span className="badge status-overdue">Overdue</span>}
+                  {d !== null && d >= 0 && d <= 2 && <span className="badge priority-high">{d === 0 ? 'Today' : `${d}d`}</span>}
                 </div>
-                <span className={`badge tone-${ev.category}`}>{meta.label}</span>
-              </div>
-            )
-          })}
-          <button className="btn ghost small" style={{ marginTop: 8 }} onClick={() => onNavigate('calendar')}>
-            Open calendar →
+              )
+            })
+          )}
+          <button className="btn ghost small" style={{ marginTop: 8 }} onClick={() => onNavigate('assignments')}>
+            View all assignments →
           </button>
         </div>
 
         <div className="card">
-          <div className="section-title">🛒 Shopping</div>
-          {nextTrip ? (
-            <p>
-              Next planned trip: <strong>{formatDate(nextTrip.tripDate)}</strong> for "{nextTrip.name}" ({nextTrip.items.filter((i) => !i.checked).length} item(s) left to get).
-            </p>
+          <div className="section-title">🎯 Goals &amp; Grades</div>
+          {activeGoals.length === 0 ? (
+            <EmptyState emoji="🎯" title="No active goals" subtitle="Set one to stay focused." />
           ) : (
-            <p className="muted">No shopping trip date planned. Set one so you get a reminder banner on the day.</p>
+            activeGoals.slice(0, 4).map((g) => {
+              const total = g.milestones.length
+              const done = g.milestones.filter((m) => m.done).length
+              const milestonePct = total ? Math.round((done / total) * 100) : null
+              const currentAvg = g.moduleId ? computeModuleAverage(state.grades, g.moduleId) : null
+              const hasGradeTarget = g.targetGradePct != null && g.moduleId
+              const gradePct = hasGradeTarget && currentAvg !== null ? Math.min(100, Math.round((currentAvg / g.targetGradePct) * 100)) : null
+              const pct = milestonePct ?? gradePct ?? 0
+              return (
+                <div key={g.id} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', marginBottom: 4 }}>
+                    <strong>{g.title}</strong>
+                    <span className="muted">
+                      {hasGradeTarget
+                        ? currentAvg !== null
+                          ? `${currentAvg.toFixed(1)}% / ${g.targetGradePct}%`
+                          : `target ${g.targetGradePct}%`
+                        : `${pct}%`}
+                    </span>
+                  </div>
+                  <ProgressBar value={pct} />
+                </div>
+              )
+            })
           )}
-          <button className="btn ghost small" onClick={() => onNavigate('shopping')}>
-            Open shopping list →
+          <button className="btn ghost small" style={{ marginTop: 4 }} onClick={() => onNavigate('goals')}>
+            View goals &amp; grades →
           </button>
         </div>
       </div>
 
-      <div className="grid cols-2" style={{ marginTop: 16 }}>
-        <div className="card">
-          <div className="section-title">💰 Budget</div>
-          <p className="muted">Full income split, expense log and monthly reports.</p>
-          <button className="btn small" onClick={() => onNavigate('budget')}>
-            Open budget →
-          </button>
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="section-title">
+          💡 Tip of the day <span className="decor-rainbow-arc" style={{ fontSize: '1.2rem' }}>🌈</span>
         </div>
-        <div className="card">
-          <div className="section-title">📖 Recipe box</div>
-          <p className="muted">Brain-dump meals, ingredients and photos, then send them straight to the shopping list.</p>
-          <button className="btn small" onClick={() => onNavigate('recipes')}>
-            Open recipe box →
-          </button>
+        <div className="tip-card">
+          <span style={{ fontSize: '1.6rem' }}>{tipOfDay.emoji}</span>
+          <h4 style={{ margin: '4px 0' }}>{tipOfDay.title}</h4>
+          <p style={{ margin: 0 }}>{tipOfDay.body}</p>
         </div>
+        <button
+          className="btn ghost small"
+          style={{ marginTop: 10 }}
+          onClick={() => dispatch({ type: 'TOGGLE_TIP_FAVORITE', payload: { tipId: tipOfDay.id } })}
+        >
+          {state.favoriteTips.includes(tipOfDay.id) ? '⭐ Favorited' : '☆ Save this tip'}
+        </button>
       </div>
     </div>
   )

@@ -16,7 +16,7 @@ export default function Toast() {
   return (
     <div className="toast-wrap" role="status" onClick={() => dispatch({ type: 'DISMISS_TOAST' })}>
       <div className="toast-card">
-        <span className="toast-emoji">{toast.emoji || '🍲'}</span>
+        <span className="toast-emoji">{toast.emoji || '🐰'}</span>
         <div className="grow">
           <strong>{toast.title}</strong>
           <p>{toast.body}</p>

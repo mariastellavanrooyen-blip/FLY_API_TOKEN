@@ -1,49 +1,57 @@
 import { uid, todayKey } from '../lib/utils.js'
 
-export const STORAGE_KEY = 'wifesbrain_state_v1'
+export const STORAGE_KEY = 'burrowbrief_state_v1'
 
 export function makeDefaultState() {
+  const moduleA = uid()
+  const moduleB = uid()
   return {
     version: 1,
     settings: {
-      householdName: "The Wife's Brain",
-      partnerAName: 'Me',
-      partnerBName: 'Husband',
-      currencySymbol: '$',
-      expenseCategories: ['Food & Groceries', 'Kids', 'Household & Bills', 'Transport', 'Health', 'Other'],
+      displayName: 'Maria',
+      aiMode: 'offline', // 'offline' | 'claude'
+      backendUrl: '',
     },
-    // calendar
-    events: [
-      // { id, date: 'YYYY-MM-DD', time: '', title, category: 'household'|'kids'|'appointment'|'other', notes }
-    ],
-    // budget — flat, filterable-by-date lists rather than pre-bucketed months
-    budget: {
-      recurringIncomes: [
-        // { id, person: 'a'|'b', label, amount } — assumed every month from now on
-      ],
-      extraIncomes: [
-        // { id, person: 'a'|'b', label, amount, date }
-      ],
-      expenses: [
-        // { id, category, label, amount, date }
-      ],
-    },
-    // recipe box
-    recipes: [
-      // { id, title, category, hasImage, ingredients: [{id, text}], instructions, notes, createdAt }
-    ],
-    // shopping lists (can have a planned trip date + repeat monthly)
-    shoppingLists: [
+    modules: [
       {
-        id: uid(),
-        name: 'Big monthly shop',
-        tripDate: null,
-        recurring: false,
-        lastAcknowledged: null,
-        items: [],
+        id: moduleA,
+        name: 'Professional Ethics',
+        color: '#d97952',
+        description: 'Rules of professional conduct, duties to clients, courts and colleagues.',
+        chapters: [],
+      },
+      {
+        id: moduleB,
+        name: 'Notarial Practice',
+        color: '#93ab7c',
+        description: 'Deeds, formalities, registration and the practical work of a notary.',
+        chapters: [],
       },
     ],
-    createdAt: todayKey(),
+    assignments: [],
+    goals: [],
+    grades: [],
+    favoriteTips: [],
+    notes: [],
+    quizzes: [],
+    documents: [],
+    habits: [
+      { id: uid(), name: 'Study 1 hour', createdAt: todayKey(), log: {} },
+      { id: uid(), name: 'Review yesterday’s notes', createdAt: todayKey(), log: {} },
+    ],
+    timerSessions: [],
+    chatHistory: [],
+    // Lives in global state (not component state) on purpose: switching sidebar
+    // tabs must not unmount-and-lose a running timer. endTime is an absolute
+    // timestamp so backgrounding/throttling can't make it drift or "stop".
+    timer: {
+      mode: 'work', // 'work' | 'short' | 'long'
+      minutes: 25,
+      running: false,
+      endTime: null, // ms epoch when the timer completes, while running
+      pausedRemainingSeconds: null, // seconds left, while paused
+      moduleId: moduleA,
+    },
     uiToast: null,
   }
 }

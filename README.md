@@ -1,91 +1,96 @@
-# 🍲 The Wife's Brain — Household Planner
+# 🐰 Burrow & Brief — Legal Studies Companion
 
-A cream, sage-green and terracotta household command centre: a shared calendar for
-family and kids' things, a two-income budget tracker with monthly reports, a recipe
-box with photos, and a shopping list with trip-day reminders. Built as a React web
-app that installs like a real app on both your tablet and your PC.
+A cream, terracotta and soft-beige themed study app for two law modules
+(**Professional Ethics** and **Notarial Practice**, renameable in-app),
+built as a React web app with an optional real-AI backend.
 
-## 📲 Get it as an app on your tablet and PC
+## 📲 Get it as an app on your laptop
 
-The Wife's Brain is a real installable app (a "PWA") — no app store, no download
-link needed, just a webpage you can install in a couple of clicks. It works fully
-offline once installed.
+Burrow & Brief is a real installable app (a "PWA") — no app store, no download link
+needed, just a webpage you can turn into a desktop app in a couple of clicks. It works
+fully offline once installed (Real AI mode still needs internet, everything else doesn't).
 
 **One-time setup (about 30 seconds), done by whoever owns the GitHub repo:**
 
 1. On GitHub, open this repo → **Settings** → **Pages** (left sidebar, under "Code and automation").
 2. Under **Build and deployment → Source**, choose **GitHub Actions**, then save.
-3. Go to the **Actions** tab → **Deploy frontend to GitHub Pages** → **Run workflow**
-   (it's manual-trigger only, so pushing alone won't deploy it — see
-   `.github/workflows/deploy-pages.yml`). Takes about a minute the first time.
+3. That's it — pushing to this branch already triggers the included workflow
+   (`.github/workflows/deploy-pages.yml`), which builds the app and deploys it. Check the
+   **Actions** tab for progress (~1 minute the first time).
 4. Once it finishes, your app is live at:
    `https://<your-github-username>.github.io/<this-repo-name>/`
    (GitHub shows the exact URL at the top of the Pages settings page once it's live.)
 
-**Then, to install it:**
+**Then, to install it on your laptop:**
 
-- **On your PC** (Chrome or Edge): open that URL, click the **install icon** in the
-  address bar (a little monitor-with-arrow icon), or **⋮ menu → Save and share →
-  Install…**. It becomes its own app with its own icon, no browser tabs or address bar.
-- **On your tablet** (Chrome/Safari): open the URL, then **Add to Home Screen** from
-  the browser menu. It'll sit on your home screen with its own icon and open full-screen.
+1. Open that URL in **Chrome** or **Edge**.
+2. Click the **install icon** in the right side of the address bar (a little monitor-with-
+   arrow icon), or open the **⋮ menu → Save and share → Install Burrow & Brief…**.
+3. Confirm — it's now a real app: its own icon on your desktop/dock/start menu, opens in
+   its own window (no browser tabs or address bar), and works offline.
 
-Don't want to touch GitHub settings? Run it locally instead — see
-[Running the app locally](#running-the-app-locally) below, then open
-`http://localhost:4173` after `npm run build && npm run preview` and install it
-from there the same way.
+On a phone, the same URL works via **Add to Home Screen** in the browser menu.
+
+Don't want to touch GitHub settings? You can also just run it locally — see
+[Running the frontend locally](#running-the-frontend-locally) below, then open
+`http://localhost:4173` in Chrome/Edge after `npm run build && npm run preview` and
+install it from there the same way.
 
 ## Features
 
-- **Dashboard** — this month's balance at a glance, upcoming calendar events, next
-  planned shopping trip, recipe count, and quick links into everything else.
-- **Calendar** — a month grid for household and kids' things: appointments, school
-  events, chores — colour-coded by category, with an upcoming list on the side.
-- **Budget** — the detailed money tracker:
-  - **Income**, split by who earns it — a regular monthly amount per partner (salary
-    etc.) plus one-off "additional income" per month (bonuses, side jobs, gifts).
-  - **Expenses**, tagged by category (Food & Groceries, Kids, Household & Bills,
-    Transport, Health, Other — fully customisable) with a running monthly total.
-  - **Reports** — pick any month to see both partners' income, total spent, the
-    balance left over, a spend-by-category breakdown, and a 6-month trend. Reports
-    are calculated live from your saved entries, so nothing is ever out of date.
-- **Recipe Box** — your brain-dump of go-to meals: a photo (tap to upload — it's
-  compressed automatically so it doesn't eat your storage), ingredients as a
-  checklist-style card, instructions, and notes. Search and filter by category.
-  Any recipe's ingredients can be sent straight to a shopping list in one tap.
-- **Shopping List** — one or more lists, each with tick-off checkboxes, a "reset
-  ticks" button so you can reuse the same list next month, and an optional planned
-  shopping-trip date. When you open the app on that date, a reminder banner appears
-  automatically (with an optional real browser notification too — see below); mark a
-  list "repeats monthly" and its date rolls forward on its own after each trip.
-- **Settings** — household/partner names, currency symbol, budget categories,
-  notification permission, data export/import/reset, and recipe-photo storage.
+- **Dashboard** — upcoming assignments, today's habits, goals in progress, your burrow at a glance, tip of the day
+- **Assignments** — per-module tracker with due dates, priority and status
+- **Goals** — target-dated goals broken into checkable milestones with a progress bar
+- **My Burrow (memory)** — upload chapter PDFs, Word docs, text files or photos of your notes;
+  the app remembers every upload, extracts its text, tracks your progress on it
+  (New / In progress / Reviewed), and lets you jump straight into generating notes/quizzes
+  from it. Persists across visits — see [My Burrow](#my-burrow-your-document-memory) below.
+- **Modules & Assistant** — edit your two modules/chapters and chat with a study assistant
+- **Notes & Quiz Generator** — paste chapter text in (or pull it straight from My Burrow);
+  get bullet notes, a glossary and an auto-generated quiz (multiple choice / true-false /
+  fill-in-the-blank) back out
+- **Study Tips** — curated legal-study tips (exam technique, case briefing, essay writing,
+  ethics, notarial practice, time management), favoritable
+- **Study Timer** — Pomodoro-style focus/break timer that logs study minutes
+- **Habit Tracker** — daily habit checklist with streaks and a 35-day heatmap
+- **Settings** — profile, AI mode, storage usage, data export/import/reset
 
-Everything is stored locally on-device — nothing leaves your browser, and there's no
-account or backend needed.
+Everything is stored locally on your device — nothing leaves your browser unless you turn
+on Real AI mode.
 
-## About the shopping-day reminder
+## My Burrow — your document memory
 
-This is a plain front-end app with no server, so it can only remind you **while the
-app is open** (or backgrounded, not fully closed) — there's no push server able to
-wake a closed app. In practice that means:
+**My Burrow** is the app's built-in memory for your documents, progress and uploads. Drop in
+a chapter PDF, a `.docx`, a plain text/markdown file, or a photo of handwritten notes:
 
-- Every time you open the app, it checks today's date against your lists' planned
-  trip dates and shows a banner if one matches — this always works.
-- If you also grant browser notification permission (**Settings → Shopping-day
-  reminders**), you'll get a real pop-up notification too, which is handy if you
-  keep the app open in a background tab.
+- The file itself is remembered on-device in the browser's IndexedDB storage (far larger
+  capacity than the small `localStorage` quota used for the rest of the app), so it survives
+  reloads and browser restarts.
+- Text is extracted automatically — natively for `.txt`/`.md`, via `pdf.js` for PDFs, and via
+  `mammoth` for `.docx`. Photos need Real AI mode (below) to be read, using Claude's vision.
+- Each document tracks its own **progress** — New → In progress → Reviewed — and automatically
+  moves to "In progress" the first time you generate notes/quiz from it, with a running count
+  of how many note sets came from it.
+- From any document's preview you can jump straight into **Notes & Quiz** with its text
+  pre-loaded, or pick it from a dropdown there directly.
+- **Settings** shows how much on-device storage your burrow is using and lets you clear it
+  independently of the rest of your data.
 
-## About syncing between your tablet and PC
+Note: the JSON export/import backup in Settings covers your document *list* (filenames,
+status, links) but not the file contents themselves, which live only in this browser's
+storage — export a copy of anything irreplaceable separately if you plan to clear your
+browser data.
 
-Data is stored only on the device it was entered on — installing the app on both
-your tablet and PC gives you the same *app*, not automatically shared *data*. To
-move your data across, use **Settings → Export backup** on one device and
-**Import backup** on the other. (Recipe photos live in separate on-device storage
-and aren't included in that backup file — re-add photos on the second device if you
-want them there too.)
+## Two AI modes
 
-## Running the app locally
+| Mode | What it does | Setup |
+|---|---|---|
+| **Offline (default)** | A local heuristic engine turns pasted text into notes/glossary/quiz, and a rule-based assistant answers common study questions. Free, private, instant. | None — works out of the box. |
+| **Real AI (Claude API)** | Genuine understanding: better notes, better quizzes, a real conversational assistant. Costs a small amount per use. | Deploy `server/` (below), then paste its URL into **Settings → AI assistant**. |
+
+Switch modes anytime in **Settings**.
+
+## Running the frontend locally
 
 ```bash
 cd frontend
@@ -95,26 +100,61 @@ npm run dev
 
 Open the printed local URL (defaults to `http://localhost:5173`).
 
-To build a static production bundle (deployable to GitHub Pages, Netlify, Vercel, or
-any static host):
+To build a static production bundle (deployable to GitHub Pages, Netlify, Vercel, or any
+static host):
 
 ```bash
 cd frontend
 npm run build   # outputs to frontend/dist
-npm run preview # serve the production build locally to test/install it
 ```
+
+## Deploying the real-AI backend (Fly.io)
+
+`server/` is a small Express API that proxies three endpoints to the Claude API:
+`POST /api/generate` (notes + quiz), `POST /api/chat` (assistant replies), and
+`POST /api/describe-image` (reads text out of photos uploaded to My Burrow). Your
+Anthropic API key stays server-side and is never exposed to the browser.
+
+1. Install the [Fly.io CLI](https://fly.io/docs/flyctl/install/) and `fly auth login`.
+2. From the `server/` directory:
+   ```bash
+   cd server
+   fly launch --no-deploy   # pick/confirm an app name — edit `app` in fly.toml too
+   fly secrets set ANTHROPIC_API_KEY=sk-ant-your-key-here
+   fly deploy
+   ```
+3. Fly will print your app's URL, e.g. `https://burrow-and-brief-api.fly.dev`.
+4. In the running frontend, go to **Settings → AI assistant → Real AI (Claude API)**,
+   paste that URL into **Backend URL**, and click **Test connection**.
+
+Optional environment variables on the backend:
+
+- `ANTHROPIC_MODEL` — defaults to `claude-opus-5`. Set to `claude-sonnet-5` or
+  `claude-haiku-4-5` for a cheaper/faster model if you're cost-conscious.
+- `FRONTEND_ORIGIN` — restrict CORS to your deployed frontend's origin instead of `*`
+  (recommended once you're not just testing locally).
+
+Run it locally instead of on Fly:
+
+```bash
+cd server
+npm install
+ANTHROPIC_API_KEY=sk-ant-your-key-here npm start
+```
+
+then point the frontend's Backend URL at `http://localhost:8080`.
 
 ## Project structure
 
 ```
-frontend/               React + Vite app — the whole app, works fully offline
+frontend/               React + Vite app (the whole UI, works standalone in offline mode)
+server/                 Express backend that calls the Claude API (only needed for Real AI mode)
 .github/workflows/      GitHub Actions workflow that builds & deploys frontend/ to GitHub Pages
 ```
 
 ## Customizing
 
-- Rename your household, partners, currency symbol, and budget categories from
-  **Settings** — no code changes needed.
+- Rename your modules, add chapters, and manage everything else from within the app —
+  no code changes needed for day-to-day use.
+- Study tips live in `frontend/src/lib/tipsData.js` if you want to add your own.
 - Theme colors are CSS variables at the top of `frontend/src/theme.css`.
-- Calendar event categories (Household / Kids / Appointment / Other) are defined in
-  `frontend/src/lib/utils.js` (`EVENT_CATEGORIES`) if you want to add more.
