@@ -286,6 +286,8 @@ function localStore() {
     setMonth: (id, m) => { d.months[id] = m; save(); },
     setTx: t => { const { id, ...b } = t; d.tx[id] = b; save(); },
     delTx: id => { delete d.tx[id]; save(); },
+    exportAll: () => clone(d),
+    importAll: data => { d = { config: data.config, months: data.months || {}, tx: data.tx || {} }; save(); },
   };
 }
 async function connect() {
@@ -293,6 +295,8 @@ async function connect() {
   try { if (window.claude && typeof window.claude.use === "function") db = await window.claude.use("db"); } catch {}
   S.mode = db ? "account" : "local";
   store = db ? dbStore(db) : localStore();
+  // Ask the phone or browser not to clear this app's data when space runs low.
+  if (!db) try { navigator.storage?.persist?.(); } catch {}
   store.watch({
     config: c => { S.config = c; S.ready.config = true; render(); },
     months: m => { S.months = m; S.ready.months = true; render(); },
@@ -351,7 +355,7 @@ function draw() {
   $("monthLabel").textContent = monthName(S.month);
   $("thisMonth").hidden = S.month === CUR_MONTH;
   const ready = S.ready.config && S.ready.months && S.ready.tx;
-  $("mode").textContent = !ready ? "Loading your budget…" : S.mode === "account" ? "Saved to your account" : "Saved in this browser only";
+  $("mode").textContent = !ready ? "Loading your budget…" : S.mode === "account" ? "Saved to your account" : "Saved on this device";
   if (!ready) { $("body").innerHTML = `<p class="empty">Loading your budget…</p>`; return; }
   if (!S.config) return renderSetup();
   if (!$("main")) renderShell();
@@ -473,6 +477,7 @@ function renderEnvelopes() {
       <label><span class="label">Take-home pay</span><input class="field num" id="inIncome" inputmode="decimal" value="${T.plan.income || ""}" placeholder="0"></label>
       <label><span class="label">Currency</span><select class="field" id="inCur">${Object.keys(LOCALES).map(c => `<option${c === S.config.currency ? " selected" : ""}>${c}</option>`).join("")}</select></label>
       <p class="hint" style="margin:0;grid-column:1/-1">Changes apply to ${esc(monthName(S.month))} and carry forward to later months until you change them again.${T.plan.from ? ` This month currently uses ${esc(monthName(T.plan.from, { month: "long" }))}'s plan.` : ""}</p>
+      ${S.mode === "local" ? backupHtml() : ""}
     </div>`;
   } else if (pace !== null) {
     html += `<p class="hint" style="margin:-4px 0 10px">The thin line on each bar marks how far through the month you are. A bar past its line is spending ahead of pace.</p>`;
@@ -554,6 +559,43 @@ function bindEnvelopes() {
     savePlan(p => { p.income = v; });
   };
   if ($("inCur")) $("inCur").onchange = e => saveConfig(c => { c.currency = e.target.value; });
+  if (S.mode === "local") bindBackup();
+}
+
+/* ---------- backup (only when data lives on this device) ---------- */
+function backupHtml() {
+  const r = S.pendingRestore;
+  return `<div style="grid-column:1/-1;display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px">
+    <span class="label">Backup</span>
+    <p class="hint" style="margin:0">Your budget is stored on this device only. Save a backup file now and then, so you can restore it on a new phone or after clearing your browser.</p>
+    ${r ? `<div class="banner"><span>Replace everything on this device with the backup from ${esc(r.when)} (${r.count} transactions)?</span>
+      <span style="display:flex;gap:6px"><button class="btn primary" id="restoreYes">Replace</button><button class="btn" id="restoreNo">Cancel</button></span></div>`
+      : `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="backupSave">Save backup file</button>
+      <label class="btn" for="backupFile" style="display:inline-block">Restore from file</label>
+      <input type="file" id="backupFile" accept=".json,application/json" hidden></div>`}
+  </div>`;
+}
+function bindBackup() {
+  if ($("backupSave")) $("backupSave").onclick = () => {
+    const data = { app: "penny-plan", version: 1, savedAt: new Date().toISOString(), ...store.exportAll() };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = `penny-plan-backup-${isoDay(new Date())}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    toast("Backup file saved to your downloads.");
+  };
+  if ($("backupFile")) $("backupFile").onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      if (data.app !== "penny-plan" || !data.config || !Array.isArray(data.config.categories)) throw new Error();
+      S.pendingRestore = { data, count: Object.keys(data.tx || {}).length, when: data.savedAt ? new Date(data.savedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "an unknown date" };
+      render();
+    } catch { toast("That file isn't a Penny Plan backup. Choose a file named penny-plan-backup-….json."); }
+  };
+  if ($("restoreYes")) $("restoreYes").onclick = () => { store.importAll(S.pendingRestore.data); S.pendingRestore = null; S.filter = null; toast("Backup restored."); };
+  if ($("restoreNo")) $("restoreNo").onclick = () => { S.pendingRestore = null; render(); };
 }
 
 function renderCatPicker() {
