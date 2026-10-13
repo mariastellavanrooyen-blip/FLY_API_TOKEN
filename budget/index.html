@@ -1,0 +1,665 @@
+<title>Penny Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a summary strip on top, then envelopes (the plan) beside a quick-add + ledger column; stacks to one column on phones with quick-add first. */
+:root {
+  --paper: #eef3f1; --card: #ffffff; --ink: #14221e; --muted: #5a6a65; --line: #d5dfdb;
+  --accent: #0e6a56; --accent-ink: #ffffff; --accent-soft: #d9ede6;
+  --ok: #1d7a4c; --warn: #a86d12; --over: #bf3d2a; --track: #e4ebe8;
+  --needs: #2f5d8a; --wants: #9a4f92; --savings: #0e6a56;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0d1412; --card: #151f1c; --ink: #e4ede9; --muted: #92a39d; --line: #26342f;
+  --accent: #4cc3a0; --accent-ink: #062018; --accent-soft: #163a30;
+  --ok: #4cc38a; --warn: #e2aa4c; --over: #f07a63; --track: #22302b;
+  --needs: #82aad8; --wants: #d39acb; --savings: #4cc3a0; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --paper: #0d1412; --card: #151f1c; --ink: #e4ede9; --muted: #92a39d; --line: #26342f;
+  --accent: #4cc3a0; --accent-ink: #062018; --accent-soft: #163a30;
+  --ok: #4cc38a; --warn: #e2aa4c; --over: #f07a63; --track: #22302b;
+  --needs: #82aad8; --wants: #d39acb; --savings: #4cc3a0; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.5 var(--f-body); }
+.app { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; display: grid; gap: 16px; }
+h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
+.num { font-family: var(--f-num); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 7px 12px; font-weight: 700; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--accent); padding-inline: 6px; }
+.btn.ghost:hover { text-decoration: underline; }
+.field { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 8px 10px; min-width: 0; width: 100%; }
+.field:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.brand h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+.brand h1 span { color: var(--accent); }
+.mode { font-size: 12.5px; color: var(--muted); }
+.monthnav { display: flex; align-items: center; gap: 6px; }
+.monthnav .m { font-family: var(--f-display); font-weight: 600; font-size: 18px; min-width: 9.5em; text-align: center; }
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); display: grid; place-items: center; font-size: 18px; line-height: 1; }
+.icon-btn:hover { border-color: var(--accent); }
+
+/* Summary */
+.summary { display: grid; grid-template-columns: 1.3fr repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.tile { background: var(--card); padding: 14px 16px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.tile .big { font-size: clamp(28px, 4vw, 38px); font-weight: 500; line-height: 1.1; }
+.tile .mid { font-size: 21px; line-height: 1.2; }
+.tile .sub { font-size: 13px; color: var(--muted); }
+.neg { color: var(--over); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; padding: 2px 9px; border-radius: 99px; width: fit-content; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 13%, transparent); }
+.pill.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 15%, transparent); }
+.pill.over { color: var(--over); background: color-mix(in srgb, var(--over) 13%, transparent); }
+
+/* Main grid */
+.main { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.col { display: grid; gap: 16px; min-width: 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.card-head h2 { font-size: 19px; font-weight: 600; }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--r); padding: 10px 14px; font-size: 14px; }
+
+/* Envelopes */
+.group { display: grid; gap: 2px; }
+.group + .group { margin-top: 14px; }
+.group-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.group-head h3 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+.group-head .num { font-size: 12.5px; color: var(--muted); }
+.env { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; text-align: left; border: 0; background: transparent; padding: 8px 8px; border-radius: 8px; width: 100%; }
+.env:hover { background: var(--paper); }
+.env[aria-pressed="true"] { background: var(--accent-soft); }
+.env-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.env-left { text-align: right; font-size: 14px; }
+.env-sub { font-size: 12.5px; color: var(--muted); grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 8px; }
+.bar { grid-column: 1 / -1; position: relative; height: 7px; border-radius: 99px; background: var(--track); overflow: visible; }
+.bar i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; background: var(--ok); max-width: 100%; }
+.bar i.warn { background: var(--warn); } .bar i.over { background: var(--over); }
+.bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: .45; border-radius: 1px; }
+.edit-row { display: grid; grid-template-columns: minmax(0, 1fr) 8.5em auto; gap: 8px; padding: 5px 0; align-items: center; }
+.edit-row .field { padding: 6px 9px; }
+.del { border: 1px solid transparent; background: transparent; color: var(--muted); border-radius: 8px; padding: 6px 9px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.del:hover { color: var(--over); border-color: var(--line); }
+.del.armed { color: var(--accent-ink); background: var(--over); border-color: var(--over); }
+.plan-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 14px; padding: 12px; background: var(--paper); border-radius: 8px; }
+.plan-top label { display: grid; gap: 4px; }
+.hint { font-size: 13px; color: var(--muted); }
+
+/* Balance bar (50/30/20) */
+.balance { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); display: grid; gap: 8px; }
+.stack { position: relative; display: flex; height: 12px; border-radius: 4px; overflow: hidden; background: var(--track); }
+.stack span { height: 100%; }
+.stack-wrap { position: relative; }
+.tick { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); opacity: .55; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; }
+.legend div { display: flex; align-items: center; gap: 6px; }
+.legend .t { color: var(--muted); }
+
+/* Quick add */
+.qa { display: grid; gap: 10px; }
+.qa-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 8px; }
+.amount-wrap { position: relative; }
+.amount-wrap .field { font-family: var(--f-num); font-size: 20px; padding-block: 7px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--paper); border-radius: 99px; padding: 3px 11px; font-size: 13px; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.err { color: var(--over); font-size: 13px; min-height: 1em; }
+kbd { font-family: var(--f-num); font-size: 11.5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--paper); }
+
+/* Ledger */
+.tx-day { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 10px 0 4px; }
+.tx { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.tx:last-child { border-bottom: 0; }
+.tx .what { min-width: 0; }
+.tx .what div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tx .cat { font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.tx .x { border: 0; background: transparent; color: var(--muted); width: 28px; height: 28px; border-radius: 6px; font-size: 16px; }
+.tx .x:hover { color: var(--over); background: var(--paper); }
+.ex { font-size: 10.5px; font-weight: 700; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 4px; text-transform: uppercase; letter-spacing: .05em; }
+.empty { color: var(--muted); font-size: 14px; padding: 12px 0; }
+
+/* Trend */
+.trend svg { width: 100%; height: auto; display: block; }
+.trend .lbl { fill: var(--muted); font: 11px var(--f-body); }
+.trend .val { fill: var(--ink); font: 500 11px var(--f-num); }
+.trend .base { stroke: var(--line); }
+.trend .grid { stroke: var(--line); stroke-dasharray: 2 3; }
+.trend .inc { stroke: var(--ink); stroke-width: 2; opacity: .55; }
+.trend .bar-s { fill: var(--accent); opacity: .45; }
+.trend .bar-s.cur { opacity: 1; }
+.trend .bar-s.over { fill: var(--over); }
+
+/* Setup / loading */
+.setup { max-width: 520px; margin: 6vh auto 0; display: grid; gap: 14px; }
+.setup h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+.setup p { margin: 0; color: var(--muted); }
+.setup .grid2 { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; }
+.setup label { display: grid; gap: 4px; }
+
+/* Toast */
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 10px; display: flex; gap: 14px; align-items: center; font-size: 14px; max-width: calc(100vw - 32px); box-shadow: 0 8px 24px rgb(0 0 0 / .18); z-index: 10; }
+.toast button { background: transparent; border: 0; color: var(--paper); font-weight: 700; text-decoration: underline; padding: 0; }
+
+@media (max-width: 860px) {
+  .main { grid-template-columns: minmax(0, 1fr); }
+  .col.side { order: -1; }
+  .summary { grid-template-columns: 1fr 1fr; }
+  .summary .tile:first-child, .summary .tile:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 420px) {
+  .qa-row, .setup .grid2 { grid-template-columns: minmax(0, 1fr); }
+  .edit-row { grid-template-columns: minmax(0, 1fr) 6.5em auto; }
+  .monthnav .m { min-width: 0; font-size: 16px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bar i, .stack span { transition: width .35s ease; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><h1>Penny<span>Plan</span></h1><span class="mode" id="mode">Loading your budget…</span></div>
+    <nav class="monthnav" aria-label="Month">
+      <button class="icon-btn" id="prev" aria-label="Previous month">‹</button>
+      <div class="m" id="monthLabel"></div>
+      <button class="icon-btn" id="next" aria-label="Next month">›</button>
+      <button class="btn ghost" id="thisMonth" hidden>This month</button>
+    </nav>
+  </header>
+  <div id="body"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden><span id="toastMsg"></span><button id="toastUndo" hidden>Undo</button></div>
+
+<script>
+(() => {
+const GROUPS = [
+  { id: "needs", label: "Needs", target: 50 },
+  { id: "wants", label: "Wants", target: 30 },
+  { id: "savings", label: "Savings & debt", target: 20 },
+];
+const LOCALES = { ZAR: "en-ZA", USD: "en-US", EUR: "en-IE", GBP: "en-GB", AUD: "en-AU", CAD: "en-CA", NZD: "en-NZ", INR: "en-IN", NGN: "en-NG", KES: "en-KE" };
+// Starter envelopes, as a percentage of take-home pay (adds up to 50 / 30 / 20).
+const STARTER = [
+  ["Rent or bond", "needs", 25], ["Groceries", "needs", 10], ["Utilities", "needs", 5], ["Transport", "needs", 6], ["Insurance & medical", "needs", 4],
+  ["Eating out", "wants", 6], ["Entertainment", "wants", 4], ["Shopping", "wants", 7], ["Subscriptions", "wants", 3], ["Personal care", "wants", 4], ["Gifts", "wants", 2], ["Fun money", "wants", 4],
+  ["Emergency fund", "savings", 10], ["Debt repayment", "savings", 5], ["Long-term savings", "savings", 5],
+];
+
+const pad = n => String(n).padStart(2, "0");
+const ym = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+const isoDay = d => `${ym(d)}-${pad(d.getDate())}`;
+const now = new Date();
+const CUR_MONTH = ym(now);
+const S = {
+  config: null, months: {}, tx: [], ready: { config: false, months: false, tx: false },
+  month: CUR_MONTH, editing: false, filter: null, showAll: false, mode: "loading",
+};
+let store = null, pendingFocus = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const clone = o => JSON.parse(JSON.stringify(o));
+const round2 = n => Math.round(n * 100) / 100;
+function shiftMonth(id, n) { const [y, m] = id.split("-").map(Number); return ym(new Date(y, m - 1 + n, 1)); }
+function daysIn(id) { const [y, m] = id.split("-").map(Number); return new Date(y, m, 0).getDate(); }
+function monthName(id, opts = { month: "long", year: "numeric" }) { const [y, m] = id.split("-").map(Number); return new Date(y, m - 1, 1).toLocaleDateString("en-GB", opts); }
+function parseAmount(str) {
+  let s = String(str).replace(/[^\d.,-]/g, "");
+  if (/,\d{1,2}$/.test(s) && !s.includes(".")) s = s.replace(/,(\d{1,2})$/, ".$1");
+  s = s.replace(/,/g, "");
+  const n = Number(s);
+  return Number.isFinite(n) ? round2(n) : NaN;
+}
+function money(n, cents) {
+  const cur = S.config?.currency || "ZAR";
+  const whole = !cents && (Math.abs(n) >= 100 || Number.isInteger(n));
+  try {
+    return new Intl.NumberFormat(LOCALES[cur] || "en-US", { style: "currency", currency: cur, minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: whole ? 0 : 2 }).format(n);
+  } catch { return n.toFixed(2); }
+}
+
+/* ---------- data ---------- */
+function planFor(id) {
+  if (S.months[id]) return { income: S.months[id].income || 0, planned: { ...(S.months[id].planned || {}) }, from: null };
+  const earlier = Object.keys(S.months).filter(k => k < id).sort().pop();
+  if (earlier) return { income: S.months[earlier].income || 0, planned: { ...(S.months[earlier].planned || {}) }, from: earlier };
+  return { income: 0, planned: {}, from: null };
+}
+const cats = () => S.config?.categories || [];
+const catById = id => cats().find(c => c.id === id);
+const monthTx = id => S.tx.filter(t => t.month === id);
+function spentMap(id) { const m = {}; for (const t of monthTx(id)) m[t.catId] = round2((m[t.catId] || 0) + t.amount); return m; }
+function totals(id) {
+  const plan = planFor(id), spent = spentMap(id);
+  const planned = round2(cats().reduce((a, c) => a + (plan.planned[c.id] || 0), 0));
+  const spentAll = round2(Object.values(spent).reduce((a, b) => a + b, 0));
+  return { plan, spent, planned, spentAll, left: round2(planned - spentAll), unassigned: round2(plan.income - planned) };
+}
+
+/* ---------- storage: account (db capability) or this browser ---------- */
+function dbStore(db) {
+  const q = {};
+  const serial = (key, fn) => (q[key] = (q[key] || Promise.resolve()).catch(() => {}).then(fn));
+  const fail = e => {
+    if (e && e.code === "invalid_argument") toast("Only the owner of this budget can make changes.");
+    else toast("That change didn't save. Check your connection and try again.");
+  };
+  const lost = () => toast("Lost the connection to your saved budget. Reload the page to reconnect.");
+  return {
+    watch(h) {
+      db.doc("budget/config").onSnapshot(s => h.config(s.exists ? s.data() : null), lost);
+      db.collection("months").onSnapshot(s => { const o = {}; s.docs.forEach(d => (o[d.id] = d.data())); h.months(o); }, lost);
+      db.collection("tx").onSnapshot(s => h.tx(s.docs.map(d => ({ ...d.data(), id: d.id }))), lost);
+    },
+    setConfig: c => serial("config", () => db.doc("budget/config").set(c)).catch(fail),
+    setMonth: (id, m) => serial("m" + id, () => db.collection("months").doc(id).set(m)).catch(fail),
+    setTx: t => { const { id, ...b } = t; return serial("t" + id, () => db.collection("tx").doc(id).set(b)).catch(fail); },
+    delTx: id => serial("t" + id, () => db.collection("tx").doc(id).delete()).catch(fail),
+  };
+}
+function localStore() {
+  const KEY = "penny-plan-v1";
+  let d = { config: null, months: {}, tx: {} }, h;
+  try { const raw = localStorage.getItem(KEY); if (raw) d = JSON.parse(raw); } catch {}
+  const emit = () => { h.config(d.config); h.months({ ...d.months }); h.tx(Object.entries(d.tx).map(([id, t]) => ({ ...t, id }))); };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch { toast("This browser isn't keeping your data. Changes will be lost on reload."); } emit(); };
+  return {
+    watch(x) { h = x; emit(); },
+    setConfig: c => { d.config = c; save(); },
+    setMonth: (id, m) => { d.months[id] = m; save(); },
+    setTx: t => { const { id, ...b } = t; d.tx[id] = b; save(); },
+    delTx: id => { delete d.tx[id]; save(); },
+  };
+}
+async function connect() {
+  let db = null;
+  try { if (window.claude && typeof window.claude.use === "function") db = await window.claude.use("db"); } catch {}
+  S.mode = db ? "account" : "local";
+  store = db ? dbStore(db) : localStore();
+  store.watch({
+    config: c => { S.config = c; S.ready.config = true; render(); },
+    months: m => { S.months = m; S.ready.months = true; render(); },
+    tx: t => { S.tx = t; S.ready.tx = true; render(); },
+  });
+}
+
+/* ---------- actions ---------- */
+function savePlan(mut) {
+  const p = planFor(S.month);
+  const next = { income: p.income, planned: p.planned };
+  mut(next);
+  store.setMonth(S.month, next);
+}
+function saveConfig(mut) { const c = clone(S.config); mut(c); store.setConfig(c); }
+function addTx(t) {
+  store.setTx(t);
+  const where = t.month === S.month ? "" : ` (${monthName(t.month, { month: "long" })})`;
+  toast(`Added ${money(t.amount, true)} to ${catById(t.catId)?.name || "Uncategorised"}${where}`, () => store.delTx(t.id));
+}
+function deleteTx(id) {
+  const t = S.tx.find(x => x.id === id); if (!t) return;
+  store.delTx(id);
+  toast(`Deleted ${money(t.amount, true)}${t.note ? " · " + t.note : ""}`, () => store.setTx(t));
+}
+async function clearExamples() {
+  const ex = S.tx.filter(t => t.example);
+  for (const t of ex) await store.delTx(t.id);
+  toast(`Removed ${ex.length} example transaction${ex.length === 1 ? "" : "s"}.`);
+}
+function buildStarter(income, currency) {
+  const categories = STARTER.map(([name, group]) => ({ id: uid("c"), name, group }));
+  const planned = {};
+  categories.forEach((c, i) => { planned[c.id] = Math.round((income * STARTER[i][2]) / 100 / 10) * 10; });
+  store.setConfig({ currency, categories });
+  store.setMonth(S.month, { income, planned });
+}
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg, undo) {
+  $("toastMsg").textContent = msg;
+  const b = $("toastUndo");
+  b.hidden = !undo;
+  b.onclick = () => { undo(); $("toast").hidden = true; };
+  $("toast").hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => ($("toast").hidden = true), undo ? 6000 : 3500);
+}
+
+/* ---------- render ---------- */
+// Batch renders to the next tick so a Tab out of an edited field lands on the next field before we redraw.
+let renderQueued = false;
+function render() { if (renderQueued) return; renderQueued = true; setTimeout(() => { renderQueued = false; draw(); }, 0); }
+function draw() {
+  $("monthLabel").textContent = monthName(S.month);
+  $("thisMonth").hidden = S.month === CUR_MONTH;
+  const ready = S.ready.config && S.ready.months && S.ready.tx;
+  $("mode").textContent = !ready ? "Loading your budget…" : S.mode === "account" ? "Saved to your account" : "Saved in this browser only";
+  if (!ready) { $("body").innerHTML = `<p class="empty">Loading your budget…</p>`; return; }
+  if (!S.config) return renderSetup();
+  if (!$("main")) renderShell();
+  renderBanner(); renderSummary(); renderEnvelopes(); renderCatPicker(); renderLedger(); renderTrend();
+}
+
+function renderSetup() {
+  if ($("setup")) return;
+  $("body").innerHTML = `
+  <form class="setup card" id="setup">
+    <span class="label">Set up in one step</span>
+    <h2>What do you take home each month?</h2>
+    <p>Penny Plan splits your pay into envelopes using the 50 / 30 / 20 guide: half for needs, 30% for wants, 20% for savings and debt. Every amount can be changed afterwards.</p>
+    <div class="grid2">
+      <label><span class="label">Take-home pay</span><input class="field num" id="setupIncome" inputmode="decimal" placeholder="25 000" autocomplete="off" required></label>
+      <label><span class="label">Currency</span><select class="field" id="setupCur">${Object.keys(LOCALES).map(c => `<option${c === "ZAR" ? " selected" : ""}>${c}</option>`).join("")}</select></label>
+    </div>
+    <div class="err" id="setupErr"></div>
+    <div><button class="btn primary" type="submit">Build my budget</button></div>
+  </form>`;
+  $("setup").addEventListener("submit", e => {
+    e.preventDefault();
+    const inc = parseAmount($("setupIncome").value);
+    if (!(inc > 0)) { $("setupErr").textContent = "Enter your monthly take-home pay, for example 25000."; return; }
+    buildStarter(inc, $("setupCur").value);
+  });
+}
+
+function renderShell() {
+  $("body").innerHTML = `
+  <div id="main" style="display:grid;gap:16px">
+    <div id="banner"></div>
+    <section class="summary" id="summary" aria-label="Month summary"></section>
+    <div class="main">
+      <div class="col">
+        <section class="card" id="envCard" aria-labelledby="envTitle"></section>
+      </div>
+      <div class="col side">
+        <section class="card">
+          <div class="card-head"><h2>Add spending</h2><span class="hint">Press <kbd>N</kbd> to jump here</span></div>
+          <form class="qa" id="qa" autocomplete="off">
+            <div class="qa-row">
+              <label class="amount-wrap"><span class="label">Amount</span><input class="field" id="qaAmount" inputmode="decimal" placeholder="0.00"></label>
+              <label><span class="label">Envelope</span><select class="field" id="qaCat"></select></label>
+            </div>
+            <div class="chips" id="qaChips" aria-label="Frequent envelopes"></div>
+            <div class="qa-row">
+              <label><span class="label">Note</span><input class="field" id="qaNote" placeholder="Where or what"></label>
+              <label><span class="label">Date</span><input class="field" id="qaDate" type="date"></label>
+            </div>
+            <div class="err" id="qaErr"></div>
+            <div><button class="btn primary" type="submit">Add</button></div>
+          </form>
+        </section>
+        <section class="card" id="ledger" aria-label="Transactions"></section>
+        <section class="card trend" id="trend" aria-label="Six month trend"></section>
+      </div>
+    </div>
+  </div>`;
+  $("qa").addEventListener("submit", onQuickAdd);
+  $("qaDate").value = defaultDate();
+}
+
+function defaultDate() {
+  if (S.month === CUR_MONTH) return isoDay(now);
+  return S.month < CUR_MONTH ? `${S.month}-${pad(daysIn(S.month))}` : `${S.month}-01`;
+}
+
+function renderBanner() {
+  const n = S.tx.filter(t => t.example).length;
+  $("banner").innerHTML = n ? `<div class="banner"><span>${n} example transactions are showing so you can see how Penny Plan works. Your envelopes and pay are yours to edit.</span><button class="btn" id="clearEx">Remove examples</button></div>` : "";
+  if (n) $("clearEx").onclick = clearExamples;
+}
+
+function renderSummary() {
+  const T = totals(S.month);
+  const dim = daysIn(S.month);
+  let perDay, perSub;
+  if (S.month === CUR_MONTH) {
+    const daysLeft = dim - now.getDate() + 1;
+    perDay = money(Math.max(0, T.left) / daysLeft, true);
+    perSub = `for each of the ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
+  } else if (S.month < CUR_MONTH) {
+    perDay = T.left >= 0 ? money(T.left) : "–";
+    perSub = T.left >= 0 ? "unspent when the month closed" : "month closed over plan";
+  } else {
+    perDay = money(Math.max(0, T.left) / dim, true);
+    perSub = `per day across ${dim} days`;
+  }
+  const pct = T.planned ? Math.round((T.spentAll / T.planned) * 100) : 0;
+  let un;
+  if (!T.plan.income) un = `<span class="pill warn">Add your pay</span><span class="sub">Set it under Edit plan</span>`;
+  else if (Math.abs(T.unassigned) < 0.01) un = `<span class="mid num">${money(0)}</span><span class="pill ok">Every ${S.config.currency === "ZAR" ? "rand" : "unit"} has a job</span>`;
+  else if (T.unassigned > 0) un = `<span class="mid num">${money(T.unassigned)}</span><span class="pill warn">Not given a job yet</span>`;
+  else un = `<span class="mid num neg">${money(T.unassigned)}</span><span class="pill over">Planned more than you earn</span>`;
+  $("summary").innerHTML = `
+    <div class="tile"><span class="label">Left to spend in ${esc(monthName(S.month, { month: "long" }))}</span><span class="big num ${T.left < 0 ? "neg" : ""}">${money(T.left)}</span><span class="sub">${money(T.spentAll)} spent of ${money(T.planned)} planned · ${pct}%</span></div>
+    <div class="tile"><span class="label">${S.month < CUR_MONTH ? "Result" : "Safe to spend"}</span><span class="mid num">${perDay}</span><span class="sub">${perSub}</span></div>
+    <div class="tile"><span class="label">Take-home pay</span><span class="mid num">${money(T.plan.income)}</span><span class="sub">${T.plan.from ? "Carried over from " + esc(monthName(T.plan.from, { month: "long" })) : "Planned for this month"}</span></div>
+    <div class="tile"><span class="label">Unassigned</span>${un}</div>`;
+}
+
+function statusOf(spent, planned) {
+  if (planned <= 0) return spent > 0 ? "over" : "";
+  const r = spent / planned;
+  return r > 1 ? "over" : r >= 0.85 ? "warn" : "";
+}
+
+function renderEnvelopes() {
+  const active = document.activeElement, activeId = active && active.id, sel = active && active.selectionStart;
+  const T = totals(S.month);
+  const pace = S.month === CUR_MONTH ? (now.getDate() / daysIn(S.month)) * 100 : null;
+  const editing = S.editing;
+  let html = `<div class="card-head"><h2 id="envTitle">${editing ? "Edit plan for " + esc(monthName(S.month, { month: "long" })) : "Envelopes"}</h2>
+    <div style="display:flex;gap:6px;align-items:center">${S.filter && !editing ? `<button class="btn ghost" id="clearFilter">Show all spending</button>` : ""}
+    <button class="btn ${editing ? "primary" : ""}" id="toggleEdit">${editing ? "Done" : "Edit plan"}</button></div></div>`;
+  if (editing) {
+    html += `<div class="plan-top">
+      <label><span class="label">Take-home pay</span><input class="field num" id="inIncome" inputmode="decimal" value="${T.plan.income || ""}" placeholder="0"></label>
+      <label><span class="label">Currency</span><select class="field" id="inCur">${Object.keys(LOCALES).map(c => `<option${c === S.config.currency ? " selected" : ""}>${c}</option>`).join("")}</select></label>
+      <p class="hint" style="margin:0;grid-column:1/-1">Changes apply to ${esc(monthName(S.month))} and carry forward to later months until you change them again.${T.plan.from ? ` This month currently uses ${esc(monthName(T.plan.from, { month: "long" }))}'s plan.` : ""}</p>
+    </div>`;
+  } else if (pace !== null) {
+    html += `<p class="hint" style="margin:-4px 0 10px">The thin line on each bar marks how far through the month you are. A bar past its line is spending ahead of pace.</p>`;
+  }
+  const known = new Set(cats().map(c => c.id));
+  for (const g of GROUPS) {
+    const list = cats().filter(c => c.group === g.id);
+    const gPlan = list.reduce((a, c) => a + (T.plan.planned[c.id] || 0), 0);
+    const gSpent = list.reduce((a, c) => a + (T.spent[c.id] || 0), 0);
+    html += `<div class="group"><div class="group-head"><h3><span class="dot" style="background:var(--${g.id})"></span>${g.label}</h3><span class="num">${money(gSpent)} / ${money(gPlan)}</span></div>`;
+    for (const c of list) {
+      const planned = T.plan.planned[c.id] || 0, spent = T.spent[c.id] || 0, left = round2(planned - spent);
+      if (editing) {
+        html += `<div class="edit-row">
+          <input class="field" id="nm-${c.id}" data-rename="${c.id}" value="${esc(c.name)}" aria-label="Envelope name">
+          <input class="field num" id="pl-${c.id}" data-plan="${c.id}" inputmode="decimal" value="${planned || ""}" placeholder="0" aria-label="Planned for ${esc(c.name)}">
+          <button class="del" id="dl-${c.id}" data-del="${c.id}">Remove</button></div>`;
+      } else {
+        const w = planned > 0 ? Math.min(100, (spent / planned) * 100) : spent > 0 ? 100 : 0;
+        html += `<button class="env" id="ev-${c.id}" data-cat="${c.id}" aria-pressed="${S.filter === c.id}">
+          <span class="env-name">${esc(c.name)}</span>
+          <span class="env-left num ${left < 0 ? "neg" : ""}">${left < 0 ? money(-left) + " over" : money(left) + " left"}</span>
+          <span class="bar"><i class="${statusOf(spent, planned)}" style="width:${w}%"></i>${pace !== null && planned > 0 ? `<b style="left:${pace}%"></b>` : ""}</span>
+          <span class="env-sub num"><span>${money(spent)} of ${money(planned)}</span></span></button>`;
+      }
+    }
+    if (editing) html += `<div><button class="btn ghost" id="ad-${g.id}" data-add="${g.id}">+ Add envelope</button></div>`;
+    else if (!list.length) html += `<p class="empty">No envelopes here yet. Use Edit plan to add one.</p>`;
+    html += `</div>`;
+  }
+  const orphan = round2(monthTx(S.month).filter(t => !known.has(t.catId)).reduce((a, t) => a + t.amount, 0));
+  if (orphan && !editing) html += `<div class="group"><div class="group-head"><h3>Uncategorised</h3><span class="num">${money(orphan)}</span></div><p class="hint">Spending from envelopes you removed.</p></div>`;
+
+  // 50/30/20 balance
+  const base = T.plan.income || T.planned || 1;
+  const parts = GROUPS.map(g => ({ g, v: cats().filter(c => c.group === g.id).reduce((a, c) => a + (T.plan.planned[c.id] || 0), 0) }));
+  html += `<div class="balance"><div class="card-head" style="margin:0"><span class="label">Plan balance vs the 50 / 30 / 20 guide</span></div>
+    <div class="stack-wrap"><div class="stack">${parts.map(p => `<span style="width:${Math.min(100, (p.v / base) * 100)}%;background:var(--${p.g.id})" title="${p.g.label}"></span>`).join("")}</div>
+    <span class="tick" style="left:50%"></span><span class="tick" style="left:80%"></span></div>
+    <div class="legend">${parts.map(p => `<div><span class="dot" style="background:var(--${p.g.id})"></span>${p.g.label} <b class="num">${Math.round((p.v / base) * 100)}%</b><span class="t">guide ${p.g.target}%</span></div>`).join("")}</div></div>`;
+
+  $("envCard").innerHTML = html;
+  bindEnvelopes();
+  const focusId = pendingFocus || activeId;
+  pendingFocus = null;
+  const el = focusId && document.getElementById(focusId);
+  if (el && el !== document.body) { el.focus(); try { if (sel != null && focusId === activeId) el.setSelectionRange(sel, sel); else if (el.select) el.select(); } catch {} }
+}
+
+function bindEnvelopes() {
+  const card = $("envCard");
+  $("toggleEdit").onclick = () => { S.editing = !S.editing; render(); };
+  if ($("clearFilter")) $("clearFilter").onclick = () => { S.filter = null; render(); };
+  card.querySelectorAll("[data-cat]").forEach(b => (b.onclick = () => { S.filter = S.filter === b.dataset.cat ? null : b.dataset.cat; S.showAll = false; render(); }));
+  card.querySelectorAll("[data-plan]").forEach(inp => (inp.onchange = () => {
+    const v = inp.value.trim() === "" ? 0 : parseAmount(inp.value);
+    if (!(v >= 0)) { inp.value = planFor(S.month).planned[inp.dataset.plan] || ""; return toast("Enter a number, for example 1500."); }
+    savePlan(p => { p.planned[inp.dataset.plan] = v; });
+  }));
+  card.querySelectorAll("[data-rename]").forEach(inp => (inp.onchange = () => {
+    const name = inp.value.trim(); if (!name) { inp.value = catById(inp.dataset.rename)?.name || ""; return; }
+    saveConfig(c => { c.categories.find(x => x.id === inp.dataset.rename).name = name; });
+  }));
+  card.querySelectorAll("[data-del]").forEach(b => (b.onclick = () => {
+    if (!b.classList.contains("armed")) { b.classList.add("armed"); b.textContent = "Remove?"; setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Remove"; } }, 3000); return; }
+    const id = b.dataset.del, name = catById(id)?.name;
+    saveConfig(c => { c.categories = c.categories.filter(x => x.id !== id); });
+    if (S.filter === id) S.filter = null;
+    toast(`Removed ${name}. Its past spending now shows as Uncategorised.`);
+  }));
+  card.querySelectorAll("[data-add]").forEach(b => (b.onclick = () => {
+    const id = uid("c");
+    pendingFocus = "nm-" + id;
+    saveConfig(c => { c.categories.push({ id, name: "New envelope", group: b.dataset.add }); });
+  }));
+  if ($("inIncome")) $("inIncome").onchange = e => {
+    const v = e.target.value.trim() === "" ? 0 : parseAmount(e.target.value);
+    if (!(v >= 0)) return toast("Enter your pay as a number, for example 25000.");
+    savePlan(p => { p.income = v; });
+  };
+  if ($("inCur")) $("inCur").onchange = e => saveConfig(c => { c.currency = e.target.value; });
+}
+
+function renderCatPicker() {
+  const sel = $("qaCat"), prev = sel.value;
+  const sig = JSON.stringify(cats());
+  if (sel.dataset.sig !== sig) {
+    sel.innerHTML = `<option value="">Choose…</option>` + GROUPS.map(g => {
+      const list = cats().filter(c => c.group === g.id);
+      return list.length ? `<optgroup label="${g.label}">${list.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</optgroup>` : "";
+    }).join("");
+    sel.dataset.sig = sig;
+    if (catById(prev)) sel.value = prev;
+  }
+  // Most-used envelopes as one-tap chips
+  const freq = {};
+  S.tx.forEach(t => { if (catById(t.catId)) freq[t.catId] = (freq[t.catId] || 0) + 1; });
+  const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([id]) => id);
+  const chips = top.length ? top : cats().slice(0, 6).map(c => c.id);
+  $("qaChips").innerHTML = chips.map(id => `<button type="button" class="chip" data-chip="${id}" aria-pressed="${sel.value === id}">${esc(catById(id).name)}</button>`).join("");
+  $("qaChips").querySelectorAll("[data-chip]").forEach(b => (b.onclick = () => { sel.value = b.dataset.chip; renderCatPicker(); $("qaAmount").focus(); }));
+  sel.onchange = () => renderCatPicker();
+}
+
+function onQuickAdd(e) {
+  e.preventDefault();
+  const amount = parseAmount($("qaAmount").value), catId = $("qaCat").value, date = $("qaDate").value;
+  if (!(amount > 0)) { $("qaErr").textContent = "Enter an amount, for example 85.50."; $("qaAmount").focus(); return; }
+  if (!catId) { $("qaErr").textContent = "Choose which envelope this came from."; $("qaCat").focus(); return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { $("qaErr").textContent = "Pick a date."; return; }
+  $("qaErr").textContent = "";
+  addTx({ id: uid("t"), date, month: date.slice(0, 7), amount, catId, note: $("qaNote").value.trim().slice(0, 120), created: Date.now() });
+  $("qaAmount").value = ""; $("qaNote").value = "";
+  $("qaAmount").focus();
+}
+
+function renderLedger() {
+  let list = monthTx(S.month);
+  if (S.filter) list = list.filter(t => t.catId === S.filter);
+  list.sort((a, b) => (b.date + String(b.created || 0)).localeCompare(a.date + String(a.created || 0)));
+  const total = round2(list.reduce((a, t) => a + t.amount, 0));
+  const shown = S.showAll ? list : list.slice(0, 25);
+  const title = S.filter ? esc(catById(S.filter)?.name || "Envelope") : "Spending";
+  let html = `<div class="card-head"><h2>${title}</h2><span class="num hint">${list.length} · ${money(total, true)}</span></div>`;
+  if (!list.length) html += `<p class="empty">${S.filter ? "Nothing spent from this envelope" : "Nothing recorded"} in ${esc(monthName(S.month, { month: "long" }))} yet. Add your first purchase above.</p>`;
+  let day = "";
+  for (const t of shown) {
+    if (t.date !== day) {
+      day = t.date;
+      const [y, m, d] = day.split("-").map(Number);
+      html += `<div class="tx-day">${new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</div>`;
+    }
+    const c = catById(t.catId);
+    html += `<div class="tx"><div class="what"><div>${esc(t.note || c?.name || "Spending")} ${t.example ? `<span class="ex">Example</span>` : ""}</div>
+      <div class="cat"><span class="dot" style="background:var(--${c?.group || "line"})"></span>${esc(c?.name || "Uncategorised")}</div></div>
+      <span class="num">${money(t.amount, true)}</span><button class="x" data-delt="${t.id}" aria-label="Delete ${esc(t.note || "transaction")}">×</button></div>`;
+  }
+  if (list.length > shown.length) html += `<button class="btn ghost" id="showAll">Show all ${list.length}</button>`;
+  $("ledger").innerHTML = html;
+  $("ledger").querySelectorAll("[data-delt]").forEach(b => (b.onclick = () => deleteTx(b.dataset.delt)));
+  if ($("showAll")) $("showAll").onclick = () => { S.showAll = true; renderLedger(); };
+}
+
+function renderTrend() {
+  const months = Array.from({ length: 6 }, (_, i) => shiftMonth(S.month, i - 5));
+  const rows = months.map(m => { const T = totals(m); return { m, spent: T.spentAll, income: T.plan.income }; });
+  const raw = Math.max(1, ...rows.map(r => Math.max(r.spent, r.income)));
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const max = Math.ceil(raw / mag) * mag;
+  const W = 340, H = 170, L = 8, R = 8, top = 22, bottom = 26, ch = H - top - bottom, slot = (W - L - R) / 6, bw = slot * 0.5;
+  const y = v => top + ch - (v / max) * ch;
+  let svg = `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(max / 2)}" y2="${y(max / 2)}"/><text class="lbl" x="${W - R}" y="${y(max / 2) - 4}" text-anchor="end">${money(max / 2)}</text>`;
+  svg += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(max)}" y2="${y(max)}"/><text class="lbl" x="${W - R}" y="${y(max) - 4}" text-anchor="end">${money(max)}</text>`;
+  rows.forEach((r, i) => {
+    const cx = L + slot * i + slot / 2, cur = r.m === S.month;
+    const over = r.income > 0 && r.spent > r.income;
+    const h = (r.spent / max) * ch;
+    svg += `<rect class="bar-s ${cur ? "cur" : ""} ${over ? "over" : ""}" x="${cx - bw / 2}" y="${top + ch - h}" width="${bw}" height="${Math.max(h, r.spent ? 1.5 : 0)}" rx="3"/>`;
+    if (r.income) svg += `<line class="inc" x1="${cx - slot * 0.38}" x2="${cx + slot * 0.38}" y1="${y(r.income)}" y2="${y(r.income)}"/>`;
+    if (cur && r.spent) svg += `<text class="val" x="${cx}" y="${top + ch - h - 5}" text-anchor="middle">${money(r.spent)}</text>`;
+    svg += `<text class="lbl" x="${cx}" y="${H - 8}" text-anchor="middle">${monthName(r.m, { month: "short" })}</text>`;
+  });
+  svg += `<line class="base" x1="${L}" x2="${W - R}" y1="${top + ch}" y2="${top + ch}"/>`;
+  $("trend").innerHTML = `<div class="card-head"><h2>Six months</h2></div>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Spending per month for the last six months compared with take-home pay">${svg}</svg>
+    <div class="legend" style="margin-top:6px"><div><span class="dot" style="background:var(--accent)"></span>Spent</div><div><span class="dot" style="background:var(--ink);height:2px;opacity:.55"></span>Take-home pay</div><div><span class="dot" style="background:var(--over)"></span>Spent more than earned</div></div>`;
+}
+
+/* ---------- navigation ---------- */
+function goMonth(id) {
+  S.month = id; S.filter = null; S.showAll = false;
+  if ($("qaDate")) $("qaDate").value = defaultDate();
+  render();
+}
+$("prev").onclick = () => goMonth(shiftMonth(S.month, -1));
+$("next").onclick = () => goMonth(shiftMonth(S.month, 1));
+$("thisMonth").onclick = () => goMonth(CUR_MONTH);
+document.addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (["input", "select", "textarea"].includes(tag)) return;
+  if (e.key === "n" || e.key === "N") { const a = $("qaAmount"); if (a) { e.preventDefault(); a.focus(); } }
+  if (e.key === "ArrowLeft") goMonth(shiftMonth(S.month, -1));
+  if (e.key === "ArrowRight") goMonth(shiftMonth(S.month, 1));
+});
+
+render();
+connect();
+})();
+</script>
