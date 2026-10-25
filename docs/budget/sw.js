@@ -1,5 +1,5 @@
 // Offline support for the installed Penny Plan app. VERSION is stamped by build.mjs.
-const VERSION = "mv70bq7l";
+const VERSION = "mvno70is";
 const CACHE = "penny-plan-" + VERSION;
 const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 

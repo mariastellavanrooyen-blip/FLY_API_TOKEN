@@ -135,6 +135,14 @@ button { cursor: pointer; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { border: 1px solid var(--line); background: var(--paper); border-radius: 99px; padding: 3px 11px; font-size: 13px; }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--paper); border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 3px; }
+.seg button { border: 0; background: transparent; border-radius: 7px; padding: 6px 8px; font-weight: 700; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.amt-in { color: var(--ok); }
+.tile .tile-act { justify-self: start; padding: 0; margin-top: 2px; font-size: 13px; }
+.pay-edit { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pay-edit .field { width: 9em; padding: 5px 8px; }
+.pay-edit .btn { padding: 5px 10px; }
 .err { color: var(--over); font-size: 13px; min-height: 1em; }
 kbd { font-family: var(--f-num); font-size: 11.5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--paper); }
 
@@ -224,9 +232,9 @@ const now = new Date();
 const CUR_MONTH = ym(now);
 const S = {
   config: null, months: {}, tx: [], ready: { config: false, months: false, tx: false },
-  month: CUR_MONTH, editing: false, filter: null, showAll: false, mode: "loading",
+  month: CUR_MONTH, editing: false, editingPay: false, qaKind: "out", filter: null, showAll: false, mode: "loading",
 };
-let store = null, pendingFocus = null;
+let store = null, pendingFocus = null, pendingPayFocus = false;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -261,12 +269,25 @@ function planFor(id) {
 const cats = () => S.config?.categories || [];
 const catById = id => cats().find(c => c.id === id);
 const monthTx = id => S.tx.filter(t => t.month === id);
-function spentMap(id) { const m = {}; for (const t of monthTx(id)) m[t.catId] = round2((m[t.catId] || 0) + t.amount); return m; }
+// kind "in" = extra money received (gift, side job, refund); anything else is spending.
+const isIn = t => t.kind === "in";
+function spentMap(id) { const m = {}; for (const t of monthTx(id)) if (!isIn(t)) m[t.catId] = round2((m[t.catId] || 0) + t.amount); return m; }
 function totals(id) {
   const plan = planFor(id), spent = spentMap(id);
+  const extraTo = {};
+  let extraAll = 0;
+  for (const t of monthTx(id)) if (isIn(t)) { extraAll += t.amount; if (t.catId && catById(t.catId)) extraTo[t.catId] = round2((extraTo[t.catId] || 0) + t.amount); }
+  extraAll = round2(extraAll);
+  const extraToTotal = round2(Object.values(extraTo).reduce((a, b) => a + b, 0));
   const planned = round2(cats().reduce((a, c) => a + (plan.planned[c.id] || 0), 0));
   const spentAll = round2(Object.values(spent).reduce((a, b) => a + b, 0));
-  return { plan, spent, planned, spentAll, left: round2(planned - spentAll), unassigned: round2(plan.income - planned) };
+  const budget = round2(planned + extraToTotal);
+  return {
+    plan, spent, planned, spentAll, extraAll, extraTo, budget,
+    moneyIn: round2(plan.income + extraAll),
+    left: round2(budget - spentAll),
+    unassigned: round2(plan.income + extraAll - budget),
+  };
 }
 
 /* ---------- storage: account (db capability) or this browser ---------- */
@@ -331,7 +352,11 @@ function saveConfig(mut) { const c = clone(S.config); mut(c); store.setConfig(c)
 function addTx(t) {
   store.setTx(t);
   const where = t.month === S.month ? "" : ` (${monthName(t.month, { month: "long" })})`;
-  toast(`Added ${money(t.amount, true)} to ${catById(t.catId)?.name || "Uncategorised"}${where}`, () => store.delTx(t.id));
+  const name = catById(t.catId)?.name;
+  const msg = isIn(t)
+    ? `Added ${money(t.amount, true)} money in${where}. ${name ? "It's in " + name + "." : "It's under Unassigned until you give it a job."}`
+    : `Added ${money(t.amount, true)} to ${name || "Uncategorised"}${where}`;
+  toast(msg, () => store.delTx(t.id));
 }
 function deleteTx(id) {
   const t = S.tx.find(x => x.id === id); if (!t) return;
@@ -411,11 +436,15 @@ function renderShell() {
       </div>
       <div class="col side">
         <section class="card">
-          <div class="card-head"><h2>Add spending</h2><span class="hint">Press <kbd>N</kbd> to jump here</span></div>
+          <div class="card-head"><h2 id="qaTitle">Add spending</h2><span class="hint">Press <kbd>N</kbd> to jump here</span></div>
           <form class="qa" id="qa" autocomplete="off">
+            <div class="seg" role="group" aria-label="Type of entry">
+              <button type="button" id="kindOut" aria-pressed="true">Spending</button>
+              <button type="button" id="kindIn" aria-pressed="false">Money in</button>
+            </div>
             <div class="qa-row">
               <label class="amount-wrap"><span class="label">Amount</span><input class="field" id="qaAmount" inputmode="decimal" placeholder="0.00"></label>
-              <label><span class="label">Envelope</span><select class="field" id="qaCat"></select></label>
+              <label><span class="label" id="qaCatLabel">Envelope</span><select class="field" id="qaCat"></select></label>
             </div>
             <div class="chips" id="qaChips" aria-label="Frequent envelopes"></div>
             <div class="qa-row">
@@ -423,7 +452,7 @@ function renderShell() {
               <label><span class="label">Date</span><input class="field" id="qaDate" type="date"></label>
             </div>
             <div class="err" id="qaErr"></div>
-            <div><button class="btn primary" type="submit">Add</button></div>
+            <div><button class="btn primary" type="submit" id="qaSubmit">Add</button></div>
           </form>
         </section>
         <section class="card" id="ledger" aria-label="Transactions"></section>
@@ -432,6 +461,8 @@ function renderShell() {
     </div>
   </div>`;
   $("qa").addEventListener("submit", onQuickAdd);
+  $("kindOut").onclick = () => setKind("out");
+  $("kindIn").onclick = () => setKind("in");
   $("qaDate").value = defaultDate();
 }
 
@@ -461,17 +492,48 @@ function renderSummary() {
     perDay = money(Math.max(0, T.left) / dim, true);
     perSub = `per day across ${dim} days`;
   }
-  const pct = T.planned ? Math.round((T.spentAll / T.planned) * 100) : 0;
+  const pct = T.budget ? Math.round((T.spentAll / T.budget) * 100) : 0;
   let un;
-  if (!T.plan.income) un = `<span class="pill warn">Add your pay</span><span class="sub">Set it under Edit plan</span>`;
+  if (!T.moneyIn) un = `<span class="pill warn">Add your pay</span><span class="sub">Tap Change pay to set it</span>`;
   else if (Math.abs(T.unassigned) < 0.01) un = `<span class="mid num">${money(0)}</span><span class="pill ok">Every ${S.config.currency === "ZAR" ? "rand" : "unit"} has a job</span>`;
-  else if (T.unassigned > 0) un = `<span class="mid num">${money(T.unassigned)}</span><span class="pill warn">Not given a job yet</span>`;
+  else if (T.unassigned > 0) un = `<span class="mid num">${money(T.unassigned)}</span><span class="pill warn">Not given a job yet</span><span class="sub">Put it in envelopes under Edit plan</span>`;
   else un = `<span class="mid num neg">${money(T.unassigned)}</span><span class="pill over">Planned more than you earn</span>`;
+  const payFocus = document.activeElement && document.activeElement.id === "payInput";
+  const payDraft = $("payInput") ? $("payInput").value : null;
   $("summary").innerHTML = `
-    <div class="tile"><span class="label">Left to spend in ${esc(monthName(S.month, { month: "long" }))}</span><span class="big num ${T.left < 0 ? "neg" : ""}">${money(T.left)}</span><span class="sub">${money(T.spentAll)} spent of ${money(T.planned)} planned · ${pct}%</span></div>
+    <div class="tile"><span class="label">Left to spend in ${esc(monthName(S.month, { month: "long" }))}</span><span class="big num ${T.left < 0 ? "neg" : ""}">${money(T.left)}</span><span class="sub">${money(T.spentAll)} spent of ${money(T.budget)} in envelopes · ${pct}%</span></div>
     <div class="tile"><span class="label">${S.month < CUR_MONTH ? "Result" : "Safe to spend"}</span><span class="mid num">${perDay}</span><span class="sub">${perSub}</span></div>
-    <div class="tile"><span class="label">Take-home pay</span><span class="mid num">${money(T.plan.income)}</span><span class="sub">${T.plan.from ? "Carried over from " + esc(monthName(T.plan.from, { month: "long" })) : "Planned for this month"}</span></div>
+    <div class="tile"><span class="label">Money in</span>${payTile(T)}</div>
     <div class="tile"><span class="label">Unassigned</span>${un}</div>`;
+  if (payDraft !== null && $("payInput")) $("payInput").value = payDraft;
+  bindPay(payFocus);
+}
+
+function payTile(T) {
+  if (S.editingPay) return `<form class="pay-edit" id="payForm">
+      <input class="field num" id="payInput" inputmode="decimal" value="${T.plan.income || ""}" placeholder="0" aria-label="Take-home pay for ${esc(monthName(S.month))}">
+      <button class="btn primary" type="submit">Save</button><button class="btn" type="button" id="payCancel">Cancel</button>
+    </form><span class="sub">Your regular pay for ${esc(monthName(S.month, { month: "long" }))}. Later months use it too until you change it.</span>`;
+  const sub = T.extraAll
+    ? `${money(T.plan.income)} pay + ${money(T.extraAll)} extra`
+    : T.plan.from ? "Pay carried over from " + esc(monthName(T.plan.from, { month: "long" })) : "Take-home pay";
+  return `<span class="mid num">${money(T.moneyIn)}</span><span class="sub">${sub}</span>
+    <button class="btn ghost tile-act" id="payEdit">Change pay</button>`;
+}
+function bindPay(refocus) {
+  if ($("payEdit")) $("payEdit").onclick = () => { S.editingPay = true; pendingPayFocus = true; render(); };
+  if ($("payCancel")) $("payCancel").onclick = () => { S.editingPay = false; render(); };
+  if ($("payForm")) {
+    $("payForm").onsubmit = e => {
+      e.preventDefault();
+      const raw = $("payInput").value.trim(), v = raw === "" ? 0 : parseAmount(raw);
+      if (!(v >= 0)) return toast("Enter your pay as a number, for example 25000.");
+      S.editingPay = false;
+      savePlan(p => { p.income = v; });
+      toast(`Pay for ${monthName(S.month, { month: "long" })} set to ${money(v)}.`);
+    };
+    if (pendingPayFocus || refocus) { const i = $("payInput"); i.focus(); if (pendingPayFocus) i.select(); pendingPayFocus = false; }
+  }
 }
 
 function statusOf(spent, planned) {
@@ -503,13 +565,15 @@ function renderEnvelopes() {
     const list = cats().filter(c => c.group === g.id);
     const gPlan = list.reduce((a, c) => a + (T.plan.planned[c.id] || 0), 0);
     const gSpent = list.reduce((a, c) => a + (T.spent[c.id] || 0), 0);
-    html += `<div class="group"><div class="group-head"><h3><span class="dot" style="background:var(--${g.id})"></span>${g.label}</h3><span class="num">${money(gSpent)} / ${money(gPlan)}</span></div>`;
+    const gExtra = list.reduce((a, c) => a + (T.extraTo[c.id] || 0), 0);
+    html += `<div class="group"><div class="group-head"><h3><span class="dot" style="background:var(--${g.id})"></span>${g.label}</h3><span class="num">${money(gSpent)} / ${money(gPlan + (editing ? 0 : gExtra))}</span></div>`;
     for (const c of list) {
-      const planned = T.plan.planned[c.id] || 0, spent = T.spent[c.id] || 0, left = round2(planned - spent);
+      const plannedOnly = T.plan.planned[c.id] || 0, extra = T.extraTo[c.id] || 0;
+      const planned = round2(plannedOnly + extra), spent = T.spent[c.id] || 0, left = round2(planned - spent);
       if (editing) {
         html += `<div class="edit-row">
           <input class="field" id="nm-${c.id}" data-rename="${c.id}" value="${esc(c.name)}" aria-label="Envelope name">
-          <input class="field num" id="pl-${c.id}" data-plan="${c.id}" inputmode="decimal" value="${planned || ""}" placeholder="0" aria-label="Planned for ${esc(c.name)}">
+          <input class="field num" id="pl-${c.id}" data-plan="${c.id}" inputmode="decimal" value="${plannedOnly || ""}" placeholder="0" aria-label="Planned for ${esc(c.name)}">
           <button class="del" id="dl-${c.id}" data-del="${c.id}">Remove</button></div>`;
       } else {
         const w = planned > 0 ? Math.min(100, (spent / planned) * 100) : spent > 0 ? 100 : 0;
@@ -517,18 +581,18 @@ function renderEnvelopes() {
           <span class="env-name">${esc(c.name)}</span>
           <span class="env-left num ${left < 0 ? "neg" : ""}">${left < 0 ? money(-left) + " over" : money(left) + " left"}</span>
           <span class="bar"><i class="${statusOf(spent, planned)}" style="width:${w}%"></i>${pace !== null && planned > 0 ? `<b style="left:${pace}%"></b>` : ""}</span>
-          <span class="env-sub num"><span>${money(spent)} of ${money(planned)}</span></span></button>`;
+          <span class="env-sub num"><span>${money(spent)} of ${money(planned)}</span>${extra ? `<span class="amt-in">incl. ${money(extra)} extra</span>` : ""}</span></button>`;
       }
     }
     if (editing) html += `<div><button class="btn ghost" id="ad-${g.id}" data-add="${g.id}">+ Add envelope</button></div>`;
     else if (!list.length) html += `<p class="empty">No envelopes here yet. Use Edit plan to add one.</p>`;
     html += `</div>`;
   }
-  const orphan = round2(monthTx(S.month).filter(t => !known.has(t.catId)).reduce((a, t) => a + t.amount, 0));
+  const orphan = round2(monthTx(S.month).filter(t => !isIn(t) && !known.has(t.catId)).reduce((a, t) => a + t.amount, 0));
   if (orphan && !editing) html += `<div class="group"><div class="group-head"><h3>Uncategorised</h3><span class="num">${money(orphan)}</span></div><p class="hint">Spending from envelopes you removed.</p></div>`;
 
   // 50/30/20 balance
-  const base = T.plan.income || T.planned || 1;
+  const base = T.moneyIn || T.planned || 1;
   const parts = GROUPS.map(g => ({ g, v: cats().filter(c => c.group === g.id).reduce((a, c) => a + (T.plan.planned[c.id] || 0), 0) }));
   html += `<div class="balance"><div class="card-head" style="margin:0"><span class="label">Plan balance vs the 50 / 30 / 20 guide</span></div>
     <div class="stack-wrap"><div class="stack">${parts.map(p => `<span style="width:${Math.min(100, (p.v / base) * 100)}%;background:var(--${p.g.id})" title="${p.g.label}"></span>`).join("")}</div>
@@ -616,9 +680,10 @@ function bindBackup() {
 
 function renderCatPicker() {
   const sel = $("qaCat"), prev = sel.value;
-  const sig = JSON.stringify(cats());
+  const inMode = S.qaKind === "in";
+  const sig = S.qaKind + JSON.stringify(cats());
   if (sel.dataset.sig !== sig) {
-    sel.innerHTML = `<option value="">Choose…</option>` + GROUPS.map(g => {
+    sel.innerHTML = `<option value="">${inMode ? "Unassigned (decide later)" : "Choose…"}</option>` + GROUPS.map(g => {
       const list = cats().filter(c => c.group === g.id);
       return list.length ? `<optgroup label="${g.label}">${list.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</optgroup>` : "";
     }).join("");
@@ -627,22 +692,39 @@ function renderCatPicker() {
   }
   // Most-used envelopes as one-tap chips
   const freq = {};
-  S.tx.forEach(t => { if (catById(t.catId)) freq[t.catId] = (freq[t.catId] || 0) + 1; });
+  S.tx.forEach(t => { if (!isIn(t) && catById(t.catId)) freq[t.catId] = (freq[t.catId] || 0) + 1; });
   const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([id]) => id);
   const chips = top.length ? top : cats().slice(0, 6).map(c => c.id);
+  $("qaChips").hidden = inMode;
   $("qaChips").innerHTML = chips.map(id => `<button type="button" class="chip" data-chip="${id}" aria-pressed="${sel.value === id}">${esc(catById(id).name)}</button>`).join("");
   $("qaChips").querySelectorAll("[data-chip]").forEach(b => (b.onclick = () => { sel.value = b.dataset.chip; renderCatPicker(); $("qaAmount").focus(); }));
   sel.onchange = () => renderCatPicker();
 }
 
+function setKind(kind) {
+  S.qaKind = kind;
+  const inMode = kind === "in";
+  $("kindOut").setAttribute("aria-pressed", String(!inMode));
+  $("kindIn").setAttribute("aria-pressed", String(inMode));
+  $("qaTitle").textContent = inMode ? "Add money in" : "Add spending";
+  $("qaCatLabel").textContent = inMode ? "Put it in" : "Envelope";
+  $("qaNote").placeholder = inMode ? "From where: side job, gift, refund" : "Where or what";
+  $("qaSubmit").textContent = inMode ? "Add money in" : "Add";
+  $("qaErr").textContent = "";
+  $("qaCat").value = "";
+  renderCatPicker();
+  $("qaAmount").focus();
+}
+
 function onQuickAdd(e) {
   e.preventDefault();
+  const inMode = S.qaKind === "in";
   const amount = parseAmount($("qaAmount").value), catId = $("qaCat").value, date = $("qaDate").value;
   if (!(amount > 0)) { $("qaErr").textContent = "Enter an amount, for example 85.50."; $("qaAmount").focus(); return; }
-  if (!catId) { $("qaErr").textContent = "Choose which envelope this came from."; $("qaCat").focus(); return; }
+  if (!catId && !inMode) { $("qaErr").textContent = "Choose which envelope this came from."; $("qaCat").focus(); return; }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { $("qaErr").textContent = "Pick a date."; return; }
   $("qaErr").textContent = "";
-  addTx({ id: uid("t"), date, month: date.slice(0, 7), amount, catId, note: $("qaNote").value.trim().slice(0, 120), created: Date.now() });
+  addTx({ id: uid("t"), ...(inMode ? { kind: "in" } : {}), date, month: date.slice(0, 7), amount, catId, note: $("qaNote").value.trim().slice(0, 120), created: Date.now() });
   $("qaAmount").value = ""; $("qaNote").value = "";
   $("qaAmount").focus();
 }
@@ -651,11 +733,12 @@ function renderLedger() {
   let list = monthTx(S.month);
   if (S.filter) list = list.filter(t => t.catId === S.filter);
   list.sort((a, b) => (b.date + String(b.created || 0)).localeCompare(a.date + String(a.created || 0)));
-  const total = round2(list.reduce((a, t) => a + t.amount, 0));
+  const out = round2(list.filter(t => !isIn(t)).reduce((a, t) => a + t.amount, 0));
+  const inn = round2(list.filter(isIn).reduce((a, t) => a + t.amount, 0));
   const shown = S.showAll ? list : list.slice(0, 25);
-  const title = S.filter ? esc(catById(S.filter)?.name || "Envelope") : "Spending";
-  let html = `<div class="card-head"><h2>${title}</h2><span class="num hint">${list.length} · ${money(total, true)}</span></div>`;
-  if (!list.length) html += `<p class="empty">${S.filter ? "Nothing spent from this envelope" : "Nothing recorded"} in ${esc(monthName(S.month, { month: "long" }))} yet. Add your first purchase above.</p>`;
+  const title = S.filter ? esc(catById(S.filter)?.name || "Envelope") : "Money in & out";
+  let html = `<div class="card-head"><h2>${title}</h2><span class="num hint">${money(out, true)} out${inn ? ` · <span class="amt-in">+${money(inn, true)} in</span>` : ""}</span></div>`;
+  if (!list.length) html += `<p class="empty">${S.filter ? "Nothing in this envelope" : "Nothing recorded"} in ${esc(monthName(S.month, { month: "long" }))} yet. Add your first purchase above.</p>`;
   let day = "";
   for (const t of shown) {
     if (t.date !== day) {
@@ -663,10 +746,11 @@ function renderLedger() {
       const [y, m, d] = day.split("-").map(Number);
       html += `<div class="tx-day">${new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</div>`;
     }
-    const c = catById(t.catId);
-    html += `<div class="tx"><div class="what"><div>${esc(t.note || c?.name || "Spending")} ${t.example ? `<span class="ex">Example</span>` : ""}</div>
-      <div class="cat"><span class="dot" style="background:var(--${c?.group || "line"})"></span>${esc(c?.name || "Uncategorised")}</div></div>
-      <span class="num">${money(t.amount, true)}</span><button class="x" data-delt="${t.id}" aria-label="Delete ${esc(t.note || "transaction")}">×</button></div>`;
+    const c = catById(t.catId), inc = isIn(t);
+    const where = inc ? (c ? "Money in · " + c.name : "Money in · Unassigned") : (c?.name || "Uncategorised");
+    html += `<div class="tx"><div class="what"><div>${esc(t.note || (inc ? "Extra money" : c?.name || "Spending"))} ${t.example ? `<span class="ex">Example</span>` : ""}</div>
+      <div class="cat"><span class="dot" style="background:var(--${inc ? "ok" : c?.group || "line"})"></span>${esc(where)}</div></div>
+      <span class="num ${inc ? "amt-in" : ""}">${inc ? "+" : ""}${money(t.amount, true)}</span><button class="x" data-delt="${t.id}" aria-label="Delete ${esc(t.note || "transaction")}">×</button></div>`;
   }
   if (list.length > shown.length) html += `<button class="btn ghost" id="showAll">Show all ${list.length}</button>`;
   $("ledger").innerHTML = html;
@@ -676,7 +760,7 @@ function renderLedger() {
 
 function renderTrend() {
   const months = Array.from({ length: 6 }, (_, i) => shiftMonth(S.month, i - 5));
-  const rows = months.map(m => { const T = totals(m); return { m, spent: T.spentAll, income: T.plan.income }; });
+  const rows = months.map(m => { const T = totals(m); return { m, spent: T.spentAll, income: T.moneyIn }; });
   const raw = Math.max(1, ...rows.map(r => Math.max(r.spent, r.income)));
   const mag = Math.pow(10, Math.floor(Math.log10(raw)));
   const max = Math.ceil(raw / mag) * mag;
@@ -696,7 +780,7 @@ function renderTrend() {
   svg += `<line class="base" x1="${L}" x2="${W - R}" y1="${top + ch}" y2="${top + ch}"/>`;
   $("trend").innerHTML = `<div class="card-head"><h2>Six months</h2></div>
     <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Spending per month for the last six months compared with take-home pay">${svg}</svg>
-    <div class="legend" style="margin-top:6px"><div><span class="dot" style="background:var(--accent)"></span>Spent</div><div><span class="dot" style="background:var(--ink);height:2px;opacity:.55"></span>Take-home pay</div><div><span class="dot" style="background:var(--over)"></span>Spent more than earned</div></div>`;
+    <div class="legend" style="margin-top:6px"><div><span class="dot" style="background:var(--accent)"></span>Spent</div><div><span class="dot" style="background:var(--ink);height:2px;opacity:.55"></span>Money in</div><div><span class="dot" style="background:var(--over)"></span>Spent more than earned</div></div>`;
 }
 
 /* ---------- navigation ---------- */
