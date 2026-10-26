@@ -1,0 +1,903 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Seamwise HQ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap">
+<style>
+/* Layout: black brand band on top, tab bar, one working column (max 1080px) of panels; phone-first */
+:root{
+  --bg:#F1F2F3; --surface:#FFFFFF; --surface-2:#E6E8EB; --line:#CDD1D6;
+  --ink:#121315; --ink-2:#3A3F46; --muted:#5B616A;
+  --band:#1E1F21; --band-ink:#FFFFFF; --band-muted:#AEB4BC;
+  --accent:#0BB4E4; --accent-ink:#0E0F11; --accent-text:#08779A; --accent-soft:#DDF3FB;
+  --good:#1E7F4F; --good-soft:#DFF2E7; --warn:#A35F00; --warn-soft:#FBEBD3; --bad:#B42318; --bad-soft:#FBE3E0;
+  --font:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121315; --surface:#1B1C1F; --surface-2:#24262A; --line:#34373D;
+  --ink:#F1F2F3; --ink-2:#C9CED4; --muted:#9AA1AA;
+  --band:#0A0B0C; --band-ink:#FFFFFF; --band-muted:#9AA1AA;
+  --accent:#0BB4E4; --accent-ink:#0E0F11; --accent-text:#4CC9EE; --accent-soft:#12313B;
+  --good:#5FCB93; --good-soft:#163024; --warn:#F0B35A; --warn-soft:#352812; --bad:#F2877B; --bad-soft:#3A1A17;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#121315; --surface:#1B1C1F; --surface-2:#24262A; --line:#34373D;
+  --ink:#F1F2F3; --ink-2:#C9CED4; --muted:#9AA1AA;
+  --band:#0A0B0C; --band-ink:#FFFFFF; --band-muted:#9AA1AA;
+  --accent:#0BB4E4; --accent-ink:#0E0F11; --accent-text:#4CC9EE; --accent-soft:#12313B;
+  --good:#5FCB93; --good-soft:#163024; --warn:#F0B35A; --warn-soft:#352812; --bad:#F2877B; --bad-soft:#3A1A17;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--band);color:var(--band-ink)}
+header.band .wrap{padding-block:18px 0;display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{flex:0 0 36px}
+.brand-name{font-size:18px;letter-spacing:.06em}
+.brand-name b{font-weight:700}.brand-name span{font-weight:300}
+.brand-sub{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--band-muted)}
+.tabs{display:flex;gap:4px;overflow-x:auto}
+.tab{appearance:none;border:0;background:transparent;color:var(--band-muted);font:inherit;font-size:14px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:12px 14px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--band-ink);border-bottom-color:var(--accent)}
+.tab:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main .wrap{padding-block:24px 48px;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{margin:0;font-weight:500;text-wrap:balance}
+h1{font-size:clamp(24px,4vw,32px);letter-spacing:-.01em}
+h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.panel{background:var(--surface);border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.stat{background:var(--surface);border:1px solid var(--line);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat .n{font-size:30px;font-weight:300;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .l{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stat.accent .l{color:var(--accent-ink)}
+.bar{height:8px;background:var(--surface-2);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--accent)}
+.phase-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center}
+.phase-row .bar{grid-column:1 / -1}
+.phase-row .count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.list{display:flex;flex-direction:column}
+.task{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.list .task:first-child{border-top:0}
+.task .title{font-weight:500;overflow-wrap:anywhere}
+.task.done .title{text-decoration:line-through;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.chip.over{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.chip.soon{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.chip.doing{background:var(--accent-soft);border-color:transparent;color:var(--accent-text)}
+.chip.high{background:var(--band);color:var(--band-ink);border-color:var(--band)}
+.chip.ok{background:var(--good-soft);border-color:transparent;color:var(--good)}
+.check{appearance:none;width:26px;height:26px;border:2px solid var(--ink-2);background:var(--surface);cursor:pointer;margin:0;display:grid;place-items:center;flex:0 0 26px}
+.check:checked{background:var(--accent);border-color:var(--accent)}
+.check:checked::after{content:"";width:10px;height:6px;border:solid var(--accent-ink);border-width:0 0 2.5px 2.5px;transform:rotate(-45deg) translate(1px,-1px)}
+.row-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+select,input[type="text"],input[type="url"],input[type="date"],input[type="email"],input[type="tel"],input[type="search"],textarea{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);padding:8px 10px;min-width:0;border-radius:0}
+textarea{resize:vertical;min-height:110px;width:100%;line-height:1.5}
+.btn{appearance:none;font:inherit;font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:9px 14px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;min-height:40px;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:5px 10px;min-height:34px;font-size:12px}
+.btn.ghost{border-color:var(--line);color:var(--ink-2)}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.form{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));align-items:end}
+.form .wide{grid-column:1 / -1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{appearance:none;font:inherit;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer;min-height:34px}
+.pill[aria-pressed="true"]{background:var(--band);border-color:var(--band);color:var(--band-ink)}
+.lib{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr))}
+.card{background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+.thumb{aspect-ratio:4/3;background:var(--surface-2);display:grid;place-items:center;overflow:hidden;max-width:100%}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .tlabel{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:8px}
+.thumb.kind-link{background:var(--band)}
+.thumb.kind-link .tlabel{color:var(--band-muted)}
+.card .body{padding:12px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card .name{font-weight:500;overflow-wrap:anywhere}
+.card .note{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.card .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.card a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+.notice{padding:10px 12px;font-size:14px;background:var(--warn-soft);color:var(--warn)}
+.notice.info{background:var(--accent-soft);color:var(--accent-text)}
+.saved{font-size:12px;color:var(--muted)}
+.daylog{display:flex;flex-direction:column;gap:10px}
+.daylog .d{border-top:1px solid var(--line);padding-top:10px}
+.daylog .d .dt{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.daylog .d p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.list .lead:first-child{border-top:0}
+.lead .who{appearance:none;border:0;background:none;padding:0;font:inherit;font-weight:500;color:var(--ink);text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.lead .who:hover{color:var(--accent-text)}
+.lead .sub{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.lead .sub a{color:var(--accent-text)}
+label.tick{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink);cursor:pointer;min-height:40px}
+.sep{border:0;border-top:1px solid var(--line);margin:4px 0}
+dialog.dlg{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:0;width:min(680px,calc(100vw - 32px));max-height:calc(100dvh - 32px)}
+dialog.dlg::backdrop{background:rgba(10,11,12,.55)}
+dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
+.prog{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s ease}}
+</style>
+
+<header class="band">
+  <div class="wrap">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" width="36" height="36" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0BB4E4"></rect><path d="M13 40 Q 22.5 24 32 32 Q 41.5 40 51 24" fill="none" stroke="#1E1F21" stroke-width="3.2" stroke-linecap="round"></path><circle cx="13" cy="40" r="4.5" fill="#1E1F21"></circle><circle cx="32" cy="32" r="6" fill="#FFFFFF"></circle><circle cx="51" cy="24" r="4.5" fill="#1E1F21"></circle></svg>
+      <div>
+        <div class="brand-name"><b>SEAM</b><span>WISE</span> HQ</div>
+        <div class="brand-sub">Daily command centre</div>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-today" aria-selected="true" aria-controls="view-today">Today</button>
+      <button class="tab" role="tab" id="tab-tasks" aria-selected="false" aria-controls="view-tasks">Tasks</button>
+      <button class="tab" role="tab" id="tab-leads" aria-selected="false" aria-controls="view-leads">Leads</button>
+      <button class="tab" role="tab" id="tab-library" aria-selected="false" aria-controls="view-library">Brand library</button>
+      <button class="tab" role="tab" id="tab-history" aria-selected="false" aria-controls="view-history">History</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="notice" id="offline" hidden>Saving isn't available in this view. Open Seamwise HQ from your Claude artifacts to see and update your tasks and files.</div>
+
+    <!-- TODAY -->
+    <section id="view-today" role="tabpanel" aria-labelledby="tab-today" style="display:flex;flex-direction:column;gap:20px">
+      <div class="hd">
+        <h1 id="greeting">Good morning, Maria</h1>
+        <span class="saved" id="todayDate"></span>
+      </div>
+      <div class="stats">
+        <div class="stat accent"><span class="n" id="sPct">0%</span><span class="l">Launch progress</span></div>
+        <div class="stat"><span class="n" id="sTodo">0</span><span class="l">To do</span></div>
+        <div class="stat"><span class="n" id="sDoing">0</span><span class="l">In progress</span></div>
+        <div class="stat"><span class="n" id="sDone">0</span><span class="l">Done</span></div>
+        <div class="stat"><span class="n" id="sOver">0</span><span class="l">Overdue</span></div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <h2>Focus: overdue, due this week, in progress</h2>
+          <div class="list" id="focusList"><div class="empty">Loading your tasks…</div></div>
+        </div>
+        <div class="panel">
+          <h2>Done today</h2>
+          <div class="list" id="doneToday"><div class="empty">Tick a task and it lands here.</div></div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <div class="hd"><h2>Daily check-in</h2><span class="saved" id="noteSaved"></span></div>
+          <label class="f" for="dayNote">What did you work on, what's blocking you, what's next?</label>
+          <textarea id="dayNote" placeholder="e.g. Called two partners, sent the audit proposal to the dental practice, need to chase the domain."></textarea>
+        </div>
+        <div class="panel">
+          <h2>Progress by phase</h2>
+          <div id="phaseBars" style="display:flex;flex-direction:column;gap:12px"><div class="empty">Phases appear once tasks load.</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Recent check-ins</h2>
+        <div class="daylog" id="dayLog"><div class="empty">Your daily notes will build up here.</div></div>
+      </div>
+    </section>
+
+    <!-- TASKS -->
+    <section id="view-tasks" role="tabpanel" aria-labelledby="tab-tasks" hidden style="display:flex;flex-direction:column;gap:20px">
+      <h1>Tasks</h1>
+      <form class="panel" id="taskForm">
+        <h2>Add a task</h2>
+        <div class="form">
+          <label class="f wide" for="tTitle">Task<input type="text" id="tTitle" required placeholder="e.g. Book the first partner meeting"></label>
+          <label class="f" for="tPhase">Phase<select id="tPhase"></select></label>
+          <label class="f" for="tDue">Due<input type="date" id="tDue"></label>
+          <label class="f" for="tPri">Priority<select id="tPri"><option value="normal">Normal</option><option value="high">High</option></select></label>
+          <button class="btn primary" type="submit" id="tAdd">Add task</button>
+        </div>
+      </form>
+      <div class="panel">
+        <div class="filters" id="statusFilters" aria-label="Filter by status"></div>
+        <div class="filters" id="phaseFilters" aria-label="Filter by phase"></div>
+        <div class="list" id="taskList"><div class="empty">Loading your tasks…</div></div>
+      </div>
+    </section>
+
+    <!-- LEADS -->
+    <section id="view-leads" role="tabpanel" aria-labelledby="tab-leads" hidden style="display:flex;flex-direction:column;gap:20px">
+      <div class="hd"><h1>Leads</h1><span class="saved">Every change saves automatically</span></div>
+      <div class="stats">
+        <div class="stat accent"><span class="n" id="lTotal">0</span><span class="l">Leads</span></div>
+        <div class="stat"><span class="n" id="lReady">0</span><span class="l">Ready to email</span></div>
+        <div class="stat"><span class="n" id="lContacted">0</span><span class="l">Contacted</span></div>
+        <div class="stat"><span class="n" id="lMeet">0</span><span class="l">Meetings</span></div>
+        <div class="stat"><span class="n" id="lClients">0</span><span class="l">Clients</span></div>
+      </div>
+      <div class="grid">
+        <form class="panel" id="leadForm">
+          <h2>Add a lead</h2>
+          <div class="form" id="leadFormFields"></div>
+          <div class="filters"><button class="btn primary" type="submit" id="leadAdd">Add lead</button></div>
+          <div class="saved" id="leadMsg" role="status"></div>
+        </form>
+        <div class="panel">
+          <h2>Download for bulk email</h2>
+          <p style="margin:0;color:var(--muted);font-size:13px">Get an Excel file with name, email, company and the rest of each lead's details, one lead per row. Upload it to Claude and ask for a personalised email per row.</p>
+          <label class="f" for="exScope">What to include<select id="exScope">
+            <option value="ready">Ready to email: has an email, OK to email, not "Not interested"</option>
+            <option value="view">Leads in the current list view</option>
+            <option value="all">All leads</option>
+          </select></label>
+          <div class="filters"><button class="btn primary" type="button" id="exLeads">Download Excel</button></div>
+          <div class="saved" id="leadExMsg" role="status"></div>
+          <div class="filters" id="markWrap" hidden><button class="btn small" type="button" id="markContacted"></button></div>
+          <hr class="sep">
+          <h2>Import from Excel or CSV</h2>
+          <p style="margin:0;color:var(--muted);font-size:13px">Pick one or more files. Columns are matched by heading (name, email, company, phone…). A lead whose email is already here gets its blanks filled in rather than being added twice.</p>
+          <label class="f" for="impFiles">Files<input type="file" id="impFiles" accept=".xlsx,.xls,.csv" multiple></label>
+          <div class="filters">
+            <button class="btn" type="button" id="impBtn">Import</button>
+            <button class="btn ghost" type="button" id="tplBtn">Blank template</button>
+          </div>
+          <div class="saved prog" id="impMsg" role="status"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <label class="f" for="leadSearch">Search<input type="search" id="leadSearch" placeholder="Name, company, email, industry or tag"></label>
+        <div class="filters" id="leadFilters" aria-label="Filter by status"></div>
+        <div class="list" id="leadList"><div class="empty">Loading your leads…</div></div>
+        <div class="filters"><button class="btn ghost" type="button" id="leadMore" hidden>Show more</button></div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section id="view-library" role="tabpanel" aria-labelledby="tab-library" hidden style="display:flex;flex-direction:column;gap:20px">
+      <h1>Brand library</h1>
+      <div class="grid">
+        <form class="panel" id="uploadForm">
+          <h2>Upload a file</h2>
+          <p class="note" style="margin:0;color:var(--muted);font-size:13px">Logos, photos, brochures as PDF. Images, PDFs and videos up to 20 MB.</p>
+          <div class="form">
+            <label class="f wide" for="uFile">File<input type="file" id="uFile" accept="image/*,application/pdf,video/mp4,video/webm" required></label>
+            <label class="f" for="uName">Name<input type="text" id="uName" placeholder="e.g. Logo on black"></label>
+            <label class="f" for="uKind">Type<select id="uKind"></select></label>
+            <button class="btn primary" type="submit" id="uBtn">Upload</button>
+          </div>
+          <div class="saved" id="uMsg" role="status"></div>
+        </form>
+        <form class="panel" id="linkForm">
+          <h2>Add a link</h2>
+          <p class="note" style="margin:0;color:var(--muted);font-size:13px">Canva designs, your website preview, plans and playbooks.</p>
+          <div class="form">
+            <label class="f wide" for="lUrl">Link<input type="url" id="lUrl" required placeholder="https://"></label>
+            <label class="f" for="lName">Name<input type="text" id="lName" required placeholder="e.g. Law firm brochure"></label>
+            <label class="f" for="lKind">Type<select id="lKind"></select></label>
+            <button class="btn primary" type="submit" id="lBtn">Add link</button>
+          </div>
+        </form>
+      </div>
+      <div class="filters" id="kindFilters" aria-label="Filter by type"></div>
+      <div class="lib" id="libGrid"><div class="empty">Loading your library…</div></div>
+      <div class="saved" id="usage"></div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden style="display:flex;flex-direction:column;gap:20px">
+      <h1>History</h1>
+      <div class="panel">
+        <h2>Export</h2>
+        <p style="margin:0;color:var(--muted);font-size:13px">Save a copy as a file you can open in Excel or Google Sheets. Everything also stays saved here permanently. The full backup puts leads, tasks, history and library links in one Excel workbook.</p>
+        <div class="filters">
+          <button class="btn primary" type="button" id="exBackup">Full backup (Excel)</button>
+          <button class="btn" type="button" id="exHistory">Export history (CSV)</button>
+          <button class="btn" type="button" id="exTasks">Export all tasks (CSV)</button>
+        </div>
+        <div class="saved" id="exMsg" role="status"></div>
+      </div>
+      <div class="panel">
+        <h2>Day by day</h2>
+        <div class="daylog" id="historyList"><div class="empty">Your check-ins and task activity will build up here, day by day.</div></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<dialog class="dlg" id="leadDlg" aria-labelledby="dlgTitle">
+  <form method="dialog">
+    <div class="hd"><h2 id="dlgTitle">Edit lead</h2><span class="saved" id="dlgSaved" role="status"></span></div>
+    <div class="form" id="dlgFields"></div>
+    <div class="filters" style="justify-content:space-between">
+      <button class="btn small danger" type="button" id="dlgDel">Delete lead</button>
+      <button class="btn primary" value="close">Done</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+  const PHASES=["1 · Legal foundations","2 · Brand & digital","3 · Hire engineer","4 · Lead generation","5 · First clients","6 · Systemise & scale","7 · International","Admin"];
+  const KINDS={logo:"Logo",design:"Brand design",brochure:"Brochure",website:"Website",photo:"Photo",document:"Plan or document",training:"Training",other:"Other"};
+  const $=id=>document.getElementById(id);
+  const pad=n=>String(n).padStart(2,"0");
+  const dkey=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  const todayKey=dkey(new Date());
+  const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const fmt=k=>{if(!k)return"";const [y,m,d]=k.split("-");return Number(d)+" "+MONTHS[Number(m)-1]+(y!==todayKey.slice(0,4)?" "+y:"")};
+  const daysTo=k=>Math.round((Date.parse(k+"T00:00:00")-Date.parse(todayKey+"T00:00:00"))/864e5);
+  const el=(tag,props,...kids)=>{const e=document.createElement(tag);if(props)for(const[k,v]of Object.entries(props)){if(k==="class")e.className=v;else if(k==="text")e.textContent=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(v!==undefined&&v!==null&&v!==false)e.setAttribute(k,v===true?"":v)}for(const c of kids)if(c)e.append(c);return e};
+
+  let db=null, assets=null, downloads=null, tasks=[], lib=[], days=[], activity=[], leads=[], loaded={tasks:false,lib:false,leads:false};
+  const ACT={added:"Added",started:"Started",done:"Completed",reopened:"Reopened",deleted:"Deleted",lead:"New lead",leadStatus:"Lead update",leadDeleted:"Deleted lead",imported:"Imported leads",contacted:"Marked contacted"};
+  async function logActivity(type,t){if(!db)return;try{await db.collection("activity").add({at:new Date().toISOString(),date:dkey(new Date()),type,title:t.title||"",phase:t.phase||""})}catch(e){}}
+  let statusFilter="open", phaseFilter="all", kindFilter="all", confirmId=null;
+
+  // greeting
+  const h=new Date().getHours();
+  $("greeting").textContent=(h<12?"Good morning":h<17?"Good afternoon":"Good evening")+", Maria";
+  $("todayDate").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+
+  // selects
+  PHASES.forEach(p=>$("tPhase").append(el("option",{value:p,text:p})));
+  for(const[k,v]of Object.entries(KINDS)){$("uKind").append(el("option",{value:k,text:v}));$("lKind").append(el("option",{value:k,text:v}))}
+  $("lKind").value="design";
+
+  // tabs
+  const TABS=["today","tasks","leads","library","history"];
+  function show(t){TABS.forEach(n=>{$("tab-"+n).setAttribute("aria-selected",String(n===t));$("view-"+n).hidden=n!==t});try{localStorage.setItem("hq-tab",t)}catch(e){}}
+  TABS.forEach(n=>$("tab-"+n).addEventListener("click",()=>show(n)));
+  const hashTab=(location.hash||"").slice(1);
+  let startTab="today";try{startTab=TABS.includes(hashTab)?hashTab:(localStorage.getItem("hq-tab")||"today")}catch(e){}
+  if(TABS.includes(startTab))show(startTab);
+
+  function dueChip(t){
+    if(!t.due||t.status==="done")return null;
+    const n=daysTo(t.due);
+    if(n<0)return el("span",{class:"chip over",text:"Overdue · "+fmt(t.due)});
+    if(n===0)return el("span",{class:"chip soon",text:"Due today"});
+    if(n<=7)return el("span",{class:"chip soon",text:"Due "+fmt(t.due)});
+    return el("span",{class:"chip",text:"Due "+fmt(t.due)});
+  }
+  async function setStatus(t,status){
+    if(!db)return;
+    const prev=t.status||"todo";
+    if(prev===status)return;
+    try{await db.doc("tasks/"+t.id).update({status,doneAt:status==="done"?dkey(new Date()):null,updatedAt:new Date().toISOString()});
+      logActivity(status==="done"?"done":status==="doing"?"started":"reopened",t);
+    }catch(e){alertBox("Couldn't save that change. Try again in a moment.")}
+  }
+  function alertBox(msg){const n=$("offline");n.textContent=msg;n.hidden=false;setTimeout(()=>{n.hidden=true},5000)}
+
+  function taskRow(t,opts){
+    const done=t.status==="done";
+    const box=el("input",{type:"checkbox",class:"check","aria-label":(done?"Mark not done: ":"Mark done: ")+t.title,onchange:e=>setStatus(t,e.target.checked?"done":"todo")});
+    box.checked=done;
+    const meta=el("div",{class:"meta"},
+      t.priority==="high"&&!done?el("span",{class:"chip high",text:"High"}):null,
+      t.status==="doing"?el("span",{class:"chip doing",text:"In progress"}):null,
+      done&&t.doneAt?el("span",{class:"chip ok",text:"Done "+fmt(t.doneAt)}):null,
+      dueChip(t),
+      el("span",{class:"chip",text:t.phase||"Admin"}));
+    const mid=el("div",{style:"min-width:0"},el("div",{class:"title",text:t.title}),meta);
+    if(t.notes)mid.append(el("div",{class:"note",style:"font-size:13px;color:var(--muted);margin-top:6px",text:t.notes}));
+    let actions=null;
+    if(opts&&opts.full){
+      const sel=el("select",{"aria-label":"Status for "+t.title,onchange:e=>setStatus(t,e.target.value)},
+        el("option",{value:"todo",text:"To do"}),el("option",{value:"doing",text:"In progress"}),el("option",{value:"done",text:"Done"}));
+      sel.value=t.status||"todo";
+      const del=confirmId===t.id
+        ? el("button",{class:"btn small danger",type:"button",text:"Confirm delete",onclick:async()=>{confirmId=null;try{await db.doc("tasks/"+t.id).delete();logActivity("deleted",t)}catch(e){alertBox("Couldn't delete that task.")}}})
+        : el("button",{class:"btn small ghost",type:"button",text:"Delete","aria-label":"Delete "+t.title,onclick:()=>{confirmId=t.id;renderTasks();setTimeout(()=>{if(confirmId===t.id){confirmId=null;renderTasks()}},4000)}});
+      actions=el("div",{class:"row-actions"},sel,del);
+    }else if(t.status!=="doing"&&t.status!=="done"){
+      actions=el("div",{class:"row-actions"},el("button",{class:"btn small ghost",type:"button",text:"Start",onclick:()=>setStatus(t,"doing")}));
+    }
+    return el("div",{class:"task"+(done?" done":"")},box,mid,actions||el("span"));
+  }
+  const byDue=(a,b)=>(a.due||"9999").localeCompare(b.due||"9999")||(a.order||0)-(b.order||0);
+
+  function renderToday(){
+    const open=tasks.filter(t=>t.status!=="done");
+    const done=tasks.filter(t=>t.status==="done");
+    const over=open.filter(t=>t.due&&daysTo(t.due)<0);
+    $("sTodo").textContent=tasks.filter(t=>(t.status||"todo")==="todo").length;
+    $("sDoing").textContent=tasks.filter(t=>t.status==="doing").length;
+    $("sDone").textContent=done.length;
+    $("sOver").textContent=over.length;
+    $("sPct").textContent=tasks.length?Math.round(done.length/tasks.length*100)+"%":"0%";
+    const focus=open.filter(t=>t.status==="doing"||(t.due&&daysTo(t.due)<=7)).sort(byDue);
+    const fl=$("focusList");fl.replaceChildren();
+    if(!loaded.tasks)fl.append(el("div",{class:"empty",text:"Loading your tasks…"}));
+    else if(!focus.length)fl.append(el("div",{class:"empty",text:open.length?"Nothing due this week. Pick a task from the Tasks tab and press Start.":"Every task is done. Add the next one in the Tasks tab."}));
+    else focus.slice(0,12).forEach(t=>fl.append(taskRow(t)));
+    const dt=$("doneToday");dt.replaceChildren();
+    const dToday=done.filter(t=>t.doneAt===todayKey);
+    if(!dToday.length)dt.append(el("div",{class:"empty",text:"Tick a task and it lands here."}));
+    else dToday.forEach(t=>dt.append(taskRow(t)));
+    const pb=$("phaseBars");pb.replaceChildren();
+    const used=PHASES.filter(p=>tasks.some(t=>t.phase===p));
+    if(!used.length)pb.append(el("div",{class:"empty",text:"Phases appear once tasks load."}));
+    used.forEach(p=>{const all=tasks.filter(t=>t.phase===p);const d=all.filter(t=>t.status==="done").length;const pct=Math.round(d/all.length*100);
+      const bar=el("div",{class:"bar",role:"progressbar","aria-valuemin":"0","aria-valuemax":"100","aria-valuenow":String(pct),"aria-label":p+" progress"});const fill=el("i");fill.style.width=pct+"%";bar.append(fill);
+      pb.append(el("div",{class:"phase-row"},el("span",{text:p}),el("span",{class:"count",text:d+" of "+all.length}),bar))});
+  }
+
+  function renderTasks(){
+    const sf=$("statusFilters");sf.replaceChildren();
+    [["open","Open"],["todo","To do"],["doing","In progress"],["done","Done"],["all","All"]].forEach(([k,l])=>sf.append(el("button",{class:"pill",type:"button","aria-pressed":String(statusFilter===k),text:l,onclick:()=>{statusFilter=k;renderTasks()}})));
+    const pf=$("phaseFilters");pf.replaceChildren();
+    pf.append(el("button",{class:"pill",type:"button","aria-pressed":String(phaseFilter==="all"),text:"All phases",onclick:()=>{phaseFilter="all";renderTasks()}}));
+    PHASES.filter(p=>tasks.some(t=>t.phase===p)).forEach(p=>pf.append(el("button",{class:"pill",type:"button","aria-pressed":String(phaseFilter===p),text:p,onclick:()=>{phaseFilter=p;renderTasks()}})));
+    let list=tasks.filter(t=>{const s=t.status||"todo";if(statusFilter==="open"&&s==="done")return false;if(statusFilter!=="open"&&statusFilter!=="all"&&s!==statusFilter)return false;return phaseFilter==="all"||t.phase===phaseFilter});
+    list.sort((a,b)=>PHASES.indexOf(a.phase)-PHASES.indexOf(b.phase)||byDue(a,b));
+    const tl=$("taskList");tl.replaceChildren();
+    if(!loaded.tasks)tl.append(el("div",{class:"empty",text:"Loading your tasks…"}));
+    else if(!list.length)tl.append(el("div",{class:"empty",text:tasks.length?"No tasks match these filters.":"No tasks yet. Add your first one above."}));
+    else list.forEach(t=>tl.append(taskRow(t,{full:true})));
+  }
+
+  function renderLibrary(){
+    const kf=$("kindFilters");kf.replaceChildren();
+    kf.append(el("button",{class:"pill",type:"button","aria-pressed":String(kindFilter==="all"),text:"All",onclick:()=>{kindFilter="all";renderLibrary()}}));
+    Object.entries(KINDS).filter(([k])=>lib.some(i=>i.kind===k)).forEach(([k,v])=>kf.append(el("button",{class:"pill",type:"button","aria-pressed":String(kindFilter===k),text:v,onclick:()=>{kindFilter=k;renderLibrary()}})));
+    const g=$("libGrid");g.replaceChildren();
+    const items=lib.filter(i=>kindFilter==="all"||i.kind===kindFilter).sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+    if(!loaded.lib){g.append(el("div",{class:"empty",text:"Loading your library…"}));return}
+    if(!items.length){g.append(el("div",{class:"empty",text:lib.length?"Nothing of this type yet.":"Your library is empty. Upload a logo or add a Canva link above."}));return}
+    items.forEach(i=>{
+      const src=i.assetId?"/_blob/"+i.assetId:null;
+      const ct=i.contentType||"";
+      let thumb;
+      if(src&&ct.startsWith("image/")){thumb=el("div",{class:"thumb"},el("img",{src,alt:i.name,loading:"lazy"}))}
+      else if(src&&ct.startsWith("video/")){const v=el("video",{src,controls:true,preload:"metadata",style:"width:100%;height:100%;object-fit:cover"});thumb=el("div",{class:"thumb"},v)}
+      else if(src){thumb=el("div",{class:"thumb"},el("div",{class:"tlabel"},docIcon(),el("span",{text:ct==="application/pdf"?"PDF":"File"})))}
+      else{let host="";try{host=new URL(i.link).hostname.replace(/^www\./,"")}catch(e){}thumb=el("div",{class:"thumb kind-link"},el("div",{class:"tlabel"},linkIcon(),el("span",{text:host||"Link"})))}
+      const href=src||i.link;
+      const del=confirmId===i.id
+        ? el("button",{class:"btn small danger",type:"button",text:"Confirm remove",onclick:()=>removeItem(i)})
+        : el("button",{class:"btn small ghost",type:"button",text:"Remove","aria-label":"Remove "+i.name,onclick:()=>{confirmId=i.id;renderLibrary();setTimeout(()=>{if(confirmId===i.id){confirmId=null;renderLibrary()}},4000)}});
+      const body=el("div",{class:"body"},el("div",{class:"name",text:i.name}),el("div",{class:"meta"},el("span",{class:"chip",text:KINDS[i.kind]||"Other"})));
+      if(i.note)body.append(el("div",{class:"note",text:i.note}));
+      body.append(el("div",{class:"actions"},href?el("a",{class:"btn small primary",href,target:"_blank",rel:"noopener",text:src?"Open":"Open link"}):null,db?del:null));
+      g.append(el("article",{class:"card"},thumb,body));
+    });
+  }
+  function docIcon(){const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 24 24");s.setAttribute("width","36");s.setAttribute("height","36");s.setAttribute("aria-hidden","true");s.innerHTML='<path d="M6 3h8l4 4v14H6z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M14 3v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/>';return s}
+  function linkIcon(){const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 24 24");s.setAttribute("width","36");s.setAttribute("height","36");s.setAttribute("aria-hidden","true");s.innerHTML='<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';return s}
+
+  async function removeItem(i){
+    confirmId=null;
+    try{
+      if(i.assetId&&assets){try{await assets.delete(i.assetId)}catch(e){}}
+      await db.doc("library/"+i.id).delete();
+    }catch(e){alertBox("Couldn't remove that item.")}
+  }
+
+  function renderDays(){
+    const dl=$("dayLog");dl.replaceChildren();
+    const past=days.filter(d=>d.note&&d.note.trim()).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,7);
+    if(!past.length){dl.append(el("div",{class:"empty",text:"Your daily notes will build up here."}));return}
+    past.forEach(d=>dl.append(el("div",{class:"d"},el("div",{class:"dt",text:d.date===todayKey?"Today":new Date(d.date+"T12:00:00").toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"short"})}),el("p",{text:d.note}))));
+  }
+  function longDate(k){return new Date(k+"T12:00:00").toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+  function renderHistory(){
+    const hl=$("historyList");hl.replaceChildren();
+    const dates=new Set();days.forEach(d=>{if(d.note&&d.note.trim())dates.add(d.date)});activity.forEach(a=>dates.add(a.date));
+    tasks.forEach(t=>{if(t.status==="done"&&t.doneAt)dates.add(t.doneAt)});
+    const sorted=[...dates].filter(Boolean).sort().reverse();
+    if(!sorted.length){hl.append(el("div",{class:"empty",text:"Your check-ins and task activity will build up here, day by day."}));return}
+    sorted.forEach(k=>{
+      const box=el("div",{class:"d"},el("div",{class:"dt",text:k===todayKey?"Today · "+longDate(k):longDate(k)}));
+      const day=days.find(d=>d.date===k);
+      if(day&&day.note&&day.note.trim())box.append(el("p",{text:day.note}));
+      const acts=activity.filter(a=>a.date===k).sort((a,b)=>(a.at||"").localeCompare(b.at||""));
+      const logged=new Set(acts.filter(a=>a.type==="done").map(a=>a.title));
+      const extraDone=tasks.filter(t=>t.status==="done"&&t.doneAt===k&&!logged.has(t.title));
+      if(acts.length||extraDone.length){
+        const ul=el("ul",{style:"margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:2px;font-size:14px"});
+        acts.forEach(a=>ul.append(el("li",{text:(ACT[a.type]||a.type)+": "+a.title})));
+        extraDone.forEach(t=>ul.append(el("li",{text:"Completed: "+t.title})));
+        box.append(ul);
+      }
+      hl.append(box);
+    });
+  }
+  const csvCell=v=>{const s=String(v==null?"":v);return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  const toCsv=rows=>"﻿"+rows.map(r=>r.map(csvCell).join(",")).join("\r\n");
+  async function save(filename,data,msgId){
+    const m=$(msgId||"exMsg");
+    if(!downloads){m.textContent="Saving files isn't available in this view.";return false}
+    try{const r=await downloads.save({filename,data});m.textContent=r.status==="saved"?"Saved "+filename+".":"Sent.";return true}
+    catch(e){m.textContent=e&&e.code==="declined"?"Export cancelled.":e&&e.code==="rate_limited"?"A save prompt is already open.":"Couldn't export. Try again.";return false}
+  }
+  $("exHistory").addEventListener("click",()=>{
+    const rows=[["Date","Type","Detail","Phase","Time"]];
+    days.filter(d=>d.note&&d.note.trim()).forEach(d=>rows.push([d.date,"Check-in",d.note,"",d.updatedAt||""]));
+    activity.forEach(a=>rows.push([a.date,ACT[a.type]||a.type,a.title,a.phase,a.at]));
+    const logged=new Set(activity.filter(a=>a.type==="done").map(a=>a.date+"|"+a.title));
+    tasks.filter(t=>t.status==="done"&&t.doneAt&&!logged.has(t.doneAt+"|"+t.title)).forEach(t=>rows.push([t.doneAt,"Completed",t.title,t.phase,""]));
+    const body=rows.slice(1).sort((a,b)=>String(b[0]).localeCompare(String(a[0]))||String(b[4]).localeCompare(String(a[4])));
+    save("seamwise-history-"+todayKey+".csv",toCsv([rows[0],...body]));
+  });
+  $("exTasks").addEventListener("click",()=>{
+    const rows=[["Task","Phase","Status","Priority","Due","Completed on","Notes"]];
+    const label={todo:"To do",doing:"In progress",done:"Done"};
+    [...tasks].sort((a,b)=>PHASES.indexOf(a.phase)-PHASES.indexOf(b.phase)||(a.order||0)-(b.order||0)).forEach(t=>rows.push([t.title,t.phase,label[t.status||"todo"],t.priority==="high"?"High":"Normal",t.due||"",t.doneAt||"",t.notes||""]));
+    save("seamwise-tasks-"+todayKey+".csv",toCsv(rows));
+  });
+  // ---------- leads ----------
+  const STATUSES={new:"New",contacted:"Contacted",replied:"Replied",meeting:"Meeting booked",proposal:"Proposal sent",client:"Client",lost:"Not interested"};
+  const STATUS_CHIP={contacted:"doing",replied:"soon",meeting:"soon",proposal:"high",client:"ok",lost:"over"};
+  const SOURCES=["LinkedIn","Referral","Website","Event","Cold outreach","Directory","Other"];
+  const INDUSTRIES=["Law firm","Accounting","Dental or medical","Building & trades","Real estate","Financial services","Retail","Hospitality","Other"];
+  const LEAD_FIELDS=[
+    ["firstName","First name","text"],["lastName","Last name","text"],["email","Email","email"],["phone","Phone","tel"],
+    ["company","Company","text"],["role","Role","text"],["industry","Industry","industry"],["city","City","text"],
+    ["source","Source","source"],["status","Status","status"],["lastContacted","Last contacted","date"],["tags","Tags (comma separated)","text"],
+    ["okToEmail","OK to email (they agreed, or you may contact them)","bool"],["notes","Notes","textarea"]];
+  const ADD_KEYS=["firstName","lastName","email","phone","company","industry","source","status","okToEmail","notes"];
+  const LEAD_PHASE="4 · Lead generation";
+  const EMAIL_RE=/[^\s<>()",;:]+@[^\s<>()",;:]+\.[^\s<>()",;:]+/;
+  const lc=s=>String(s||"").trim().toLowerCase();
+  const fullName=l=>[l.firstName,l.lastName].filter(Boolean).join(" ").trim();
+  const leadLabel=l=>(fullName(l)||l.email||"Unnamed lead")+(l.company?" ("+l.company+")":"");
+  const leadKey=l=>lc(l.email)||("n:"+lc(fullName(l))+"|"+lc(l.company));
+  const isReady=l=>!!l.email&&l.okToEmail!==false&&l.status!=="lost";
+  let leadStatusFilter="all", leadQuery="", leadShow=150, lastExportIds=[];
+
+  const dl=(id,opts)=>{const d=el("datalist",{id});opts.forEach(o=>d.append(el("option",{value:o})));return d};
+  document.body.append(dl("industryList",INDUSTRIES));
+  function fieldInput(prefix,[k,label,type],val,onChange){
+    const id=prefix+"-"+k;
+    if(type==="bool"){const c=el("input",{type:"checkbox",class:"check",id});c.checked=val!==false;c.addEventListener("change",()=>onChange&&onChange(k,c.checked));return el("label",{class:"tick wide",for:id},c,el("span",{text:label}))}
+    let inp;
+    if(type==="status"){inp=el("select",{id});Object.entries(STATUSES).forEach(([s,l])=>inp.append(el("option",{value:s,text:l})));inp.value=val||"new"}
+    else if(type==="source"){inp=el("select",{id},el("option",{value:"",text:"Choose…"}));SOURCES.forEach(s=>inp.append(el("option",{value:s,text:s})));if(val&&!SOURCES.includes(val))inp.append(el("option",{value:val,text:val}));inp.value=val||""}
+    else if(type==="textarea"){inp=el("textarea",{id,style:"min-height:80px"});inp.value=val||""}
+    else{inp=el("input",{id,type:type==="industry"?"text":type,list:type==="industry"?"industryList":null,autocomplete:"off"});inp.value=val||""}
+    inp.addEventListener(type==="status"||type==="source"||type==="date"?"change":"input",()=>onChange&&onChange(k,inp.value));
+    return el("label",{class:"f"+(type==="textarea"?" wide":""),for:id},label,inp);
+  }
+  function buildAddForm(){
+    const box=$("leadFormFields");box.replaceChildren();
+    LEAD_FIELDS.filter(f=>ADD_KEYS.includes(f[0])).forEach(f=>box.append(fieldInput("add",f,f[0]==="okToEmail"?true:"")));
+  }
+  buildAddForm();
+  function readAddForm(){
+    const o={};LEAD_FIELDS.filter(f=>ADD_KEYS.includes(f[0])).forEach(([k,,t])=>{const e=$("add-"+k);o[k]=t==="bool"?e.checked:e.value.trim()});return o;
+  }
+
+  // writes: retry transient failures, a few at a time
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  async function withRetry(fn){for(let i=0;;i++){try{return await fn()}catch(e){const c=e&&e.code;if(i<4&&(c==="unavailable"||c==="resource_exhausted")){await sleep((400<<i)+Math.random()*300);continue}throw e}}}
+  async function runPool(items,worker,n,onProgress){
+    let i=0,done=0,stop=null;const failed=[];
+    await Promise.all(Array.from({length:Math.min(n,items.length)},async()=>{
+      while(i<items.length&&!stop){const it=items[i++];try{await withRetry(()=>worker(it))}catch(e){failed.push(it);if(e&&e.code==="quota_exceeded")stop=e}done++;onProgress&&onProgress(done)}
+    }));
+    return {failed,stop};
+  }
+  function newLeadDoc(o){
+    const now=new Date().toISOString();
+    return {firstName:o.firstName||"",lastName:o.lastName||"",email:o.email||"",phone:o.phone||"",company:o.company||"",role:o.role||"",industry:o.industry||"",city:o.city||"",source:o.source||"",status:STATUSES[o.status]?o.status:"new",lastContacted:o.lastContacted||"",tags:o.tags||"",okToEmail:o.okToEmail!==false,notes:o.notes||"",createdAt:now,updatedAt:now};
+  }
+
+  $("leadForm").addEventListener("submit",async e=>{
+    e.preventDefault();if(!db)return;
+    const o=readAddForm();
+    const m=EMAIL_RE.exec(o.email||"");if(o.email&&!m){$("leadMsg").textContent="That email doesn't look right. Check it and try again.";return}
+    if(m)o.email=m[0];
+    if(!o.firstName&&!o.lastName&&!o.email&&!o.company){$("leadMsg").textContent="Add at least a name, email or company.";return}
+    const dup=o.email&&leads.find(l=>lc(l.email)===lc(o.email));
+    if(dup){$("leadMsg").textContent="That email is already saved as "+leadLabel(dup)+". Opened it so you can update it.";openLead(dup);return}
+    if(o.status==="contacted")o.lastContacted=todayKey;
+    $("leadAdd").disabled=true;$("leadMsg").textContent="Saving…";
+    try{const d=newLeadDoc(o);await withRetry(()=>db.collection("leads").add(d));logActivity("lead",{title:leadLabel(d),phase:LEAD_PHASE});
+      buildAddForm();$("leadMsg").textContent="Saved "+leadLabel(d)+".";$("add-firstName").focus()}
+    catch(err){$("leadMsg").textContent=err&&err.code==="quota_exceeded"?"Storage is full. Delete leads you no longer need, or download a backup and clear old ones.":"Couldn't save that lead. Try again."}
+    $("leadAdd").disabled=false;
+  });
+
+  async function setLeadStatus(l,status){
+    if(!db||l.status===status)return;
+    const patch={status,updatedAt:new Date().toISOString()};
+    if(status==="contacted"&&!l.lastContacted)patch.lastContacted=todayKey;
+    try{await withRetry(()=>db.doc("leads/"+l.id).update(patch));logActivity("leadStatus",{title:leadLabel(l)+" → "+STATUSES[status],phase:LEAD_PHASE})}
+    catch(e){alertBox("Couldn't save that change. Try again in a moment.")}
+  }
+
+  function viewLeads(){
+    const q=lc(leadQuery);
+    return leads.filter(l=>{
+      if(leadStatusFilter==="ready"){if(!isReady(l))return false}
+      else if(leadStatusFilter!=="all"&&(l.status||"new")!==leadStatusFilter)return false;
+      if(!q)return true;
+      return [l.firstName,l.lastName,l.company,l.email,l.industry,l.city,l.tags,l.role,l.phone].some(v=>lc(v).includes(q));
+    }).sort((a,b)=>(b.updatedAt||b.createdAt||"").localeCompare(a.updatedAt||a.createdAt||""));
+  }
+  function renderLeads(){
+    const cnt=s=>leads.filter(l=>(l.status||"new")===s).length;
+    $("lTotal").textContent=leads.length;
+    $("lReady").textContent=leads.filter(isReady).length;
+    $("lContacted").textContent=leads.filter(l=>l.status&&l.status!=="new").length;
+    $("lMeet").textContent=cnt("meeting")+cnt("proposal");
+    $("lClients").textContent=cnt("client");
+    const lf=$("leadFilters");lf.replaceChildren();
+    [["all","All · "+leads.length],["ready","Ready to email · "+leads.filter(isReady).length],...Object.entries(STATUSES).filter(([s])=>cnt(s)).map(([s,l])=>[s,l+" · "+cnt(s)])]
+      .forEach(([k,l])=>lf.append(el("button",{class:"pill",type:"button","aria-pressed":String(leadStatusFilter===k),text:l,onclick:()=>{leadStatusFilter=k;leadShow=150;renderLeads()}})));
+    const list=viewLeads();
+    const ll=$("leadList");ll.replaceChildren();
+    $("leadMore").hidden=true;
+    if(!loaded.leads){ll.append(el("div",{class:"empty",text:"Loading your leads…"}));return}
+    if(!list.length){ll.append(el("div",{class:"empty",text:leads.length?"No leads match this search or filter.":"No leads yet. Add your first one above, or import a spreadsheet."}));return}
+    list.slice(0,leadShow).forEach(l=>{
+      const st=l.status||"new";
+      const sel=el("select",{"aria-label":"Status for "+leadLabel(l),onchange:e=>setLeadStatus(l,e.target.value)});
+      Object.entries(STATUSES).forEach(([s,t])=>sel.append(el("option",{value:s,text:t})));sel.value=st;
+      const sub=el("div",{class:"sub"});
+      if(l.email)sub.append(el("a",{href:"mailto:"+l.email,text:l.email}));
+      const bits=[l.role,l.phone,l.city].filter(Boolean).join(" · ");
+      if(bits)sub.append((l.email?" · ":"")+bits);
+      const meta=el("div",{class:"meta"},
+        el("span",{class:"chip "+(STATUS_CHIP[st]||""),text:STATUSES[st]||"New"}),
+        l.industry?el("span",{class:"chip",text:l.industry}):null,
+        l.email&&l.okToEmail===false?el("span",{class:"chip over",text:"Don't email"}):null,
+        !l.email?el("span",{class:"chip",text:"No email"}):null,
+        l.lastContacted?el("span",{class:"chip",text:"Contacted "+fmt(l.lastContacted)}):null,
+        ...String(l.tags||"").split(",").map(t=>t.trim()).filter(Boolean).slice(0,4).map(t=>el("span",{class:"chip",text:"#"+t})));
+      const left=el("div",{style:"min-width:0"},
+        el("button",{class:"who",type:"button",text:(fullName(l)||l.email||"Unnamed lead")+(l.company?" · "+l.company:""),onclick:()=>openLead(l)}),sub,meta);
+      ll.append(el("div",{class:"lead"},left,el("div",{class:"row-actions"},sel,el("button",{class:"btn small ghost",type:"button",text:"Edit","aria-label":"Edit "+leadLabel(l),onclick:()=>openLead(l)}))));
+    });
+    if(list.length>leadShow){const b=$("leadMore");b.hidden=false;b.textContent="Show more ("+(list.length-leadShow)+" left)"}
+  }
+  $("leadMore").addEventListener("click",()=>{leadShow+=150;renderLeads()});
+  let searchTimer=null;
+  $("leadSearch").addEventListener("input",e=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{leadQuery=e.target.value;leadShow=150;renderLeads()},150)});
+
+  // edit dialog: every change autosaves after a short pause, and on close
+  let editId=null, pending={}, editTimer=null, delArmed=false;
+  function openLead(l){
+    flushEdit();
+    editId=l.id;pending={};delArmed=false;
+    $("dlgDel").textContent="Delete lead";
+    $("dlgTitle").textContent=leadLabel(l);
+    $("dlgSaved").textContent=l.updatedAt?"Saved":"";
+    const box=$("dlgFields");box.replaceChildren();
+    LEAD_FIELDS.forEach(f=>box.append(fieldInput("dlg",f,l[f[0]],onEditField)));
+    const dlg=$("leadDlg");if(!dlg.open){try{dlg.showModal()}catch(e){dlg.setAttribute("open","")}}
+  }
+  function onEditField(k,v){
+    if(k==="status"&&v==="contacted"&&!$("dlg-lastContacted").value){$("dlg-lastContacted").value=todayKey;pending.lastContacted=todayKey}
+    pending[k]=typeof v==="string"&&k!=="notes"?v.trim():v;
+    $("dlgSaved").textContent="Saving…";
+    clearTimeout(editTimer);editTimer=setTimeout(flushEdit,700);
+  }
+  async function flushEdit(){
+    clearTimeout(editTimer);editTimer=null;
+    const id=editId,patch=pending;pending={};
+    if(!id||!db||!Object.keys(patch).length)return;
+    if(patch.email){const m=EMAIL_RE.exec(patch.email);if(m)patch.email=m[0]}
+    const before=leads.find(l=>l.id===id);
+    patch.updatedAt=new Date().toISOString();
+    try{await withRetry(()=>db.doc("leads/"+id).update(patch));
+      if(editId===id)$("dlgSaved").textContent="Saved";
+      if(before&&patch.status&&patch.status!==before.status)logActivity("leadStatus",{title:leadLabel(before)+" → "+STATUSES[patch.status],phase:LEAD_PHASE});
+    }catch(e){if(editId===id){pending=Object.assign(patch,pending);$("dlgSaved").textContent="Not saved yet. Check your connection; it will retry when you edit or close."}}
+  }
+  $("leadDlg").addEventListener("close",()=>{flushEdit().then(()=>{editId=null})});
+  $("dlgDel").addEventListener("click",async()=>{
+    if(!delArmed){delArmed=true;$("dlgDel").textContent="Confirm delete";setTimeout(()=>{if(delArmed){delArmed=false;$("dlgDel").textContent="Delete lead"}},4000);return}
+    const l=leads.find(x=>x.id===editId);if(!l)return;
+    pending={};clearTimeout(editTimer);
+    try{await withRetry(()=>db.doc("leads/"+l.id).delete());logActivity("leadDeleted",{title:leadLabel(l),phase:LEAD_PHASE});editId=null;$("leadDlg").close()}
+    catch(e){$("dlgSaved").textContent="Couldn't delete. Try again."}
+  });
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){flushEdit();if(noteTimer){clearTimeout(noteTimer);saveNote()}}});
+
+  // Excel
+  let xlsxP=null;
+  function loadXlsx(){
+    if(window.XLSX)return Promise.resolve(window.XLSX);
+    if(!xlsxP)xlsxP=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error("xlsx"));s.onerror=()=>{xlsxP=null;s.remove();rej(new Error("xlsx"))};document.head.append(s)});
+    return xlsxP;
+  }
+  const LEAD_COLS=[["First name",14,l=>l.firstName],["Last name",16,l=>l.lastName],["Full name",24,l=>fullName(l)],["Email",30,l=>l.email],["Company",26,l=>l.company],["Role",18,l=>l.role],["Industry",18,l=>l.industry],["City",14,l=>l.city],["Phone",16,l=>l.phone],["Status",16,l=>STATUSES[l.status||"new"]],["OK to email",12,l=>l.okToEmail===false?"No":"Yes"],["Source",14,l=>l.source],["Tags",20,l=>l.tags],["Last contacted",15,l=>l.lastContacted],["Notes",40,l=>l.notes],["Added on",12,l=>(l.createdAt||"").slice(0,10)]];
+  const leadRows=list=>[LEAD_COLS.map(c=>c[0]),...list.map(l=>LEAD_COLS.map(c=>c[2](l)||""))];
+  function addSheet(X,wb,name,rows,widths){
+    const ws=X.utils.aoa_to_sheet(rows);
+    if(widths)ws["!cols"]=widths.map(w=>({wch:w}));
+    if(widths&&rows.length>1)ws["!autofilter"]={ref:X.utils.encode_range({s:{r:0,c:0},e:{r:rows.length-1,c:rows[0].length-1}})};
+    X.utils.book_append_sheet(wb,ws,name);
+  }
+  const xlsxData=(X,wb)=>X.write(wb,{bookType:"xlsx",type:"array"});
+  const SCOPE_LABEL={ready:"Ready to email",view:"Current list view",all:"All leads"};
+
+  $("exLeads").addEventListener("click",async()=>{
+    const scope=$("exScope").value;
+    const list=(scope==="ready"?leads.filter(isReady):scope==="view"?viewLeads():leads.slice()).sort((a,b)=>lc(a.company).localeCompare(lc(b.company))||lc(fullName(a)).localeCompare(lc(fullName(b))));
+    $("markWrap").hidden=true;
+    if(!list.length){$("leadExMsg").textContent=scope==="ready"?"No leads are ready to email yet. A lead needs an email address and OK to email ticked.":"There are no leads to export.";return}
+    $("exLeads").disabled=true;$("leadExMsg").textContent="Building your Excel file…";
+    const name="seamwise-leads-"+(scope==="ready"?"ready-to-email-":"")+todayKey;
+    let ok=false;
+    try{
+      const X=await loadXlsx();const wb=X.utils.book_new();
+      addSheet(X,wb,"Leads",leadRows(list),LEAD_COLS.map(c=>c[1]));
+      addSheet(X,wb,"How to use",[["Seamwise leads export"],["Exported on",todayKey],["Included",SCOPE_LABEL[scope]],["Number of leads",list.length],[],
+        ["Bulk email with Claude"],["1. Upload this file to Claude."],["2. Ask for one personalised email per row, using First name, Company, Industry and Notes."],
+        ["3. Only send marketing emails to rows where OK to email is Yes."],["4. After sending, go back to Seamwise HQ › Leads and press Mark as contacted so your records stay up to date."]],[90,20]);
+      ok=await save(name+".xlsx",xlsxData(X,wb),"leadExMsg");
+    }catch(e){
+      ok=await save(name+".csv",toCsv(leadRows(list)),"leadExMsg");
+      if(ok)$("leadExMsg").textContent="Couldn't load the Excel builder, so this was saved as a CSV file. Excel opens it the same way.";
+    }
+    $("exLeads").disabled=false;
+    if(ok){lastExportIds=list.map(l=>l.id);$("markContacted").textContent="Mark these "+list.length+" as contacted today";$("markWrap").hidden=false}
+  });
+  $("markContacted").addEventListener("click",async()=>{
+    const ids=lastExportIds.slice();if(!ids.length||!db)return;
+    $("markContacted").disabled=true;
+    const now=new Date().toISOString();
+    const r=await runPool(ids,id=>{const l=leads.find(x=>x.id===id);if(!l)return;const p={lastContacted:todayKey,updatedAt:now};if((l.status||"new")==="new")p.status="contacted";return db.doc("leads/"+id).update(p)},4,n=>{$("leadExMsg").textContent="Updating "+n+" of "+ids.length+"…"});
+    $("leadExMsg").textContent=r.failed.length?"Updated "+(ids.length-r.failed.length)+" leads. "+r.failed.length+" couldn't be saved; press the button again to retry.":"Marked "+ids.length+" leads as contacted today.";
+    if(!r.failed.length){logActivity("contacted",{title:ids.length+" leads after a bulk email",phase:LEAD_PHASE});$("markWrap").hidden=true;lastExportIds=[]}
+    else lastExportIds=r.failed;
+    $("markContacted").disabled=false;
+  });
+  $("tplBtn").addEventListener("click",async()=>{
+    try{const X=await loadXlsx();const wb=X.utils.book_new();addSheet(X,wb,"Leads",[LEAD_COLS.filter(c=>c[0]!=="Full name"&&c[0]!=="Added on").map(c=>c[0])],LEAD_COLS.filter(c=>c[0]!=="Full name"&&c[0]!=="Added on").map(c=>c[1]));await save("seamwise-leads-template.xlsx",xlsxData(X,wb),"impMsg")}
+    catch(e){$("impMsg").textContent="Couldn't load the Excel builder. Check your connection and try again."}
+  });
+
+  // import
+  const nh=s=>String(s||"").toLowerCase().replace(/[^a-z]/g,"");
+  const HEADERS={firstname:"firstName",first:"firstName",givenname:"firstName",name:"fullName",fullname:"fullName",contactname:"fullName",contact:"fullName",clientname:"fullName",client:"fullName",lastname:"lastName",surname:"lastName",familyname:"lastName",email:"email",emailaddress:"email",mail:"email",company:"company",companyname:"company",organisation:"company",organization:"company",business:"company",businessname:"company",firm:"company",practice:"company",role:"role",title:"role",jobtitle:"role",position:"role",phone:"phone",phonenumber:"phone",mobile:"phone",cell:"phone",cellphone:"phone",cellnumber:"phone",telephone:"phone",tel:"phone",industry:"industry",sector:"industry",city:"city",town:"city",location:"city",source:"source",leadsource:"source",status:"status",stage:"status",notes:"notes",note:"notes",comments:"notes",tags:"tags",oktoemail:"okToEmail",optin:"okToEmail",emailoptin:"okToEmail",optedin:"okToEmail",subscribed:"okToEmail",consent:"okToEmail",lastcontacted:"lastContacted",lastcontact:"lastContacted"};
+  const STATUS_IN=Object.assign({},...Object.entries(STATUSES).map(([k,v])=>({[k]:k,[nh(v)]:k})),{meeting:"meeting",proposal:"proposal",won:"client",customer:"client",lost:"lost",dead:"lost",nointerest:"lost",emailed:"contacted"});
+  function cellStr(v){if(v instanceof Date&&!isNaN(v))return dkey(v);return String(v==null?"":v).trim()}
+  function parseBool(v){const s=lc(v);if(/^(n|no|false|0|unsubscribed|opted ?out|don'?t email)$/.test(s))return false;return true}
+  function rowToLead(row){
+    const o={};
+    for(const [h,v] of Object.entries(row)){const k=HEADERS[nh(h)];if(!k)continue;const s=cellStr(v);if(s&&!o[k])o[k]=s}
+    if(o.fullName&&!o.firstName&&!o.lastName){const p=o.fullName.split(/\s+/);o.firstName=p.shift();o.lastName=p.join(" ")}
+    delete o.fullName;
+    if(o.email){const m=EMAIL_RE.exec(o.email);o.email=m?m[0]:""}
+    if(o.status)o.status=STATUS_IN[nh(o.status)]||"new";
+    if("okToEmail" in o)o.okToEmail=parseBool(o.okToEmail);
+    if(o.lastContacted&&!/^\d{4}-\d{2}-\d{2}$/.test(o.lastContacted)){const d=new Date(o.lastContacted);o.lastContacted=isNaN(d)?"":dkey(d)}
+    return o;
+  }
+  $("impBtn").addEventListener("click",async()=>{
+    const files=[...$("impFiles").files];const msg=$("impMsg");
+    if(!db){msg.textContent="Saving isn't available in this view.";return}
+    if(!files.length){msg.textContent="Choose one or more Excel or CSV files first.";return}
+    $("impBtn").disabled=true;msg.textContent="Reading "+files.length+" file"+(files.length>1?"s":"")+"…";
+    let X;try{X=await loadXlsx()}catch(e){msg.textContent="Couldn't load the Excel reader. Check your connection and try again.";$("impBtn").disabled=false;return}
+    const byKey=new Map(leads.map(l=>[leadKey(l),{id:l.id,cur:l,patch:{}}]));
+    const creates=new Map();let skipped=0,unreadable=[];
+    for(const f of files){
+      try{
+        const wb=X.read(await f.arrayBuffer(),{type:"array",cellDates:true});
+        const ws=wb.Sheets[wb.SheetNames.find(n=>n!=="How to use")||wb.SheetNames[0]];
+        const rows=X.utils.sheet_to_json(ws,{defval:"",raw:true});
+        for(const row of rows){
+          const o=rowToLead(row);
+          if(!o.email&&!o.firstName&&!o.lastName&&!o.company){skipped++;continue}
+          const key=leadKey(o);
+          const ex=byKey.get(key);
+          if(ex){
+            for(const [k,v] of Object.entries(o)){
+              if(k==="okToEmail"){if(v===false&&ex.cur.okToEmail!==false)ex.patch.okToEmail=false;continue}
+              if(k==="status"){if((ex.cur.status||"new")==="new"&&v!=="new")ex.patch.status=v;continue}
+              if(v&&!ex.cur[k]&&!ex.patch[k])ex.patch[k]=v;
+            }
+          }else if(creates.has(key)){const c=creates.get(key);for(const [k,v] of Object.entries(o))if(v!==""&&(c[k]===""||c[k]===undefined))c[k]=v;if(o.okToEmail===false)c.okToEmail=false}
+          else creates.set(key,newLeadDoc(o));
+        }
+      }catch(e){unreadable.push(f.name)}
+    }
+    const updates=[...byKey.values()].filter(u=>Object.keys(u.patch).length);
+    const ops=[...[...creates.values()].map(d=>({c:d})),...updates.map(u=>({u}))];
+    if(!ops.length){msg.textContent="Nothing new to add."+(skipped?" Skipped "+skipped+" empty rows.":"")+(unreadable.length?" Couldn't read: "+unreadable.join(", ")+".":"");$("impBtn").disabled=false;return}
+    const now=new Date().toISOString();
+    const r=await runPool(ops,op=>op.c?db.collection("leads").doc().set(op.c):db.doc("leads/"+op.u.id).update(Object.assign({},op.u.patch,{updatedAt:now})),4,n=>{msg.textContent="Saving "+n+" of "+ops.length+"…"});
+    const failedC=r.failed.filter(o=>o.c).length,failedU=r.failed.filter(o=>o.u).length;
+    const added=creates.size-failedC,updated=updates.length-failedU;
+    let t="Added "+added+" new lead"+(added===1?"":"s")+", updated "+updated+".";
+    if(skipped)t+=" Skipped "+skipped+" empty rows.";
+    if(unreadable.length)t+=" Couldn't read: "+unreadable.join(", ")+".";
+    if(r.stop)t+=" Storage is full, so "+r.failed.length+" weren't saved. Delete old leads and import again.";
+    else if(r.failed.length)t+=" "+r.failed.length+" couldn't be saved; import the same file again to finish (nothing will be doubled).";
+    msg.textContent=t;
+    if(added||updated)logActivity("imported",{title:added+" new, "+updated+" updated from "+files.map(f=>f.name).join(", "),phase:LEAD_PHASE});
+    $("impFiles").value="";$("impBtn").disabled=false;
+  });
+
+  // full backup
+  $("exBackup").addEventListener("click",async()=>{
+    $("exBackup").disabled=true;$("exMsg").textContent="Building your backup…";
+    try{
+      const X=await loadXlsx();const wb=X.utils.book_new();const label={todo:"To do",doing:"In progress",done:"Done"};
+      addSheet(X,wb,"Leads",leadRows(leads),LEAD_COLS.map(c=>c[1]));
+      addSheet(X,wb,"Tasks",[["Task","Phase","Status","Priority","Due","Completed on","Notes"],...[...tasks].sort((a,b)=>PHASES.indexOf(a.phase)-PHASES.indexOf(b.phase)||(a.order||0)-(b.order||0)).map(t=>[t.title,t.phase,label[t.status||"todo"],t.priority==="high"?"High":"Normal",t.due||"",t.doneAt||"",t.notes||""])],[40,22,12,10,12,14,40]);
+      const hist=[...days.filter(d=>d.note&&d.note.trim()).map(d=>[d.date,"Check-in",d.note,"",d.updatedAt||""]),...activity.map(a=>[a.date,ACT[a.type]||a.type,a.title,a.phase,a.at])].sort((a,b)=>String(b[0]).localeCompare(String(a[0]))||String(b[4]).localeCompare(String(a[4])));
+      addSheet(X,wb,"History",[["Date","Type","Detail","Phase","Time"],...hist],[12,16,60,22,24]);
+      addSheet(X,wb,"Library",[["Name","Type","Link or file","Added"],...lib.map(i=>[i.name,KINDS[i.kind]||"Other",i.link||(i.assetId?"Uploaded file ("+(i.contentType||"file")+")":""),(i.createdAt||"").slice(0,10)])],[30,18,50,12]);
+      await save("seamwise-backup-"+todayKey+".xlsx",xlsxData(X,wb));
+    }catch(e){$("exMsg").textContent="Couldn't load the Excel builder. Check your connection and try again."}
+    $("exBackup").disabled=false;
+  });
+
+  function renderAll(){renderToday();renderTasks();renderLeads();renderLibrary();renderDays();renderHistory()}
+
+  // forms
+  $("taskForm").addEventListener("submit",async e=>{
+    e.preventDefault();if(!db)return;
+    const title=$("tTitle").value.trim();if(!title)return;
+    $("tAdd").disabled=true;
+    try{await db.collection("tasks").add({title,phase:$("tPhase").value,due:$("tDue").value||null,priority:$("tPri").value,status:"todo",doneAt:null,notes:"",order:Date.now(),createdAt:new Date().toISOString()});
+      logActivity("added",{title,phase:$("tPhase").value});
+      $("tTitle").value="";$("tDue").value="";}
+    catch(err){alertBox(err&&err.code==="quota_exceeded"?"The task list is full. Delete some finished tasks to add more.":"Couldn't add that task. Try again.")}
+    $("tAdd").disabled=false;
+  });
+  $("linkForm").addEventListener("submit",async e=>{
+    e.preventDefault();if(!db)return;
+    const link=$("lUrl").value.trim(),name=$("lName").value.trim();if(!link||!name)return;
+    $("lBtn").disabled=true;
+    try{await db.collection("library").add({name,kind:$("lKind").value,link,note:"",createdAt:new Date().toISOString()});$("lUrl").value="";$("lName").value=""}
+    catch(err){alertBox("Couldn't add that link. Try again.")}
+    $("lBtn").disabled=false;
+  });
+  $("uFile").addEventListener("change",()=>{const f=$("uFile").files[0];if(f&&!$("uName").value)$("uName").value=f.name.replace(/\.[^.]+$/,"").replace(/[-_]+/g," ")});
+  $("uploadForm").addEventListener("submit",async e=>{
+    e.preventDefault();if(!db||!assets)return;
+    const f=$("uFile").files[0];if(!f)return;
+    $("uBtn").disabled=true;$("uMsg").textContent="Uploading…";
+    try{
+      const r=await assets.upload(f);
+      await db.collection("library").add({name:$("uName").value.trim()||f.name,kind:$("uKind").value,assetId:r.id,contentType:r.contentType,sizeBytes:r.sizeBytes,note:"",createdAt:new Date().toISOString()});
+      $("uMsg").textContent="Uploaded.";$("uFile").value="";$("uName").value="";refreshUsage();
+    }catch(err){
+      const c=err&&err.code;
+      $("uMsg").textContent=c==="too_large"?"That file is too big. Keep files under 20 MB (2 MB for SVG).":c==="unsupported_type"?"That file type isn't supported. Use an image, PDF or video.":c==="quota_or_state"?"Storage is full. Remove some files first.":"Upload failed. Try again in a moment.";
+    }
+    $("uBtn").disabled=false;
+  });
+  let noteTimer=null;
+  $("dayNote").addEventListener("input",()=>{$("noteSaved").textContent="Saving…";clearTimeout(noteTimer);noteTimer=setTimeout(saveNote,900)});
+  $("dayNote").addEventListener("blur",()=>{if(noteTimer){clearTimeout(noteTimer);saveNote()}});
+  async function saveNote(){noteTimer=null;if(!db)return;try{await db.doc("days/"+todayKey).set({date:todayKey,note:$("dayNote").value,updatedAt:new Date().toISOString()});$("noteSaved").textContent="Saved"}catch(e){$("noteSaved").textContent="Not saved. Try again."}}
+
+  async function refreshUsage(){if(!assets)return;try{const r=await assets.list();const mb=b=>(b/1048576).toFixed(1);$("usage").textContent="Storage: "+r.usage.files+" files · "+mb(r.usage.bytes)+" MB of "+mb(r.usage.maxBytes)+" MB"}catch(e){}}
+
+  renderAll();
+
+  // capabilities
+  (async()=>{
+    const use=window.claude&&window.claude.use;
+    if(!use){$("offline").hidden=false;loaded.tasks=loaded.lib=loaded.leads=true;renderAll();return}
+    db=await window.claude.use("db");
+    if(!db){$("offline").hidden=false;loaded.tasks=loaded.lib=loaded.leads=true;renderAll();return}
+    const onErr=()=>{$("offline").textContent="Lost connection to your saved data. Reload to reconnect.";$("offline").hidden=false};
+    db.collection("tasks").onSnapshot(s=>{tasks=s.docs.map(d=>Object.assign({id:d.id},d.data()));loaded.tasks=true;renderToday();renderTasks();renderHistory()},onErr);
+    db.collection("activity").orderBy("at","desc").limit(1000).onSnapshot(s=>{activity=s.docs.map(d=>d.data());renderHistory()},onErr);
+    db.collection("leads").onSnapshot(s=>{leads=s.docs.map(d=>Object.assign({id:d.id},d.data()));loaded.leads=true;renderLeads()},onErr);
+    db.collection("library").onSnapshot(s=>{lib=s.docs.map(d=>Object.assign({id:d.id},d.data()));loaded.lib=true;renderLibrary()},onErr);
+    db.collection("days").orderBy("date","desc").limit(1000).onSnapshot(s=>{days=s.docs.map(d=>d.data());const t=days.find(d=>d.date===todayKey);if(t&&document.activeElement!==$("dayNote")&&!noteTimer)$("dayNote").value=t.note||"";renderDays();renderHistory()},onErr);
+    window.claude.use("downloads").then(d=>{downloads=d;if(!d){["exHistory","exTasks","exBackup","exLeads","tplBtn"].forEach(id=>$(id).disabled=true);$("leadExMsg").textContent="Downloading isn't available in this view.";$("exMsg").textContent="Exporting isn't available in this view."}});
+    assets=await window.claude.use("assets");
+    if(!assets){$("uploadForm").hidden=true}else refreshUsage();
+    renderLibrary();
+  })();
+})();
+</script>
+
+</body></html>
