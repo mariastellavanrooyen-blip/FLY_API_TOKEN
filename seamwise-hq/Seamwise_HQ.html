@@ -124,6 +124,12 @@ dialog.dlg{border:1px solid var(--line);background:var(--surface);color:var(--in
 dialog.dlg::backdrop{background:rgba(10,11,12,.55)}
 dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
 .prog{font-variant-numeric:tabular-nums}
+.thread summary{cursor:pointer;font-weight:500;overflow-wrap:anywhere}
+.thread .msg{border-left:3px solid var(--line);padding:4px 0 4px 10px;margin-top:8px}
+.thread .msg .dt{font-size:12px;color:var(--muted)}
+.thread .msg p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.thread a,.daylog a{color:var(--accent-text)}
+.mail-preview{background:var(--surface-2);padding:12px 14px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s ease}}
 </style>
@@ -250,6 +256,28 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
           <div class="saved prog" id="impMsg" role="status"></div>
         </div>
       </div>
+      <div class="panel" id="gmailPanel">
+        <div class="hd"><h2>Email drafts in Gmail</h2><span class="saved" id="dfSaved"></span></div>
+        <p style="margin:0;color:var(--muted);font-size:13px">Write one email and Seamwise creates a personal draft in your Gmail for every lead you pick. Nothing is sent. You check each draft in Gmail and press send yourself. Each draft is also saved to that lead's email trail.</p>
+        <div class="form">
+          <label class="f wide" for="dfScope">Who gets a draft<select id="dfScope">
+            <option value="ready">Ready to email: has an email, OK to email, not "Not interested"</option>
+            <option value="view">Leads in the current list view (with an email and OK to email)</option>
+          </select></label>
+          <label class="f wide" for="dfSubject">Subject<input type="text" id="dfSubject" placeholder="e.g. Admin help for {company}"></label>
+          <label class="f wide" for="dfBody">Email<textarea id="dfBody" style="min-height:180px" placeholder="Hi {first_name},&#10;&#10;Write your email here. Use the fill-ins below for each lead's details.&#10;&#10;Kind regards,&#10;Maria"></textarea></label>
+        </div>
+        <div class="filters" id="dfFills" aria-label="Insert a fill-in"></div>
+        <label class="tick" for="dfAI" id="dfAIWrap"><input type="checkbox" class="check" id="dfAI"><span>Let Claude tailor each email to the lead, using their details and your notes. Plain, human wording, no made-up facts.</span></label>
+        <label class="tick" for="dfSig"><input type="checkbox" class="check" id="dfSig" checked><span>Add my Gmail signature</span></label>
+        <div class="filters">
+          <button class="btn" type="button" id="dfPreview">Preview first email</button>
+          <button class="btn primary" type="button" id="dfCreate">Create drafts</button>
+          <button class="btn ghost" type="button" id="dfStop" hidden>Stop</button>
+        </div>
+        <div id="dfPreviewBox" class="daylog" hidden></div>
+        <div class="saved prog" id="dfMsg" role="status"></div>
+      </div>
       <div class="panel">
         <label class="f" for="leadSearch">Search<input type="search" id="leadSearch" placeholder="Name, company, email, industry or tag"></label>
         <div class="filters" id="leadFilters" aria-label="Filter by status"></div>
@@ -314,6 +342,17 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
   <form method="dialog">
     <div class="hd"><h2 id="dlgTitle">Edit lead</h2><span class="saved" id="dlgSaved" role="status"></span></div>
     <div class="form" id="dlgFields"></div>
+    <hr class="sep">
+    <div class="hd"><h2>Email trail</h2><span class="saved prog" id="trMsg" role="status"></span></div>
+    <p style="margin:0;color:var(--muted);font-size:13px">Pull every Gmail conversation with this lead's email address into their record. Press it again any time to bring in new replies.</p>
+    <div class="filters"><button class="btn small" type="button" id="trFind">Save emails from Gmail</button></div>
+    <div class="daylog" id="trList"></div>
+    <div class="form">
+      <label class="f" for="trUrl">Or add a link to an email<input type="url" id="trUrl" placeholder="https://mail.google.com/…"></label>
+      <label class="f" for="trLabel">What it is<input type="text" id="trLabel" placeholder="e.g. Proposal sent from Outlook"></label>
+      <button class="btn small" type="button" id="trAdd">Add link</button>
+    </div>
+    <hr class="sep">
     <div class="filters" style="justify-content:space-between">
       <button class="btn small danger" type="button" id="dlgDel">Delete lead</button>
       <button class="btn primary" value="close">Done</button>
@@ -551,6 +590,7 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
   const leadKey=l=>lc(l.email)||("n:"+lc(fullName(l))+"|"+lc(l.company));
   const isReady=l=>!!l.email&&l.okToEmail!==false&&l.status!=="lost";
   let leadStatusFilter="all", leadQuery="", leadShow=150, lastExportIds=[];
+  let mcp=null, sample=null;
 
   const dl=(id,opts)=>{const d=el("datalist",{id});opts.forEach(o=>d.append(el("option",{value:o})));return d};
   document.body.append(dl("industryList",INDUSTRIES));
@@ -651,6 +691,8 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
         l.email&&l.okToEmail===false?el("span",{class:"chip over",text:"Don't email"}):null,
         !l.email?el("span",{class:"chip",text:"No email"}):null,
         l.lastContacted?el("span",{class:"chip",text:"Contacted "+fmt(l.lastContacted)}):null,
+        l.emailCount?el("span",{class:"chip",text:l.emailCount+" email"+(l.emailCount===1?"":"s")+" saved"}):null,
+        l.lastDraftAt?el("span",{class:"chip doing",text:"Draft "+fmt(l.lastDraftAt)}):null,
         ...String(l.tags||"").split(",").map(t=>t.trim()).filter(Boolean).slice(0,4).map(t=>el("span",{class:"chip",text:"#"+t})));
       const left=el("div",{style:"min-width:0"},
         el("button",{class:"who",type:"button",text:(fullName(l)||l.email||"Unnamed lead")+(l.company?" · "+l.company:""),onclick:()=>openLead(l)}),sub,meta);
@@ -672,6 +714,7 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
     $("dlgSaved").textContent=l.updatedAt?"Saved":"";
     const box=$("dlgFields");box.replaceChildren();
     LEAD_FIELDS.forEach(f=>box.append(fieldInput("dlg",f,l[f[0]],onEditField)));
+    openTrail(l);
     const dlg=$("leadDlg");if(!dlg.open){try{dlg.showModal()}catch(e){dlg.setAttribute("open","")}}
   }
   function onEditField(k,v){
@@ -692,7 +735,7 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
       if(before&&patch.status&&patch.status!==before.status)logActivity("leadStatus",{title:leadLabel(before)+" → "+STATUSES[patch.status],phase:LEAD_PHASE});
     }catch(e){if(editId===id){pending=Object.assign(patch,pending);$("dlgSaved").textContent="Not saved yet. Check your connection; it will retry when you edit or close."}}
   }
-  $("leadDlg").addEventListener("close",()=>{flushEdit().then(()=>{editId=null})});
+  $("leadDlg").addEventListener("close",()=>{closeTrail();flushEdit().then(()=>{editId=null})});
   $("dlgDel").addEventListener("click",async()=>{
     if(!delArmed){delArmed=true;$("dlgDel").textContent="Confirm delete";setTimeout(()=>{if(delArmed){delArmed=false;$("dlgDel").textContent="Delete lead"}},4000);return}
     const l=leads.find(x=>x.id===editId);if(!l)return;
@@ -709,7 +752,7 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
     if(!xlsxP)xlsxP=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=()=>window.XLSX?res(window.XLSX):rej(new Error("xlsx"));s.onerror=()=>{xlsxP=null;s.remove();rej(new Error("xlsx"))};document.head.append(s)});
     return xlsxP;
   }
-  const LEAD_COLS=[["First name",14,l=>l.firstName],["Last name",16,l=>l.lastName],["Full name",24,l=>fullName(l)],["Email",30,l=>l.email],["Company",26,l=>l.company],["Role",18,l=>l.role],["Industry",18,l=>l.industry],["City",14,l=>l.city],["Phone",16,l=>l.phone],["Status",16,l=>STATUSES[l.status||"new"]],["OK to email",12,l=>l.okToEmail===false?"No":"Yes"],["Source",14,l=>l.source],["Tags",20,l=>l.tags],["Last contacted",15,l=>l.lastContacted],["Notes",40,l=>l.notes],["Added on",12,l=>(l.createdAt||"").slice(0,10)]];
+  const LEAD_COLS=[["First name",14,l=>l.firstName],["Last name",16,l=>l.lastName],["Full name",24,l=>fullName(l)],["Email",30,l=>l.email],["Company",26,l=>l.company],["Role",18,l=>l.role],["Industry",18,l=>l.industry],["City",14,l=>l.city],["Phone",16,l=>l.phone],["Status",16,l=>STATUSES[l.status||"new"]],["OK to email",12,l=>l.okToEmail===false?"No":"Yes"],["Source",14,l=>l.source],["Tags",20,l=>l.tags],["Last contacted",15,l=>l.lastContacted],["Emails saved",12,l=>l.emailCount?String(l.emailCount):""],["Last email",12,l=>l.lastEmailAt],["Notes",40,l=>l.notes],["Added on",12,l=>(l.createdAt||"").slice(0,10)]];
   const leadRows=list=>[LEAD_COLS.map(c=>c[0]),...list.map(l=>LEAD_COLS.map(c=>c[2](l)||""))];
   function addSheet(X,wb,name,rows,widths){
     const ws=X.utils.aoa_to_sheet(rows);
@@ -820,6 +863,182 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
     $("impFiles").value="";$("impBtn").disabled=false;
   });
 
+  // ---------- Gmail ----------
+  const GMAIL="Gmail";
+  function gmailProblem(e){
+    const c=e&&e.code;
+    if(c==="needs_reauth")return "Your Gmail connection has expired. Reconnect Gmail in claude.ai Settings › Connectors, then try again.";
+    if(c==="server_not_connected"||c==="server_not_found")return "Gmail isn't connected. Add Gmail in claude.ai Settings › Connectors, then try again.";
+    if(c==="selection_required")return "You have more than one Gmail connected. Choose one when Claude asks, then try again.";
+    if(c==="not_in_manifest"||c==="approval_required"||c==="consent_required")return "This page doesn't have permission to use your Gmail yet. Press the button again and choose Allow when Claude asks.";
+    if(c==="blocked_by_policy")return "Your organisation's settings block Gmail here.";
+    if(c==="not_granted"||c==="capability_disabled"||c==="capability_removed")return "Gmail isn't available in this view. Open Seamwise HQ in claude.ai.";
+    return null;
+  }
+  async function gmailRead(tool,input){
+    try{return (await mcp.callTool(GMAIL,tool,input,{cache:false})).payload}
+    catch(e){if(e&&e.retryable){await sleep(Math.max(e.retryAfterMs||0,800+Math.random()*700));return (await mcp.callTool(GMAIL,tool,input,{cache:false})).payload}throw e}
+  }
+  function trimBody(s){
+    s=String(s||"").replace(/\r/g,"");
+    const cut=s.search(/\n-----Original Message-----|\nOn [^\n]{5,200}wrote:\s*\n|\n_{10,}\s*\nFrom:|\nFrom: [^\n]+\n(Sent|Date): /);
+    if(cut>0)s=s.slice(0,cut);
+    s=s.replace(/\n{3,}/g,"\n\n").trim();
+    return s.length>4000?s.slice(0,4000)+"…":s;
+  }
+  const whenStr=iso=>{if(!iso)return"";const d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})};
+
+  // email trail: leads/<id>/emails, one document per Gmail conversation or saved link
+  let trailUnsub=null, trailLead=null, trail=[];
+  function openTrail(l){
+    closeTrail();trailLead=l;trail=[];$("trMsg").textContent="";$("trUrl").value="";$("trLabel").value="";
+    $("trFind").disabled=!mcp||!l.email;
+    $("trFind").title=!l.email?"Add an email address first":"";
+    renderTrail();
+    if(db)trailUnsub=db.collection("leads/"+l.id+"/emails").onSnapshot(s=>{trail=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderTrail()},()=>{});
+  }
+  function closeTrail(){if(trailUnsub){trailUnsub();trailUnsub=null}trailLead=null}
+  function renderTrail(){
+    const box=$("trList");box.replaceChildren();
+    if(!trail.length){box.append(el("div",{class:"empty",text:trailLead&&trailLead.email?"No emails saved yet.":"Add an email address above to pull in emails from Gmail."}));return}
+    [...trail].sort((a,b)=>(b.lastDate||"").localeCompare(a.lastDate||"")).forEach(t=>{
+      if(t.kind==="link"){box.append(el("div",{class:"d"},el("div",{class:"dt",text:"Link · "+whenStr(t.lastDate)}),el("p",{},el("a",{href:t.url,target:"_blank",rel:"noopener",text:t.subject||t.url}))));return}
+      const msgs=t.messages||[];
+      const det=el("details",{class:"thread"},el("summary",{text:(t.subject||"(no subject)")+" · "+(t.kind==="draft"?"Draft":(t.messageCount||msgs.length)+" message"+((t.messageCount||msgs.length)===1?"":"s"))}));
+      msgs.forEach(m=>det.append(el("div",{class:"msg"},el("div",{class:"dt",text:(m.from||"")+" · "+whenStr(m.date)}),el("p",{text:m.body||""}))));
+      const top=el("div",{class:"dt"},whenStr(t.lastDate)+" · ");
+      if(t.url)top.append(el("a",{href:t.url,target:"_blank",rel:"noopener",text:t.kind==="draft"?"Open draft in Gmail":"Open in Gmail"}));
+      box.append(el("div",{class:"d"},top,det));
+    });
+  }
+  async function syncLeadCounts(l){
+    try{const s=await db.collection("leads/"+l.id+"/emails").get();const docs=s.docs.map(d=>d.data());
+      const last=docs.map(d=>d.lastDate||"").sort().pop()||"";
+      await withRetry(()=>db.doc("leads/"+l.id).update({emailCount:docs.length,lastEmailAt:last.slice(0,10)}))}catch(e){}
+  }
+  $("trFind").addEventListener("click",async()=>{
+    const l=trailLead;if(!l||!l.email||!mcp||!db)return;
+    const msg=$("trMsg");$("trFind").disabled=true;msg.textContent="Searching Gmail…";
+    try{
+      const em=l.email.replace(/[^\w.@+-]/g,"");
+      const res=await gmailRead("search_threads",{query:"from:"+em+" OR to:"+em+" OR cc:"+em,pageSize:25,view:"THREAD_VIEW_METADATA_ONLY"});
+      const threads=(res&&res.threads)||[];
+      if(!threads.length){msg.textContent="No Gmail conversations found with "+l.email+".";$("trFind").disabled=false;return}
+      let n=0,failed=0;
+      for(const th of threads){
+        if(trailLead!==l)break;
+        msg.textContent="Saving conversation "+(++n)+" of "+threads.length+"…";
+        try{
+          const full=await gmailRead("get_thread",{threadId:th.id,messageFormat:"PLAIN_TEXT"});
+          let ms=((full&&full.messages)||[]).map(m=>({from:m.sender||"",to:(m.toRecipients||[]).join(", "),date:m.date||"",subject:m.subject||"",body:trimBody(m.plaintextBody||m.snippet||"")}));
+          ms=ms.slice(-30);
+          const doc={kind:"thread",threadId:th.id,subject:(ms[0]&&ms[0].subject)||"",url:(full&&full.viewUrl)||th.viewUrl||"",messageCount:(full&&full.messageCount)||ms.length,lastDate:(ms[ms.length-1]&&ms[ms.length-1].date)||"",messages:ms,savedAt:new Date().toISOString()};
+          while(JSON.stringify(doc).length>200000&&doc.messages.length>1)doc.messages.shift();
+          await withRetry(()=>db.doc("leads/"+l.id+"/emails/"+th.id).set(doc));
+        }catch(e){if(gmailProblem(e))throw e;failed++}
+      }
+      await syncLeadCounts(l);
+      msg.textContent="Saved "+(n-failed)+" conversation"+(n-failed===1?"":"s")+(failed?". "+failed+" couldn't be read; press again to retry.":".");
+    }catch(e){msg.textContent=gmailProblem(e)||(e&&e.code==="quota_exceeded"?"Storage is full. Delete old leads or emails first.":"Gmail didn't answer. Try again in a moment.")}
+    $("trFind").disabled=false;
+  });
+  $("trAdd").addEventListener("click",async()=>{
+    const l=trailLead;if(!l||!db)return;
+    const url=$("trUrl").value.trim();if(!/^https?:\/\//i.test(url)){$("trMsg").textContent="Paste a full link starting with https://";return}
+    try{await withRetry(()=>db.collection("leads/"+l.id+"/emails").add({kind:"link",url,subject:$("trLabel").value.trim()||url,lastDate:new Date().toISOString(),savedAt:new Date().toISOString()}));
+      $("trUrl").value="";$("trLabel").value="";$("trMsg").textContent="Link saved.";syncLeadCounts(l)}
+    catch(e){$("trMsg").textContent="Couldn't save that link. Try again."}
+  });
+  ["trUrl","trLabel"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("trAdd").click()}}));
+
+  // drafts: the template autosaves to settings/emailTemplate
+  const FILLS={first_name:l=>l.firstName,last_name:l=>l.lastName,full_name:fullName,company:l=>l.company,industry:l=>l.industry,city:l=>l.city,role:l=>l.role};
+  const mergeT=(t,l)=>t.replace(/\{(\w+)\}/g,(m,k)=>FILLS[k]?(FILLS[k](l)||(k==="first_name"?"there":"")):m);
+  Object.keys(FILLS).forEach(k=>$("dfFills").append(el("button",{class:"pill",type:"button",text:"{"+k+"}",onclick:()=>{
+    const ta=document.activeElement===$("dfSubject")?$("dfSubject"):$("dfBody");const s=ta.selectionStart??ta.value.length,e=ta.selectionEnd??s;
+    ta.value=ta.value.slice(0,s)+"{"+k+"}"+ta.value.slice(e);ta.focus();ta.selectionStart=ta.selectionEnd=s+k.length+2;ta.dispatchEvent(new Event("input"))}})));
+  $("dfFills").addEventListener("mousedown",e=>e.preventDefault());
+  let tplTimer=null, tplLoaded=false;
+  function saveTplSoon(){$("dfSaved").textContent="Saving…";clearTimeout(tplTimer);tplTimer=setTimeout(saveTpl,900)}
+  async function saveTpl(){tplTimer=null;if(!db)return;try{await withRetry(()=>db.doc("settings/emailTemplate").set({subject:$("dfSubject").value,body:$("dfBody").value,tailor:$("dfAI").checked,signature:$("dfSig").checked,updatedAt:new Date().toISOString()}));$("dfSaved").textContent="Saved"}catch(e){$("dfSaved").textContent="Not saved. Try again."}}
+  ["dfSubject","dfBody"].forEach(id=>$(id).addEventListener("input",saveTplSoon));
+  ["dfAI","dfSig"].forEach(id=>$(id).addEventListener("change",saveTplSoon));
+  function draftTargets(){
+    const base=$("dfScope").value==="view"?viewLeads():leads;
+    return base.filter(l=>l.email&&l.okToEmail!==false&&l.status!=="lost");
+  }
+  const AI_OFF=["not_granted","session_expired","sampling_disabled","not_declared","capability_disabled","capability_removed"];
+  async function composeFor(l,useAI){
+    const subject=mergeT($("dfSubject").value,l).trim(), body=mergeT($("dfBody").value,l).trim();
+    if(!useAI||!sample)return {subject,body,ai:false};
+    const facts={first_name:l.firstName,last_name:l.lastName,company:l.company,role:l.role,industry:l.industry,city:l.city,status:STATUSES[l.status||"new"],notes:l.notes,tags:l.tags,last_contacted:l.lastContacted};
+    const prompt="You are adjusting one sales email that Maria at Seamwise will send to one person. Start from her draft and tailor it to this lead. Keep her meaning, her offer, her call to action and her sign-off. Keep it the same length or shorter.\n\n"+
+      "Style rules: plain and human, like a real person typing. Start with the point. Never use: \"I hope this finds you well\", \"reach out\", \"touch base\", \"circle back\", \"leverage\", \"utilize\", \"streamline\", \"seamless\", \"robust\", \"elevate\", \"empower\", \"delve\", \"in today's fast-paced\", \"don't hesitate\". No em dashes. No bullet points, headings or bold. One call to action. One-line sign-off. Use one real detail about this lead from the facts below if there is one. Never invent facts about the lead or their business. If a fact is missing, leave it out.\n\n"+
+      "Maria's subject:\n"+subject+"\n\nMaria's draft:\n"+body+"\n\nFacts about the lead (JSON):\n"+JSON.stringify(facts)+"\n\n"+
+      "Reply with JSON only, in this shape: {\"subject\": \"...\", \"body\": \"...\"}. The body is plain text with line breaks, no markdown.";
+    const r=await sample.json(prompt,{modelTier:"quick"});
+    if(!r||typeof r.body!=="string"||!r.body.trim())throw {code:"bad_answer"};
+    const fix=s=>String(s).replace(/\s*—\s*/g,", ").trim();
+    return {subject:fix(r.subject||subject),body:fix(r.body),ai:true};
+  }
+  $("dfPreview").addEventListener("click",async()=>{
+    const t=draftTargets();const box=$("dfPreviewBox");
+    if(!$("dfBody").value.trim()){$("dfMsg").textContent="Write your email first.";return}
+    if(!t.length){$("dfMsg").textContent="No leads to draft for. A lead needs an email and OK to email ticked.";return}
+    $("dfPreview").disabled=true;$("dfMsg").textContent=$("dfAI").checked&&sample?"Claude is tailoring the first email…":"";
+    try{
+      const c=await composeFor(t[0],$("dfAI").checked);
+      const used=[...($("dfSubject").value+$("dfBody").value).matchAll(/\{(\w+)\}/g)].map(m=>m[1]).filter(k=>FILLS[k]&&k!=="first_name");
+      const gaps=[...new Set(used)].map(k=>[k,t.filter(l=>!FILLS[k](l)).length]).filter(([,n])=>n);
+      box.replaceChildren(el("div",{class:"dt",text:"To "+t[0].email+(c.ai?" · tailored by Claude":"")}),el("div",{class:"mail-preview",text:"Subject: "+c.subject+"\n\n"+c.body}));
+      box.hidden=false;
+      $("dfMsg").textContent=t.length+" lead"+(t.length===1?"":"s")+" will get a draft."+(gaps.length?" Check: "+gaps.map(([k,n])=>n+" missing {"+k+"}").join(", ")+". Those emails will have a gap there.":"");
+    }catch(e){$("dfMsg").textContent=e&&AI_OFF.includes(e.code)?"Claude tailoring isn't available here, so drafts will use your email as written. Untick the Claude option to preview.":e&&e.code==="rate_limited"?"Claude is busy. Wait a moment and try again.":"Couldn't build the preview. Try again."}
+    $("dfPreview").disabled=false;
+  });
+  let dfArmed=false, dfStop=false;
+  $("dfStop").addEventListener("click",()=>{dfStop=true;$("dfStop").disabled=true});
+  $("dfCreate").addEventListener("click",async()=>{
+    if(!mcp||!db)return;
+    if(!$("dfSubject").value.trim()||!$("dfBody").value.trim()){$("dfMsg").textContent="Add a subject and an email first.";return}
+    const subjT=$("dfSubject").value.trim();
+    const all=draftTargets();
+    const fresh=all.filter(l=>!(l.lastDraftAt===todayKey&&l.lastDraftTpl===subjT)), pending=fresh.length, t=fresh.slice(0,50);
+    if(!t.length){$("dfMsg").textContent=all.length?"Every lead here already got a draft of this email today.":"No leads to draft for. A lead needs an email and OK to email ticked.";return}
+    if(!dfArmed){dfArmed=true;$("dfCreate").textContent="Confirm: create "+t.length+" draft"+(t.length===1?"":"s");setTimeout(()=>{if(dfArmed){dfArmed=false;$("dfCreate").textContent="Create drafts"}},6000);return}
+    dfArmed=false;$("dfCreate").textContent="Create drafts";
+    if(tplTimer){clearTimeout(tplTimer);saveTpl()}
+    $("dfCreate").disabled=true;$("dfPreview").disabled=true;$("dfStop").hidden=false;$("dfStop").disabled=false;dfStop=false;
+    let useAI=$("dfAI").checked&&!!sample, made=0, failed=[], note="";
+    for(let i=0;i<t.length&&!dfStop;i++){
+      const l=t[i];
+      $("dfMsg").textContent=(useAI?"Tailoring and creating":"Creating")+" draft "+(i+1)+" of "+t.length+" (to "+l.email+")…";
+      let c;
+      try{c=await composeFor(l,useAI)}
+      catch(e){if(e&&AI_OFF.includes(e.code)){useAI=false;note=" Claude tailoring wasn't available, so the rest used your email as written."}c=await composeFor(l,false)}
+      let p;
+      try{p=(await mcp.callTool(GMAIL,"create_draft",{to:[l.email],subject:c.subject,body:c.body,includeSignature:$("dfSig").checked})).payload||{}}
+      catch(e){
+        const prob=gmailProblem(e);
+        if(prob){$("dfMsg").textContent=(made?"Created "+made+" drafts, then stopped. ":"")+prob;failed=null;break}
+        if(e&&e.code==="tool_error"){failed.push(l.email);continue}
+        $("dfMsg").textContent=(made?"Created "+made+" drafts. ":"")+"Gmail didn't answer for "+l.email+", so I stopped. Check your Gmail Drafts folder before trying again: that draft may already exist.";failed=null;break;
+      }
+      made++;
+      const m=p.message||{};const threadId=p.threadId||m.threadId||"";const now=new Date().toISOString();
+      const url=p.viewUrl||m.viewUrl||"https://mail.google.com/mail/#drafts";
+      try{
+        await withRetry(()=>db.doc("leads/"+l.id+"/emails/"+(threadId||("draft-"+(p.id||Date.now())))).set({kind:"draft",threadId,draftId:p.id||"",subject:c.subject,url,messageCount:1,lastDate:now,messages:[{from:"Draft (not sent yet)",to:l.email,date:now,subject:c.subject,body:c.body}],savedAt:now}));
+        await withRetry(()=>db.doc("leads/"+l.id).update({lastDraftAt:todayKey,lastDraftTpl:subjT,emailCount:(l.emailCount||0)+1,lastEmailAt:todayKey,updatedAt:now}));
+      }catch(e){}
+    }
+    if(failed){
+      $("dfMsg").textContent=(dfStop?"Stopped. ":"")+"Created "+made+" draft"+(made===1?"":"s")+" in Gmail. Open Gmail › Drafts to check and send them."+(failed.length?" Gmail refused "+failed.length+": "+failed.slice(0,5).join(", ")+(failed.length>5?"…":"")+".":"")+(!dfStop&&pending>t.length?" Press Create drafts again for the next "+Math.min(50,pending-t.length)+".":"")+note;
+    }
+    if(made)logActivity("contacted",{title:made+" Gmail drafts: "+subjT,phase:LEAD_PHASE});
+    $("dfCreate").disabled=false;$("dfPreview").disabled=false;$("dfStop").hidden=true;
+  });
+
   // full backup
   $("exBackup").addEventListener("click",async()=>{
     $("exBackup").disabled=true;$("exMsg").textContent="Building your backup…";
@@ -892,6 +1111,9 @@ dialog.dlg form{padding:18px;display:flex;flex-direction:column;gap:14px}
     db.collection("leads").onSnapshot(s=>{leads=s.docs.map(d=>Object.assign({id:d.id},d.data()));loaded.leads=true;renderLeads()},onErr);
     db.collection("library").onSnapshot(s=>{lib=s.docs.map(d=>Object.assign({id:d.id},d.data()));loaded.lib=true;renderLibrary()},onErr);
     db.collection("days").orderBy("date","desc").limit(1000).onSnapshot(s=>{days=s.docs.map(d=>d.data());const t=days.find(d=>d.date===todayKey);if(t&&document.activeElement!==$("dayNote")&&!noteTimer)$("dayNote").value=t.note||"";renderDays();renderHistory()},onErr);
+    db.doc("settings/emailTemplate").get().then(d=>{const t=d.exists?d.data():null;if(t&&!$("dfSubject").value&&!$("dfBody").value){$("dfSubject").value=t.subject||"";$("dfBody").value=t.body||"";$("dfAI").checked=!!t.tailor;$("dfSig").checked=t.signature!==false;$("dfSaved").textContent="Saved"}}).catch(()=>{});
+    window.claude.use("mcp").then(m=>{mcp=m;if(!m){["dfCreate","trFind"].forEach(id=>$(id).disabled=true);$("dfMsg").textContent="Gmail isn't available in this view. Open Seamwise HQ in claude.ai to create drafts."}});
+    window.claude.use("sample").then(sm=>{sample=sm;if(!sm){$("dfAIWrap").hidden=true;$("dfAI").checked=false}});
     window.claude.use("downloads").then(d=>{downloads=d;if(!d){["exHistory","exTasks","exBackup","exLeads","tplBtn"].forEach(id=>$(id).disabled=true);$("leadExMsg").textContent="Downloading isn't available in this view.";$("exMsg").textContent="Exporting isn't available in this view."}});
     assets=await window.claude.use("assets");
     if(!assets){$("uploadForm").hidden=true}else refreshUsage();
