@@ -6,6 +6,13 @@
 <title>Book Nook</title>
 <meta name="description" content="A commonplace-book style reading tracker: books read, reading, wish list, and a progress sheet.">
 <meta name="theme-color" content="#6f8a68">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Book Nook">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Courier+Prime:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -885,6 +892,8 @@ function renderKeep() {
         </div>
       </div>
     </div>
+    <div class="divider">INSTALL AS AN APP</div>
+    <div class="goal">${installHTML()}</div>
     <div class="divider">GOOD TO KNOW</div>
     <div class="goal">
       <ul style="margin:0;padding-left:20px">
@@ -1287,6 +1296,14 @@ document.addEventListener('click', async e => {
       syncDraft(); await DB.del('files', id); state.fileIndex = state.fileIndex.filter(f => f.id !== id); renderBookModal(); render(); break;
     }
     case 'export': await exportData(); break;
+    case 'install': {
+      if (!installPrompt) return;
+      installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      installPrompt = null;
+      if (choice.outcome === 'accepted') toast('Book Nook is installed ✿');
+      render(); break;
+    }
     case 'paste-goals': pasteGoalsModal(); break;
     case 'parse-pasted-goals': {
       const items = parseGoals($('#paste-goals').value, false);
@@ -1396,6 +1413,27 @@ document.addEventListener('change', async e => {
     t.value = '';
   }
 });
+
+/* ---------- install as an app ---------- */
+let installPrompt = null;
+const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (state.tab === 'keep') render(); });
+window.addEventListener('appinstalled', () => { installPrompt = null; if (state.tab === 'keep') render(); });
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+function installHTML() {
+  if (isInstalled()) return '<p style="margin:0">✿ You’re using the installed Book Nook app.</p>';
+  if (installPrompt) return `<p style="margin-top:0">Put Book Nook on your desktop or home screen, with its own icon and window. It opens even without internet.</p><button class="btn" data-action="install">⤓ Install Book Nook</button>`;
+  if (location.protocol === 'file:') return `<p style="margin:0">You’ve opened Book Nook straight from a file, and browsers can only install apps from a web address.
+    Open Book Nook from its web address instead (see the README), then come back here.</p>`;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios) return `<p style="margin:0">On iPhone or iPad: tap the <b>Share</b> button <span aria-hidden="true">(□↑)</span> in Safari, then <b>Add to Home Screen</b>.</p>`;
+  return `<ul style="margin:0;padding-left:20px">
+    <li><b>Chrome / Edge on a computer:</b> click the install icon at the right end of the address bar, or open the <b>⋮</b> menu → <b>Cast, save and share</b> → <b>Install page as app</b> (in Edge: <b>Apps</b> → <b>Install this site as an app</b>).</li>
+    <li><b>Android phone:</b> open the browser’s <b>⋮</b> menu → <b>Add to Home screen</b> or <b>Install app</b>.</li>
+    <li><b>Mac Safari:</b> <b>File</b> → <b>Add to Dock</b>.</li></ul>`;
+}
 
 /* ---------- start ---------- */
 load().then(render).catch(err => {

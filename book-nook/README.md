@@ -2,9 +2,28 @@
 
 A reading tracker styled like a watercolour commonplace book, with coloured index tabs down the side.
 
-## How to open it
-Double-click `book-nook/index.html` (or drag it into Chrome, Edge or Safari). You don't need to install anything.
-To use it like an app, bookmark it. On a phone, choose **Add to Home Screen**.
+## Get it as an app (computer or phone)
+Book Nook is an installable web app. It gets its own icon and window, and it opens without internet.
+Browsers can only install it from a web address, not from a file, so it is published with GitHub Pages at:
+
+**https://mariastellavanrooyen-blip.github.io/FLY_API_TOKEN/book-nook/**
+
+To put the latest version online, merge this branch into the repo's default branch. Then on GitHub, go to
+**Actions → "Deploy frontend + Book Nook to GitHub Pages" → Run workflow**. It takes about a minute.
+(Burrow & Brief is deployed at the same time, at `/FLY_API_TOKEN/`.)
+
+Then install it:
+- **Chrome or Edge on a computer:** open the link, then click the install icon at the right end of the address bar.
+  You can also use the menu: in Chrome, ⋮ → Cast, save and share → Install page as app. In Edge, … → Apps → Install this site as an app.
+- **iPhone or iPad (Safari):** tap Share (□↑) → **Add to Home Screen**.
+- **Android:** open the browser menu (⋮) → **Install app** or **Add to Home screen**.
+- **Mac Safari:** File → **Add to Dock**.
+
+Inside the app, **Settings & Backup → Install as an app** shows the right steps for your device.
+When your browser offers it, there is also an **Install Book Nook** button.
+
+You can still just double-click `index.html` to use it without installing.
+Your books are kept separately for each browser and device, so use **Download backup** and **Restore backup** to move them.
 
 ## What's inside (the tabs)
 1. **Reading Now**: books you're reading, each with a page-progress bar and a **▶ Start reading** timer
