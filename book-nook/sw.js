@@ -1,6 +1,6 @@
 // Book Nook service worker: lets the installed app open offline.
 // Your books are NOT stored here — they live in the browser's IndexedDB.
-const CACHE = 'book-nook-v1';
+const CACHE = 'book-nook-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
