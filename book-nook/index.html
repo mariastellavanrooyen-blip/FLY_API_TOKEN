@@ -227,6 +227,21 @@
   table.log td.num { font-family: var(--type); }
   .table-wrap { overflow-x: auto; }
 
+  /* ---------- Goals checklist ---------- */
+  .add-goal { display: flex; gap: 8px; margin-bottom: 18px; }
+  .add-goal input { flex: 1; border-radius: 999px; padding-left: 16px; }
+  .checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .check-item { display: flex; align-items: center; gap: 4px; background: #fffdf7; border: 1px solid #efe6d3; border-radius: 10px; padding: 4px 6px 4px 12px; }
+  .check-item label { flex: 1; display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 8px 0; min-width: 0; }
+  .check-item input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .check-item .box { flex: none; width: 22px; height: 22px; border: 2px solid var(--sage-2); border-radius: 6px; background: #fffdf8; display: grid; place-items: center; transition: background .15s; }
+  .check-item input:checked + .box { background: var(--sage-dark); border-color: var(--sage-dark); }
+  .check-item input:checked + .box::after { content: "✓"; color: #fffdf6; font-size: .85rem; font-weight: 700; }
+  .check-item input:focus-visible + .box { outline: 2px dashed var(--sage-dark); outline-offset: 2px; }
+  .check-item .txt { font-family: var(--serif); font-size: 1.18rem; line-height: 1.2; overflow-wrap: anywhere; }
+  .check-item.done .gt { text-decoration: line-through; text-decoration-color: var(--pink-dark); color: var(--ink-soft); }
+  .check-item .when { display: block; font-family: var(--type); font-size: .7rem; color: var(--ink-soft); text-decoration: none; margin-top: 2px; }
+
   /* ---------- Quotes ---------- */
   .quotes { columns: 2 280px; column-gap: 18px; }
   .quote {
@@ -344,6 +359,7 @@ const TABS = [
   { id: 'read',     label: 'Books Read' },
   { id: 'wishlist', label: 'Wish List' },
   { id: 'progress', label: 'Progress Sheet' },
+  { id: 'goals',    label: 'Goals Checklist' },
   { id: 'log',      label: 'Reading Log' },
   { id: 'quotes',   label: 'Quotes' },
   { id: 'keep',     label: 'Settings & Backup' },
@@ -389,6 +405,7 @@ const state = {
   sessions: [],
   fileIndex: [],   // metadata only {id, bookId, name, type, size}
   settings: { yearGoal: 24, weekMinutesGoal: 210, dailyMinutesGoal: 30, name: '' },
+  goals: [],       // reading-goal checklist: {id, text, done, doneAt, addedAt}
   filter: { q: '', sort: 'recent' },
 };
 
@@ -446,15 +463,17 @@ function resizeImage(file, max = 800) {
 /* ---------- persistence ---------- */
 async function load() {
   await DB.open();
-  const [books, sessions, files, meta] = await Promise.all([DB.all('books'), DB.all('sessions'), DB.all('files'), DB.get('meta', 'settings')]);
+  const [books, sessions, files, meta, goals] = await Promise.all([DB.all('books'), DB.all('sessions'), DB.all('files'), DB.get('meta', 'settings'), DB.get('meta', 'goals')]);
   state.books = books || [];
   state.sessions = sessions || [];
   state.fileIndex = (files || []).map(({ id, bookId, name, type, size }) => ({ id, bookId, name, type, size }));
   if (meta) Object.assign(state.settings, meta.value);
+  state.goals = (goals && goals.value) || [];
   try { const t = localStorage.getItem('booknook.tab'); if (t && TABS.some(x => x.id === t)) state.tab = t; } catch (e) {}
 }
 const saveBook = b => DB.put('books', b);
 const saveSettings = () => DB.put('meta', { id: 'settings', value: state.settings });
+const saveGoals = () => DB.put('meta', { id: 'goals', value: state.goals });
 
 /* ---------- stats ---------- */
 function sessionsStats() {
@@ -499,10 +518,10 @@ function renderTabs() {
 function render() {
   renderTabs();
   const page = $('#page');
-  const fn = { reading: renderShelf, read: renderShelf, wishlist: renderShelf, progress: renderProgress, log: renderLog, quotes: renderQuotes, keep: renderKeep }[state.tab];
+  const fn = { reading: renderShelf, read: renderShelf, wishlist: renderShelf, progress: renderProgress, goals: renderGoals, log: renderLog, quotes: renderQuotes, keep: renderKeep }[state.tab];
   page.innerHTML = fn(state.tab);
   const active = $('#tabs [aria-selected=true]');
-  if (active && window.innerWidth <= 820) active.scrollIntoView({ block: 'nearest', inline: 'center' });
+  if (active && window.innerWidth <= 820) { const tabs = $('#tabs'); tabs.scrollLeft = active.offsetLeft - (tabs.clientWidth - active.offsetWidth) / 2; }
   renderTimer();
 }
 
@@ -668,6 +687,15 @@ function renderProgress() {
         <div class="bar"><span style="width:${weekPct}%"></span></div>
       </div>
     </div>
+    ${state.goals.length ? (() => {
+      const g = goalsSummary();
+      return `<div class="goal" style="margin-top:16px">
+        <h4>Goals checklist</h4>
+        <div class="nums"><span>${g.done} of ${g.total} goals ticked off</span><span>${g.pct}%</span></div>
+        <div class="bar butter"><span style="width:${g.pct}%"></span></div>
+        ${g.next.length ? `<p class="muted" style="margin:8px 0 0">Next up: ${g.next.map(x => esc(x.text)).join(' · ')}</p>` : ''}
+        <button class="btn small ghost" style="margin-top:10px" data-tab="goals">Open checklist</button>
+      </div>`; })() : ''}
 
     <div class="divider">AT A GLANCE</div>
     <div class="stats">
@@ -687,6 +715,124 @@ function renderProgress() {
     </div>
     ${!state.sessions.length ? `<p class="muted" style="margin-top:14px">Tip: press <b>▶ Start reading</b> on any book in <i>Reading Now</i> and a little timer will log your reading time for you — or log time by hand with the button above.</p>` : ''}
   `;
+}
+
+function goalsSummary() {
+  const total = state.goals.length, done = state.goals.filter(g => g.done).length;
+  return { total, done, pct: total ? Math.round((done / total) * 100) : 0, next: state.goals.filter(g => !g.done).slice(0, 3) };
+}
+
+function renderGoals() {
+  const g = goalsSummary();
+  const open = state.goals.filter(x => !x.done), done = state.goals.filter(x => x.done);
+  const item = x => `<li class="check-item ${x.done ? 'done' : ''}">
+      <label><input type="checkbox" data-goal="${x.id}" ${x.done ? 'checked' : ''}><span class="box" aria-hidden="true"></span>
+      <span class="txt"><span class="gt">${esc(x.text)}</span>${x.done && x.doneAt ? `<span class="when">ticked off ${fmtDate(x.doneAt)}</span>` : ''}</span></label>
+      <button class="icon-btn" data-action="edit-goal" data-id="${x.id}" aria-label="Edit goal">✎</button>
+      <button class="icon-btn" data-action="del-goal" data-id="${x.id}" aria-label="Delete goal">✕</button>
+    </li>`;
+  return `
+    <div class="page-head">
+      <div><h2>Goals Checklist</h2><p class="sub">Your reading goals — tick them off one by one.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label class="btn" style="cursor:pointer">⇧ Upload my list<input type="file" accept=".txt,.csv,.md,.docx,text/plain,text/csv,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document" id="goals-file" class="sr-only"></label>
+        <button class="btn ghost" data-action="paste-goals">✎ Paste a list</button>
+      </div>
+    </div>
+
+    <form class="add-goal" data-goal-form>
+      <input type="text" id="new-goal" placeholder="Add a goal, e.g. “Read one classic every month”" aria-label="New goal">
+      <button class="btn" type="submit">＋ Add</button>
+    </form>
+
+    ${g.total ? `
+      <div class="goal" style="margin-bottom:18px">
+        <div class="nums" style="margin-top:0"><span>${g.done} of ${g.total} goals ticked off</span><span>${g.pct}%</span></div>
+        <div class="bar big butter"><span style="width:${g.pct}%"></span></div>
+        ${g.done === g.total ? '<p class="muted" style="margin:8px 0 0">Every goal ticked off — what a reader! 🎉</p>' : ''}
+      </div>
+      ${open.length ? `<ul class="checklist">${open.map(item).join('')}</ul>` : ''}
+      ${done.length ? `<div class="divider">DONE ✿</div><ul class="checklist">${done.map(item).join('')}</ul>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
+        <button class="btn small ghost" data-action="download-goals">⇩ Download my checklist</button>
+        ${done.length ? `<button class="btn small ghost" data-action="clear-done-goals">Remove ticked-off goals</button>` : ''}
+      </div>`
+    : `<div class="empty"><div class="big">No goals yet</div>
+        <p>Type a goal above, or upload a list you’ve already written —<br>a Word document (<b>.docx</b>) or a <b>.txt</b> / <b>.csv</b> file, with one goal per line.</p>
+        <p class="muted">Tip: lines starting with <code>[x]</code> or <code>✓</code> are added as already done.</p></div>`}
+  `;
+}
+
+// Turn uploaded/pasted text into checklist items: one goal per line.
+function parseGoals(text, isCsv) {
+  const out = [];
+  for (let line of text.split(/\r?\n/)) {
+    if (isCsv) {
+      const m = line.match(/^\s*"((?:[^"]|"")*)"|^([^,]*)/);
+      line = m ? (m[1] != null ? m[1].replace(/""/g, '"') : m[2]) : line;
+    }
+    line = line.trim();
+    if (!line) continue;
+    let done = false;
+    line = line.replace(/^(?:[-*•+]\s+)?/, '');
+    const box = line.match(/^\[([ xX✓✔]?)\]\s*/);
+    if (box) { done = box[1].trim() !== ''; line = line.slice(box[0].length); }
+    const tick = line.match(/^[✓✔☑✅]\s*/);
+    if (tick) { done = true; line = line.slice(tick[0].length); }
+    line = line.replace(/^[☐□]\s*/, '').replace(/^\d+[.)]\s+/, '').replace(/^#+\s*/, '').trim();
+    if (!line || /^(goals?|reading goals?|my reading goals?)\s*:?$/i.test(line)) continue;
+    out.push({ text: line, done });
+  }
+  // drop duplicates (within the list and against existing goals)
+  const seen = new Set(state.goals.map(g => g.text.toLowerCase()));
+  return out.filter(g => { const k = g.text.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+
+// Word documents: load the mammoth reader only when one is uploaded (needs internet the first time).
+function docxText(file) {
+  const run = async () => (await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
+  if (window.mammoth) return run();
+  return new Promise((res, rej) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+    sc.onload = () => run().then(res, rej);
+    sc.onerror = () => rej(new Error('Reading Word files needs an internet connection'));
+    document.head.appendChild(sc);
+  });
+}
+
+let pendingGoals = [];
+function goalsPreviewModal(items, source) {
+  pendingGoals = items;
+  if (!items.length) { toast('No new goals found in that list'); return; }
+  openModal(`
+    <h3>Add these goals?</h3>
+    <p class="muted" style="margin-top:-6px">Found ${items.length} goal${items.length > 1 ? 's' : ''} in ${esc(source)}. Untick any you don’t want.</p>
+    <ul class="checklist">${items.map((g, i) => `<li class="check-item"><label><input type="checkbox" data-pending="${i}" checked><span class="box" aria-hidden="true"></span><span class="txt">${esc(g.text)}${g.done ? '<span class="when">already done</span>' : ''}</span></label></li>`).join('')}</ul>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="confirm-goals">Add to my checklist</button></div>
+  `, { narrow: true });
+}
+
+function pasteGoalsModal() {
+  openModal(`
+    <h3>Paste your goals</h3>
+    <label class="field">One goal per line<textarea id="paste-goals" style="min-height:200px" placeholder="Read 24 books this year&#10;Read one classic&#10;Finish a series&#10;Read 30 minutes before bed"></textarea></label>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="parse-pasted-goals">Next</button></div>
+  `, { narrow: true });
+}
+
+function editGoalModal(g) {
+  openModal(`
+    <h3>Edit goal</h3>
+    <label class="field">Goal<input type="text" id="edit-goal-text" value="${esc(g.text)}"></label>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="save-goal-edit" data-id="${g.id}">Save</button></div>
+  `, { narrow: true });
+}
+
+async function addGoals(items) {
+  const now = Date.now();
+  items.forEach((g, i) => state.goals.push({ id: uid(), text: g.text, done: !!g.done, doneAt: g.done ? today() : '', addedAt: now + i }));
+  await saveGoals();
 }
 
 function renderLog() {
@@ -732,7 +878,7 @@ function renderKeep() {
       </div>
       <div class="goal">
         <h4>Backup</h4>
-        <p class="muted">${state.books.length} books · ${state.sessions.length} log entries · ${state.fileIndex.length} files (${fmtSize(totalFiles)})</p>
+        <p class="muted">${state.books.length} books · ${state.goals.length} goals · ${state.sessions.length} log entries · ${state.fileIndex.length} files (${fmtSize(totalFiles)})</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn" data-action="export">⇩ Download backup</button>
           <label class="btn ghost" style="cursor:pointer">⇧ Restore backup<input type="file" accept="application/json,.json" id="import-file" class="sr-only"></label>
@@ -1030,7 +1176,7 @@ function blobToDataURL(blob) { return new Promise((res, rej) => { const r = new 
 async function exportData() {
   const files = await DB.all('files');
   const packed = await Promise.all(files.map(async f => ({ ...f, blob: undefined, data: await blobToDataURL(f.blob) })));
-  const out = { app: 'book-nook', version: 1, exportedAt: new Date().toISOString(), settings: state.settings, books: state.books, sessions: state.sessions, files: packed };
+  const out = { app: 'book-nook', version: 1, exportedAt: new Date().toISOString(), settings: state.settings, goals: state.goals, books: state.books, sessions: state.sessions, files: packed };
   const url = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
   const a = document.createElement('a'); a.href = url; a.download = `book-nook-backup-${today()}.json`; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
@@ -1050,6 +1196,7 @@ async function importData(file) {
     }
     state.settings = Object.assign(state.settings, data.settings || {});
     await saveSettings();
+    if (Array.isArray(data.goals)) { state.goals = data.goals; await saveGoals(); }
     await load();
     render();
     toast('Backup restored ✿');
@@ -1140,13 +1287,55 @@ document.addEventListener('click', async e => {
       syncDraft(); await DB.del('files', id); state.fileIndex = state.fileIndex.filter(f => f.id !== id); renderBookModal(); render(); break;
     }
     case 'export': await exportData(); break;
+    case 'paste-goals': pasteGoalsModal(); break;
+    case 'parse-pasted-goals': {
+      const items = parseGoals($('#paste-goals').value, false);
+      if (!items.length) { toast('No new goals found'); return; }
+      goalsPreviewModal(items, 'your list'); break;
+    }
+    case 'confirm-goals': {
+      const keep = pendingGoals.filter((_, i) => $(`[data-pending="${i}"]`)?.checked);
+      await addGoals(keep); pendingGoals = [];
+      closeModal(); toast(`${keep.length} goal${keep.length === 1 ? '' : 's'} added ✿`);
+      state.tab = 'goals'; render(); break;
+    }
+    case 'edit-goal': { const g = state.goals.find(x => x.id === id); if (g) editGoalModal(g); break; }
+    case 'save-goal-edit': {
+      const g = state.goals.find(x => x.id === id); const text = $('#edit-goal-text').value.trim();
+      if (g && text) { g.text = text; await saveGoals(); }
+      closeModal(); render(); break;
+    }
+    case 'del-goal': {
+      if (!confirm('Delete this goal?')) return;
+      state.goals = state.goals.filter(g => g.id !== id); await saveGoals(); render(); break;
+    }
+    case 'clear-done-goals': {
+      if (!confirm('Remove all ticked-off goals from the list?')) return;
+      state.goals = state.goals.filter(g => !g.done); await saveGoals(); render(); break;
+    }
+    case 'download-goals': {
+      const txt = 'My reading goals\n\n' + state.goals.map(g => `[${g.done ? 'x' : ' '}] ${g.text}`).join('\n') + '\n';
+      const url = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
+      const a3 = document.createElement('a'); a3.href = url; a3.download = 'my-reading-goals.txt'; a3.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000); break;
+    }
     case 'reset': {
-      if (!confirm('Erase ALL books, logs and files from this device? This cannot be undone.')) return;
+      if (!confirm('Erase ALL books, logs, goals and files from this device? This cannot be undone.')) return;
       for (const s of ['books', 'sessions', 'files']) await DB.clear(s);
-      state.books = []; state.sessions = []; state.fileIndex = []; setTimer(null);
+      state.books = []; state.sessions = []; state.fileIndex = []; state.goals = []; await saveGoals(); setTimer(null);
       toast('All cleared'); render(); break;
     }
   }
+});
+
+document.addEventListener('submit', async e => {
+  if (!e.target.matches('[data-goal-form]')) return;
+  e.preventDefault();
+  const input = $('#new-goal'); const text = input.value.trim();
+  if (!text) return;
+  if (state.goals.some(g => g.text.toLowerCase() === text.toLowerCase())) { toast('That goal is already on your list'); return; }
+  await addGoals([{ text, done: false }]);
+  render(); $('#new-goal').focus();
 });
 
 document.addEventListener('keydown', e => {
@@ -1187,6 +1376,25 @@ document.addEventListener('change', async e => {
     const b = bookById(t.value); if (b) $('#s-page').value = b.currentPage || 0;
   }
   if (t.id === 'import-file' && t.files[0]) await importData(t.files[0]);
+  if (t.matches('[data-goal]')) {
+    const g = state.goals.find(x => x.id === t.dataset.goal);
+    if (g) {
+      g.done = t.checked; g.doneAt = t.checked ? today() : '';
+      await saveGoals();
+      if (t.checked) toast('Goal ticked off — well done! ✿');
+      render();
+    }
+  }
+  if (t.id === 'goals-file' && t.files[0]) {
+    const file = t.files[0];
+    if (/\.(doc|pdf|pages)$/i.test(file.name)) { toast('Please save the list as a Word (.docx) or text (.txt) file first'); t.value = ''; return; }
+    try {
+      const text = /\.docx$/i.test(file.name) ? await docxText(file) : await file.text();
+      goalsPreviewModal(parseGoals(text, /\.csv$/i.test(file.name)), file.name);
+    }
+    catch (err) { toast(err && err.message && /internet/.test(err.message) ? err.message : 'Couldn’t read that file'); }
+    t.value = '';
+  }
 });
 
 /* ---------- start ---------- */
