@@ -1,4 +1,4 @@
-name: Deploy frontend to GitHub Pages
+name: Deploy frontend + Book Nook to GitHub Pages
 
 on:
   # Manual only — Maria chose to run the app locally instead of via GitHub
@@ -36,6 +36,11 @@ jobs:
       - name: Build
         working-directory: frontend
         run: npm run build
+
+      - name: Add Book Nook (served at /book-nook/)
+        run: |
+          mkdir -p frontend/dist/book-nook
+          cp book-nook/index.html book-nook/sw.js book-nook/manifest.webmanifest book-nook/*.png frontend/dist/book-nook/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -1,0 +1,1444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book Nook</title>
+<meta name="description" content="A commonplace-book style reading tracker: books read, reading, wish list, and a progress sheet.">
+<meta name="theme-color" content="#6f8a68">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Book Nook">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Courier+Prime:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #fbf7ee;
+    --paper-2: #f4eddd;
+    --page-edge: #ece3cf;
+    --ink: #3b4637;
+    --ink-soft: #6c7466;
+    --sage: #a9bb9c;
+    --sage-2: #8fa784;
+    --sage-dark: #4f6b48;
+    --pink: #eeb3ad;
+    --pink-dark: #c9706a;
+    --butter: #f1dc8a;
+    --butter-dark: #c9a43a;
+    --line: #e2d8c3;
+    --shadow: 0 10px 30px rgba(79, 107, 72, .12), 0 2px 6px rgba(79, 107, 72, .08);
+    --radius: 14px;
+    --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --body: "Lora", Georgia, serif;
+    --type: "Courier Prime", "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(169,187,156,.25), transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(238,179,173,.18), transparent 45%),
+      #f8f3e8;
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--sage-dark); }
+
+  /* ---------- Header ---------- */
+  header.top {
+    max-width: 1180px; margin: 0 auto; padding: 28px 16px 8px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  header.top svg { flex: none; }
+  header.top h1 {
+    font-family: var(--serif); font-weight: 700; color: var(--sage-dark);
+    font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 1; margin: 0;
+    letter-spacing: .5px;
+  }
+  header.top p {
+    margin: 4px 0 0; font-family: var(--serif); font-style: italic;
+    font-size: 1.25rem; color: var(--ink-soft);
+  }
+  .brush {
+    height: 8px; width: 220px; max-width: 60%; margin-top: 8px; border-radius: 8px;
+    background: linear-gradient(90deg, rgba(143,167,132,.0), rgba(143,167,132,.65) 15%, rgba(143,167,132,.45) 85%, rgba(143,167,132,0));
+  }
+
+  /* ---------- Book layout with tabs ---------- */
+  .book {
+    max-width: 1180px; margin: 12px auto 40px; padding: 0 16px;
+    display: grid; grid-template-columns: 1fr 190px; align-items: start;
+  }
+  .pages {
+    background: var(--paper);
+    border-radius: var(--radius) 4px 4px var(--radius);
+    box-shadow: var(--shadow), 6px 0 0 var(--page-edge), 10px 0 0 #e4d9c2, 13px 0 0 var(--page-edge);
+    border-left: 14px solid var(--sage-2);
+    min-height: 640px; padding: 28px 30px 36px;
+    position: relative;
+  }
+  nav.tabs { display: flex; flex-direction: column; gap: 6px; padding-top: 22px; padding-left: 13px; }
+  nav.tabs button {
+    all: unset; cursor: pointer; display: flex; align-items: center; gap: 10px;
+    font-family: var(--type); font-size: .82rem; text-transform: uppercase; letter-spacing: .5px;
+    padding: 12px 14px; border-radius: 0 12px 12px 0; color: #4a4a3c;
+    box-shadow: 2px 2px 4px rgba(0,0,0,.08);
+    transition: transform .15s ease, padding .15s ease;
+    line-height: 1.15;
+  }
+  nav.tabs button .num { font-size: 1.05rem; font-weight: 700; opacity: .8; }
+  nav.tabs button:nth-child(3n+1) { background: var(--pink); }
+  nav.tabs button:nth-child(3n+2) { background: var(--butter); }
+  nav.tabs button:nth-child(3n+3) { background: var(--sage); }
+  nav.tabs button:hover { transform: translateX(4px); }
+  nav.tabs button[aria-selected="true"] { transform: translateX(-10px); padding-left: 24px; font-weight: 700; }
+  nav.tabs button:focus-visible { outline: 2px dashed var(--sage-dark); outline-offset: 2px; }
+
+  @media (max-width: 820px) {
+    .book { grid-template-columns: 1fr; }
+    nav.tabs {
+      order: -1; flex-direction: row; overflow-x: auto; padding: 0 0 0 4px; gap: 4px;
+      scrollbar-width: none;
+    }
+    nav.tabs::-webkit-scrollbar { display: none; }
+    nav.tabs button { border-radius: 12px 12px 0 0; padding: 10px 12px; white-space: nowrap; font-size: .75rem; }
+    nav.tabs button:hover { transform: none; }
+    nav.tabs button[aria-selected="true"] { transform: translateY(2px); padding-left: 12px; }
+    .pages { border-left-width: 8px; padding: 20px 16px 28px; border-radius: 4px 4px var(--radius) var(--radius);
+      box-shadow: var(--shadow); min-height: 480px; }
+    header.top { padding-top: 18px; }
+    header.top svg { width: 54px; height: 54px; }
+  }
+
+  /* ---------- Page heading ---------- */
+  .page-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  .page-head h2 { font-family: var(--serif); font-size: 2.2rem; margin: 0; color: var(--sage-dark); line-height: 1.05; }
+  .page-head .sub { font-style: italic; color: var(--ink-soft); margin: 2px 0 0; }
+  .divider { text-align: center; color: var(--pink-dark); font-family: var(--type); letter-spacing: 3px; font-size: .8rem; margin: 26px 0 14px; display: flex; align-items: center; gap: 14px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--pink); }
+
+  /* ---------- Buttons & inputs ---------- */
+  .btn {
+    border: 0; cursor: pointer; border-radius: 999px; padding: 9px 18px;
+    background: var(--sage-dark); color: #fffdf6; font-family: var(--type); font-size: .85rem;
+    letter-spacing: .3px; display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 2px 0 rgba(0,0,0,.12);
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.ghost { background: transparent; color: var(--sage-dark); box-shadow: inset 0 0 0 1.5px var(--sage-2); }
+  .btn.pink { background: var(--pink-dark); }
+  .btn.butter { background: var(--butter); color: #5a4a12; }
+  .btn.small { padding: 6px 12px; font-size: .78rem; }
+  .btn.danger { background: transparent; color: #a8463f; box-shadow: inset 0 0 0 1.5px #d9928c; }
+  .btn:focus-visible, .icon-btn:focus-visible { outline: 2px dashed var(--sage-dark); outline-offset: 2px; }
+  .icon-btn { border: 0; background: transparent; cursor: pointer; padding: 4px 6px; border-radius: 8px; color: var(--ink-soft); }
+  .icon-btn:hover { background: var(--paper-2); }
+
+  label.field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--ink-soft); font-family: var(--type); }
+  input[type=text], input[type=number], input[type=date], input[type=search], select, textarea {
+    width: 100%; border: 1.5px solid var(--line); background: #fffdf8; border-radius: 10px;
+    padding: 9px 11px; font-family: var(--body); font-size: .98rem; color: var(--ink);
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--sage-2); box-shadow: 0 0 0 3px rgba(143,167,132,.25); }
+  textarea { min-height: 90px; resize: vertical; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 560px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .toolbar input[type=search] { flex: 1 1 220px; border-radius: 999px; padding-left: 16px; }
+  .toolbar select { width: auto; border-radius: 999px; }
+  @media (max-width: 480px) { .shelf { grid-template-columns: 1fr 1fr; gap: 14px 12px; } .card { padding: 8px; } .card h3 { font-size: 1.05rem; } }
+
+  /* ---------- Shelf ---------- */
+  .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 22px 18px; }
+  .card {
+    background: #fffdf7; border-radius: 12px; padding: 12px; cursor: pointer; position: relative;
+    box-shadow: 0 1px 0 var(--line), 0 6px 14px rgba(79,107,72,.08);
+    border: 1px solid #efe6d3; transition: transform .15s ease, box-shadow .15s ease;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 12px 22px rgba(79,107,72,.14); }
+  .card:focus-visible { outline: 2px dashed var(--sage-dark); outline-offset: 3px; }
+  .cover {
+    aspect-ratio: 2 / 3; width: 100%; border-radius: 4px 8px 8px 4px; overflow: hidden;
+    background: var(--sage); position: relative; box-shadow: inset 6px 0 8px -4px rgba(0,0,0,.25), 2px 3px 6px rgba(0,0,0,.12);
+  }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover.placeholder {
+    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    padding: 14px 10px; color: #fffdf6;
+    background-image: radial-gradient(circle at 30% 20%, rgba(255,255,255,.25), transparent 50%);
+  }
+  .cover.placeholder .pt { font-family: var(--serif); font-weight: 700; font-size: 1.2rem; line-height: 1.1; text-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .cover.placeholder .pa { font-style: italic; font-size: .78rem; margin-top: 8px; opacity: .95; }
+  .cover.placeholder::after { content: "❀"; position: absolute; bottom: 8px; font-size: 1.1rem; opacity: .6; }
+  .card h3 { margin: 0; font-family: var(--serif); font-size: 1.18rem; line-height: 1.15; }
+  .card .author { font-style: italic; color: var(--ink-soft); font-size: .85rem; margin-top: -6px; }
+  .card .meta { font-family: var(--type); font-size: .72rem; color: var(--ink-soft); }
+  .stars { color: var(--butter-dark); letter-spacing: 1px; font-size: .95rem; }
+  .ribbon {
+    position: absolute; top: -6px; right: 14px; background: var(--pink-dark); color: #fff; font-family: var(--type);
+    font-size: .65rem; padding: 10px 6px 6px; border-radius: 0 0 4px 4px; letter-spacing: .5px;
+  }
+
+  .bar { height: 9px; background: var(--paper-2); border-radius: 99px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.06); }
+  .bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--sage-2), var(--sage-dark)); border-radius: 99px; transition: width .4s ease; }
+  .bar.pink > span { background: linear-gradient(90deg, var(--pink), var(--pink-dark)); }
+  .bar.butter > span { background: linear-gradient(90deg, var(--butter), var(--butter-dark)); }
+  .bar.big { height: 16px; }
+
+  .empty {
+    text-align: center; padding: 50px 20px; color: var(--ink-soft); border: 2px dashed var(--line); border-radius: var(--radius);
+  }
+  .empty .big { font-family: var(--serif); font-size: 1.6rem; color: var(--sage-dark); margin-bottom: 6px; }
+
+  /* ---------- Progress sheet ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+  .stat {
+    background: #fffdf7; border: 1px solid #efe6d3; border-radius: 12px; padding: 14px 16px;
+    border-top: 6px solid var(--sage);
+  }
+  .stat:nth-child(3n+1) { border-top-color: var(--pink); }
+  .stat:nth-child(3n+2) { border-top-color: var(--butter); }
+  .stat .label { font-family: var(--type); font-size: .72rem; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-soft); }
+  .stat .value { font-family: var(--serif); font-size: 2.2rem; font-weight: 700; line-height: 1.05; color: var(--ink); }
+  .stat .hint { font-size: .8rem; color: var(--ink-soft); font-style: italic; }
+  .goal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .goal-row { grid-template-columns: 1fr; } }
+  .goal {
+    background: #fffdf7; border: 1px solid #efe6d3; border-radius: 12px; padding: 16px 18px;
+  }
+  .goal h4 { margin: 0 0 4px; font-family: var(--serif); font-size: 1.35rem; color: var(--sage-dark); }
+  .goal .nums { display: flex; justify-content: space-between; font-family: var(--type); font-size: .8rem; color: var(--ink-soft); margin: 8px 0 6px; }
+  .chart-card { background: #fffdf7; border: 1px solid #efe6d3; border-radius: 12px; padding: 16px 16px 8px; }
+  .chart-card h4 { margin: 0 0 8px; font-family: var(--serif); font-size: 1.3rem; color: var(--sage-dark); }
+  .chart-card svg { width: 100%; height: auto; display: block; }
+  .chart-card svg text { font-family: var(--type); font-size: 10px; fill: var(--ink-soft); }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .charts { grid-template-columns: 1fr; } }
+
+  table.log { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  table.log th { text-align: left; font-family: var(--type); font-size: .72rem; text-transform: uppercase; color: var(--ink-soft); font-weight: 400; padding: 6px 8px; border-bottom: 1.5px solid var(--pink); }
+  table.log td { padding: 8px; border-bottom: 1px dashed var(--line); vertical-align: middle; }
+  table.log td.num { font-family: var(--type); }
+  .table-wrap { overflow-x: auto; }
+
+  /* ---------- Goals checklist ---------- */
+  .add-goal { display: flex; gap: 8px; margin-bottom: 18px; }
+  .add-goal input { flex: 1; border-radius: 999px; padding-left: 16px; }
+  .checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .check-item { display: flex; align-items: center; gap: 4px; background: #fffdf7; border: 1px solid #efe6d3; border-radius: 10px; padding: 4px 6px 4px 12px; }
+  .check-item label { flex: 1; display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 8px 0; min-width: 0; }
+  .check-item input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .check-item .box { flex: none; width: 22px; height: 22px; border: 2px solid var(--sage-2); border-radius: 6px; background: #fffdf8; display: grid; place-items: center; transition: background .15s; }
+  .check-item input:checked + .box { background: var(--sage-dark); border-color: var(--sage-dark); }
+  .check-item input:checked + .box::after { content: "✓"; color: #fffdf6; font-size: .85rem; font-weight: 700; }
+  .check-item input:focus-visible + .box { outline: 2px dashed var(--sage-dark); outline-offset: 2px; }
+  .check-item .txt { font-family: var(--serif); font-size: 1.18rem; line-height: 1.2; overflow-wrap: anywhere; }
+  .check-item.done .gt { text-decoration: line-through; text-decoration-color: var(--pink-dark); color: var(--ink-soft); }
+  .check-item .when { display: block; font-family: var(--type); font-size: .7rem; color: var(--ink-soft); text-decoration: none; margin-top: 2px; }
+
+  /* ---------- Quotes ---------- */
+  .quotes { columns: 2 280px; column-gap: 18px; }
+  .quote {
+    break-inside: avoid; margin: 0 0 18px; background: #fffdf7; border-radius: 10px; padding: 18px 20px 14px;
+    border: 1px solid #efe6d3; position: relative;
+  }
+  .quote::before { content: "“"; position: absolute; top: -10px; left: 10px; font-family: var(--serif); font-size: 3.4rem; color: var(--pink); line-height: 1; }
+  .quote p { margin: 0 0 8px; font-family: var(--serif); font-size: 1.22rem; font-style: italic; line-height: 1.3; }
+  .quote .src { font-family: var(--type); font-size: .75rem; color: var(--ink-soft); }
+
+  /* ---------- Modal ---------- */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(59,70,55,.45); display: flex; align-items: flex-start; justify-content: center;
+    padding: 30px 12px; overflow-y: auto; z-index: 50; backdrop-filter: blur(2px);
+  }
+  .modal {
+    background: var(--paper); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    width: 100%; max-width: 760px; padding: 24px 26px 26px; border-top: 10px solid var(--sage-2); position: relative;
+  }
+  .modal.narrow { max-width: 460px; }
+  .modal h3 { font-family: var(--serif); font-size: 1.9rem; margin: 0 0 14px; color: var(--sage-dark); line-height: 1.1; padding-right: 30px; }
+  .modal .close { position: absolute; top: 12px; right: 12px; font-size: 1.4rem; }
+  .modal .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .modal .actions .spacer { flex: 1; }
+  .book-form { display: grid; grid-template-columns: 180px 1fr; gap: 20px; }
+  @media (max-width: 600px) { .book-form { grid-template-columns: 1fr; } .book-form .cover-col { max-width: 200px; margin: 0 auto; } }
+  .cover-col { display: flex; flex-direction: column; gap: 8px; }
+  .cover-col .btn { justify-content: center; }
+  .fields { display: flex; flex-direction: column; gap: 12px; }
+
+  .search-online { background: var(--paper-2); border-radius: 12px; padding: 12px; margin-bottom: 18px; }
+  .search-online .row { display: flex; gap: 8px; }
+  .search-online .hint { font-size: .8rem; color: var(--ink-soft); font-style: italic; margin-top: 6px; }
+  .results { display: grid; gap: 8px; margin-top: 10px; max-height: 300px; overflow-y: auto; }
+  .result { display: flex; gap: 10px; align-items: center; background: #fffdf8; border-radius: 10px; padding: 8px; cursor: pointer; border: 1.5px solid transparent; text-align: left; width: 100%; }
+  .result:hover, .result:focus-visible { border-color: var(--sage-2); outline: none; }
+  .result img, .result .noimg { width: 40px; height: 60px; object-fit: cover; border-radius: 3px; background: var(--sage); flex: none; }
+  .result .rt { font-family: var(--serif); font-weight: 700; font-size: 1.08rem; line-height: 1.1; }
+  .result .ra { font-size: .8rem; color: var(--ink-soft); font-style: italic; }
+
+  .star-input { display: flex; gap: 2px; }
+  .star-input button { border: 0; background: none; cursor: pointer; font-size: 1.5rem; color: #d8cfba; padding: 0 2px; line-height: 1; }
+  .star-input button.on { color: var(--butter-dark); }
+
+  .sublist { display: flex; flex-direction: column; gap: 8px; }
+  .subitem { display: flex; align-items: center; gap: 10px; background: #fffdf8; border: 1px solid #efe6d3; border-radius: 10px; padding: 8px 12px; font-size: .92rem; }
+  .subitem .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .subitem .q { font-family: var(--serif); font-style: italic; font-size: 1.08rem; white-space: normal; }
+  .muted { color: var(--ink-soft); font-size: .85rem; font-style: italic; }
+
+  /* ---------- Timer pill ---------- */
+  .timer-pill {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 40;
+    background: var(--sage-dark); color: #fffdf6; border-radius: 999px; padding: 8px 8px 8px 20px;
+    display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: calc(100% - 24px);
+  }
+  .timer-pill .t { font-family: var(--type); font-size: 1.3rem; font-weight: 700; }
+  .timer-pill .b { font-style: italic; font-size: .85rem; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+  .timer-pill .btn { background: var(--butter); color: #4b3e10; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pink); animation: pulse 1.4s infinite; flex: none; }
+  @keyframes pulse { 50% { opacity: .3; } }
+
+  .toast {
+    position: fixed; top: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fffdf6;
+    padding: 10px 18px; border-radius: 999px; font-family: var(--type); font-size: .85rem; z-index: 60;
+    box-shadow: 0 8px 20px rgba(0,0,0,.2); max-width: calc(100% - 24px); text-align: center;
+  }
+  footer { text-align: center; font-family: var(--type); color: var(--pink-dark); letter-spacing: 3px; font-size: .78rem; padding: 0 16px 30px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <svg width="74" height="74" viewBox="0 0 80 80" aria-hidden="true">
+    <path d="M14 66 C 30 50, 42 36, 64 12" stroke="#6f8a68" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <ellipse cx="26" cy="50" rx="10" ry="4.5" transform="rotate(-50 26 50)" fill="#8fa784"/>
+    <ellipse cx="38" cy="38" rx="11" ry="4.8" transform="rotate(30 38 38)" fill="#a9bb9c"/>
+    <ellipse cx="46" cy="24" rx="9" ry="4.2" transform="rotate(-55 46 24)" fill="#8fa784"/>
+    <ellipse cx="22" cy="62" rx="8" ry="3.8" transform="rotate(25 22 62)" fill="#a9bb9c"/>
+    <g transform="translate(62 14)">
+      <circle r="5.2" cx="0" cy="-6" fill="#f6d8d4"/><circle r="5.2" cx="5.7" cy="-1.8" fill="#f2c4bf"/>
+      <circle r="5.2" cx="3.5" cy="4.8" fill="#f6d8d4"/><circle r="5.2" cx="-3.5" cy="4.8" fill="#f2c4bf"/>
+      <circle r="5.2" cx="-5.7" cy="-1.8" fill="#f6d8d4"/><circle r="2.8" fill="#e5b84a"/>
+    </g>
+    <g transform="translate(34 56) scale(.7)">
+      <circle r="5.2" cx="0" cy="-6" fill="#fffdf6"/><circle r="5.2" cx="5.7" cy="-1.8" fill="#fbf1e6"/>
+      <circle r="5.2" cx="3.5" cy="4.8" fill="#fffdf6"/><circle r="5.2" cx="-3.5" cy="4.8" fill="#fbf1e6"/>
+      <circle r="5.2" cx="-5.7" cy="-1.8" fill="#fffdf6"/><circle r="2.8" fill="#e5b84a"/>
+    </g>
+  </svg>
+  <div>
+    <h1>Book Nook</h1>
+    <p>(my little commonplace book of reading)</p>
+    <div class="brush"></div>
+  </div>
+</header>
+
+<div class="book">
+  <main class="pages" id="page" aria-live="polite"></main>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+</div>
+
+<footer>— THE BOOK NOOK —</footer>
+
+<div id="timer-slot"></div>
+<div id="modal-slot"></div>
+
+<script>
+/* =========================================================
+   Book Nook — all data lives on this device in IndexedDB.
+   ========================================================= */
+const TABS = [
+  { id: 'reading',  label: 'Reading Now' },
+  { id: 'read',     label: 'Books Read' },
+  { id: 'wishlist', label: 'Wish List' },
+  { id: 'progress', label: 'Progress Sheet' },
+  { id: 'goals',    label: 'Goals Checklist' },
+  { id: 'log',      label: 'Reading Log' },
+  { id: 'quotes',   label: 'Quotes' },
+  { id: 'keep',     label: 'Settings & Backup' },
+];
+const STATUS_LABEL = { reading: 'Reading now', read: 'Read', wishlist: 'Wish list' };
+const COVER_COLORS = ['#8fa784', '#c9706a', '#c9a43a', '#6f8a68', '#d99a93', '#9fae7f', '#b88a5a', '#7d9a8f'];
+
+/* ---------- tiny IndexedDB wrapper ---------- */
+const DB = {
+  db: null,
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('book-nook', 1);
+      r.onupgradeneeded = () => {
+        const d = r.result;
+        ['books', 'sessions', 'files', 'meta'].forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: 'id' }); });
+      };
+      r.onsuccess = () => { this.db = r.result; res(); };
+      r.onerror = () => rej(r.error);
+    });
+  },
+  tx(store, mode, fn) {
+    return new Promise((res, rej) => {
+      const t = this.db.transaction(store, mode);
+      const s = t.objectStore(store);
+      const out = fn(s);
+      t.oncomplete = () => res(out && 'result' in out ? out.result : undefined);
+      t.onerror = () => rej(t.error);
+      t.onabort = () => rej(t.error);
+    });
+  },
+  all(store) { return this.tx(store, 'readonly', s => s.getAll()); },
+  get(store, id) { return this.tx(store, 'readonly', s => s.get(id)); },
+  put(store, obj) { return this.tx(store, 'readwrite', s => s.put(obj)); },
+  del(store, id) { return this.tx(store, 'readwrite', s => s.delete(id)); },
+  clear(store) { return this.tx(store, 'readwrite', s => s.clear()); },
+};
+
+/* ---------- state ---------- */
+const state = {
+  tab: 'reading',
+  books: [],
+  sessions: [],
+  fileIndex: [],   // metadata only {id, bookId, name, type, size}
+  settings: { yearGoal: 24, weekMinutesGoal: 210, dailyMinutesGoal: 30, name: '' },
+  goals: [],       // reading-goal checklist: {id, text, done, doneAt, addedAt}
+  filter: { q: '', sort: 'recent' },
+};
+
+/* ---------- helpers ---------- */
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const isoDate = d => { const x = new Date(d); const m = String(x.getMonth() + 1).padStart(2, '0'); const dd = String(x.getDate()).padStart(2, '0'); return `${x.getFullYear()}-${m}-${dd}`; };
+const today = () => isoDate(new Date());
+const parseDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const fmtDate = s => s ? parseDate(s).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+const fmtMins = m => { m = Math.round(m); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h}h ${r}m` : `${h}h`; };
+const fmtSize = b => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1048576).toFixed(1)} MB`;
+const stars = n => '★'.repeat(n || 0) + '☆'.repeat(5 - (n || 0));
+const bookById = id => state.books.find(b => b.id === id);
+const colorFor = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COVER_COLORS[h % COVER_COLORS.length]; };
+function startOfWeek(d = new Date()) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); return x; }
+
+function toast(msg) {
+  document.querySelectorAll('.toast').forEach(x => x.remove());
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2600);
+}
+
+function coverHTML(b) {
+  if (b.cover) return `<div class="cover"><img src="${esc(b.cover)}" alt="Cover of ${esc(b.title)}" loading="lazy" onerror="this.parentNode.outerHTML=window.placeholderCover(${esc(JSON.stringify(b.id))})"></div>`;
+  return placeholderCover(b.id);
+}
+window.placeholderCover = function (id) {
+  const b = bookById(id) || { title: '?', author: '' };
+  return `<div class="cover placeholder" style="background-color:${colorFor(b.title)}"><div class="pt">${esc(b.title)}</div><div class="pa">${esc(b.author)}</div></div>`;
+};
+
+function resizeImage(file, max = 800) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = rej;
+      img.src = reader.result;
+    };
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------- persistence ---------- */
+async function load() {
+  await DB.open();
+  const [books, sessions, files, meta, goals] = await Promise.all([DB.all('books'), DB.all('sessions'), DB.all('files'), DB.get('meta', 'settings'), DB.get('meta', 'goals')]);
+  state.books = books || [];
+  state.sessions = sessions || [];
+  state.fileIndex = (files || []).map(({ id, bookId, name, type, size }) => ({ id, bookId, name, type, size }));
+  if (meta) Object.assign(state.settings, meta.value);
+  state.goals = (goals && goals.value) || [];
+  try { const t = localStorage.getItem('booknook.tab'); if (t && TABS.some(x => x.id === t)) state.tab = t; } catch (e) {}
+}
+const saveBook = b => DB.put('books', b);
+const saveSettings = () => DB.put('meta', { id: 'settings', value: state.settings });
+const saveGoals = () => DB.put('meta', { id: 'goals', value: state.goals });
+
+/* ---------- stats ---------- */
+function sessionsStats() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const ws = startOfWeek(now);
+  const byDay = {};
+  let yearMins = 0, yearPages = 0, weekMins = 0, allMins = 0;
+  for (const s of state.sessions) {
+    byDay[s.date] = (byDay[s.date] || 0) + (s.minutes || 0);
+    allMins += s.minutes || 0;
+    const d = parseDate(s.date);
+    if (d.getFullYear() === year) { yearMins += s.minutes || 0; yearPages += s.pages || 0; }
+    if (d >= ws) weekMins += s.minutes || 0;
+  }
+  // streak
+  let streak = 0; const cur = new Date();
+  if (!byDay[isoDate(cur)]) cur.setDate(cur.getDate() - 1);
+  while (byDay[isoDate(cur)]) { streak++; cur.setDate(cur.getDate() - 1); }
+  // longest streak
+  let longest = 0;
+  const days = Object.keys(byDay).filter(k => byDay[k] > 0).sort();
+  let run = 0, prev = null;
+  for (const k of days) {
+    const d = parseDate(k);
+    run = prev && (d - prev) / 86400000 === 1 ? run + 1 : 1;
+    longest = Math.max(longest, run); prev = d;
+  }
+  const finishedThisYear = state.books.filter(b => b.status === 'read' && b.finishDate && parseDate(b.finishDate).getFullYear() === year);
+  const dayOfYear = Math.floor((now - new Date(year, 0, 1)) / 86400000) + 1;
+  return { byDay, yearMins, yearPages, weekMins, allMins, streak, longest, finishedThisYear, dayOfYear, year };
+}
+
+/* ---------- rendering ---------- */
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map((t, i) => {
+    const count = ['reading', 'read', 'wishlist'].includes(t.id) ? ` (${state.books.filter(b => b.status === t.id).length})` : '';
+    return `<button role="tab" aria-selected="${state.tab === t.id}" data-tab="${t.id}"><span class="num">${i + 1}</span><span>${t.label}${count}</span></button>`;
+  }).join('');
+}
+
+function render() {
+  renderTabs();
+  const page = $('#page');
+  const fn = { reading: renderShelf, read: renderShelf, wishlist: renderShelf, progress: renderProgress, goals: renderGoals, log: renderLog, quotes: renderQuotes, keep: renderKeep }[state.tab];
+  page.innerHTML = fn(state.tab);
+  const active = $('#tabs [aria-selected=true]');
+  if (active && window.innerWidth <= 820) { const tabs = $('#tabs'); tabs.scrollLeft = active.offsetLeft - (tabs.clientWidth - active.offsetWidth) / 2; }
+  renderTimer();
+}
+
+function shelfBooks(status) {
+  const q = state.filter.q.trim().toLowerCase();
+  let list = state.books.filter(b => b.status === status);
+  if (q) list = list.filter(b => [b.title, b.author, b.genre].join(' ').toLowerCase().includes(q));
+  const sort = state.filter.sort;
+  list.sort((a, b) => {
+    if (sort === 'title') return a.title.localeCompare(b.title);
+    if (sort === 'author') return (a.author || '').localeCompare(b.author || '');
+    if (sort === 'rating') return (b.rating || 0) - (a.rating || 0);
+    if (sort === 'finished') return (b.finishDate || '').localeCompare(a.finishDate || '');
+    return (b.updatedAt || b.addedAt || 0) - (a.updatedAt || a.addedAt || 0);
+  });
+  return list;
+}
+
+function renderShelf(status) {
+  const heads = {
+    reading: ['Reading Now', 'The books currently open on your nightstand.'],
+    read: ['Books Read', 'Every book you have finished — with your stars and thoughts.'],
+    wishlist: ['Wish List', 'Books you’d love to read next, or to buy one day.'],
+  };
+  const list = shelfBooks(status);
+  const total = state.books.filter(b => b.status === status).length;
+  const [title, sub] = heads[status];
+  let body;
+  if (!total) {
+    const msg = { reading: 'Nothing on the go yet.', read: 'No finished books yet.', wishlist: 'Your wish list is empty.' }[status];
+    body = `<div class="empty"><div class="big">${msg}</div><p>Add a book — search it online, snap a photo of the cover, or type it in.</p><button class="btn" data-action="add" data-status="${status}">＋ Add a book</button></div>`;
+  } else if (!list.length) {
+    body = `<div class="empty"><div class="big">No matches</div><p>Try a different search.</p></div>`;
+  } else {
+    body = `<div class="shelf">${list.map(b => bookCard(b)).join('')}</div>`;
+  }
+  return `
+    <div class="page-head">
+      <div><h2>${title}</h2><p class="sub">${sub}</p></div>
+      <button class="btn" data-action="add" data-status="${status}">＋ Add a book</button>
+    </div>
+    ${total ? `<div class="toolbar">
+      <input type="search" id="q" placeholder="Search title, author or genre…" value="${esc(state.filter.q)}" aria-label="Search books">
+      <select id="sort" aria-label="Sort">
+        ${[['recent', 'Recently updated'], ['title', 'Title A–Z'], ['author', 'Author A–Z'], ['rating', 'Highest rated'], ['finished', 'Date finished']]
+          .map(([v, l]) => `<option value="${v}" ${state.filter.sort === v ? 'selected' : ''}>${l}</option>`).join('')}
+      </select>
+    </div>` : ''}
+    ${body}`;
+}
+
+function bookCard(b) {
+  const pct = b.pages ? Math.min(100, Math.round(((b.currentPage || 0) / b.pages) * 100)) : 0;
+  const mins = state.sessions.filter(s => s.bookId === b.id).reduce((a, s) => a + (s.minutes || 0), 0);
+  let extra = '';
+  if (b.status === 'reading') {
+    extra = `<div class="bar"><span style="width:${pct}%"></span></div>
+      <div class="meta">${b.pages ? `p. ${b.currentPage || 0} of ${b.pages} · ${pct}%` : 'Add page count to track %'}${mins ? ` · ${fmtMins(mins)}` : ''}</div>
+      <button class="btn small" data-action="start-timer" data-id="${b.id}">▶ Start reading</button>`;
+  } else if (b.status === 'read') {
+    extra = `<div class="stars" aria-label="${b.rating || 0} out of 5 stars">${stars(b.rating)}</div>
+      <div class="meta">${b.finishDate ? 'Finished ' + fmtDate(b.finishDate) : ''}${mins ? ` · ${fmtMins(mins)}` : ''}</div>`;
+  } else {
+    extra = `${b.genre ? `<div class="meta">${esc(b.genre)}</div>` : ''}
+      <button class="btn small ghost" data-action="move" data-id="${b.id}" data-to="reading">Start this book</button>`;
+  }
+  const fileCount = state.fileIndex.filter(f => f.bookId === b.id).length;
+  return `<article class="card" tabindex="0" data-action="open" data-id="${b.id}" aria-label="${esc(b.title)}">
+    ${b.status === 'wishlist' && b.priority === 'high' ? '<span class="ribbon">MUST</span>' : ''}
+    ${coverHTML(b)}
+    <h3>${esc(b.title)}</h3>
+    ${b.author ? `<div class="author">${esc(b.author)}</div>` : ''}
+    ${extra}
+    ${fileCount ? `<div class="meta">📎 ${fileCount} file${fileCount > 1 ? 's' : ''}</div>` : ''}
+  </article>`;
+}
+
+/* ---------- charts ---------- */
+function barChart(data, { color = '#8fa784', unit = '', h = 170, labelEvery = 1, goal = null } = {}) {
+  const W = 520, pad = { l: 34, r: 8, t: 12, b: 24 };
+  const max = Math.max(1, goal || 0, ...data.map(d => d.value));
+  const nice = (() => { const p = Math.pow(10, Math.floor(Math.log10(max))); const m = max / p; return Math.max(4, (m <= 2 ? 2 : m <= 5 ? 5 : 10) * p); })();
+  const iw = W - pad.l - pad.r, ih = h - pad.t - pad.b;
+  const bw = iw / data.length;
+  let s = `<svg viewBox="0 0 ${W} ${h}" role="img">`;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + ih - (ih * i) / 4;
+    s += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y}" y2="${y}" stroke="#e8dfcb" stroke-dasharray="${i ? '3 4' : '0'}"/>`;
+    s += `<text x="${pad.l - 6}" y="${y + 3}" text-anchor="end">${+((nice * i) / 4).toFixed(1)}</text>`;
+  }
+  if (goal) {
+    const gy = pad.t + ih - (goal / nice) * ih;
+    s += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${gy}" y2="${gy}" stroke="#c9706a" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+    s += `<text x="${W - pad.r}" y="${gy - 4}" text-anchor="end" style="fill:#c9706a">goal ${goal}</text>`;
+  }
+  data.forEach((d, i) => {
+    const bh = (d.value / nice) * ih;
+    const x = pad.l + i * bw + bw * 0.18, w = bw * 0.64;
+    const y = pad.t + ih - bh;
+    if (d.value > 0) s += `<rect x="${x}" y="${y}" width="${w}" height="${bh}" rx="${Math.min(4, w / 2)}" fill="${d.highlight ? '#c9706a' : color}"><title>${esc(d.title || d.label)}: ${d.value}${unit}</title></rect>`;
+    if (i % labelEvery === 0) s += `<text x="${x + w / 2}" y="${h - 8}" text-anchor="middle">${esc(d.label)}</text>`;
+  });
+  return s + '</svg>';
+}
+
+function renderProgress() {
+  const st = sessionsStats();
+  const S = state.settings;
+  const done = st.finishedThisYear.length;
+  const yearPct = Math.min(100, Math.round((done / Math.max(1, S.yearGoal)) * 100));
+  const expected = (S.yearGoal * st.dayOfYear) / (st.year % 4 === 0 ? 366 : 365);
+  const pace = done - expected;
+  const left = Math.max(0, S.yearGoal - done);
+  const monthsLeft = Math.max(1, 12 - new Date().getMonth());
+  const paceText = !left ? 'Goal reached — every book from here is a bonus! 🎉'
+    : pace >= 0.5 ? `You’re ${Math.round(pace)} book${Math.round(pace) === 1 ? '' : 's'} ahead of schedule ✿`
+    : pace > -0.5 ? 'Right on track ✿'
+    : `${left} to go — about ${Math.ceil(left / monthsLeft)} a month for the rest of the year.`;
+  const weekPct = Math.min(100, Math.round((st.weekMins / Math.max(1, S.weekMinutesGoal)) * 100));
+  const todayMins = st.byDay[today()] || 0;
+  const todayPct = Math.min(100, Math.round((todayMins / Math.max(1, S.dailyMinutesGoal)) * 100));
+
+  // last 14 days
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = isoDate(d);
+    days.push({ label: d.toLocaleDateString(undefined, { weekday: 'narrow' }), title: fmtDate(k), value: st.byDay[k] || 0, highlight: i === 0 });
+  }
+  // books per month
+  const months = Array.from({ length: 12 }, (_, m) => ({ label: new Date(st.year, m, 1).toLocaleDateString(undefined, { month: 'narrow' }), title: new Date(st.year, m, 1).toLocaleDateString(undefined, { month: 'long' }), value: 0 }));
+  st.finishedThisYear.forEach(b => { months[parseDate(b.finishDate).getMonth()].value++; });
+  // hours per month
+  const monthMins = Array.from({ length: 12 }, (_, m) => ({ label: months[m].label, title: months[m].title, value: 0 }));
+  state.sessions.forEach(s => { const d = parseDate(s.date); if (d.getFullYear() === st.year) monthMins[d.getMonth()].value += s.minutes || 0; });
+  monthMins.forEach(m => m.value = Math.round((m.value / 60) * 10) / 10);
+
+  const pagesYear = st.yearPages;
+  const avgDaily = st.yearMins / st.dayOfYear;
+  const favGenre = (() => { const c = {}; st.finishedThisYear.forEach(b => b.genre && (c[b.genre] = (c[b.genre] || 0) + 1)); const e = Object.entries(c).sort((a, b) => b[1] - a[1])[0]; return e ? e[0] : '—'; })();
+
+  return `
+    <div class="page-head">
+      <div><h2>Progress Sheet</h2><p class="sub">${st.year} — watching your literary goals bloom.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" data-action="log-session">＋ Log reading time</button>
+        <button class="btn ghost" data-action="edit-goals">✎ Edit goals</button>
+      </div>
+    </div>
+
+    <div class="goal-row">
+      <div class="goal">
+        <h4>${st.year} reading challenge</h4>
+        <div class="nums"><span>${done} of ${S.yearGoal} books</span><span>${yearPct}%</span></div>
+        <div class="bar big pink"><span style="width:${yearPct}%"></span></div>
+        <p class="muted" style="margin:8px 0 0">${paceText}</p>
+      </div>
+      <div class="goal">
+        <h4>Reading time</h4>
+        <div class="nums"><span>Today: ${fmtMins(todayMins)} of ${fmtMins(S.dailyMinutesGoal)}</span><span>${todayPct}%</span></div>
+        <div class="bar butter"><span style="width:${todayPct}%"></span></div>
+        <div class="nums"><span>This week: ${fmtMins(st.weekMins)} of ${fmtMins(S.weekMinutesGoal)}</span><span>${weekPct}%</span></div>
+        <div class="bar"><span style="width:${weekPct}%"></span></div>
+      </div>
+    </div>
+    ${state.goals.length ? (() => {
+      const g = goalsSummary();
+      return `<div class="goal" style="margin-top:16px">
+        <h4>Goals checklist</h4>
+        <div class="nums"><span>${g.done} of ${g.total} goals ticked off</span><span>${g.pct}%</span></div>
+        <div class="bar butter"><span style="width:${g.pct}%"></span></div>
+        ${g.next.length ? `<p class="muted" style="margin:8px 0 0">Next up: ${g.next.map(x => esc(x.text)).join(' · ')}</p>` : ''}
+        <button class="btn small ghost" style="margin-top:10px" data-tab="goals">Open checklist</button>
+      </div>`; })() : ''}
+
+    <div class="divider">AT A GLANCE</div>
+    <div class="stats">
+      <div class="stat"><div class="label">Books finished</div><div class="value">${done}</div><div class="hint">this year · ${state.books.filter(b => b.status === 'read').length} all time</div></div>
+      <div class="stat"><div class="label">Time reading</div><div class="value">${(st.yearMins / 60).toFixed(1)}h</div><div class="hint">this year · ${(st.allMins / 60).toFixed(1)}h all time</div></div>
+      <div class="stat"><div class="label">Pages read</div><div class="value">${pagesYear.toLocaleString()}</div><div class="hint">logged this year</div></div>
+      <div class="stat"><div class="label">Reading streak</div><div class="value">${st.streak} day${st.streak === 1 ? '' : 's'}</div><div class="hint">longest: ${st.longest} days</div></div>
+      <div class="stat"><div class="label">Daily average</div><div class="value">${Math.round(avgDaily)} min</div><div class="hint">across ${st.year}</div></div>
+      <div class="stat"><div class="label">On the go · wished</div><div class="value">${state.books.filter(b => b.status === 'reading').length} · ${state.books.filter(b => b.status === 'wishlist').length}</div><div class="hint">top genre: ${esc(favGenre)}</div></div>
+    </div>
+
+    <div class="divider">CHARTS</div>
+    <div class="charts">
+      <div class="chart-card"><h4>Minutes read · last 14 days</h4>${barChart(days, { unit: ' min', goal: S.dailyMinutesGoal || null })}</div>
+      <div class="chart-card"><h4>Books finished · ${st.year}</h4>${barChart(months, { color: '#e3a39d', unit: ' books' })}</div>
+      <div class="chart-card" style="grid-column:1/-1"><h4>Hours read per month · ${st.year}</h4>${barChart(monthMins, { color: '#d9be5a', unit: ' h', h: 150 })}</div>
+    </div>
+    ${!state.sessions.length ? `<p class="muted" style="margin-top:14px">Tip: press <b>▶ Start reading</b> on any book in <i>Reading Now</i> and a little timer will log your reading time for you — or log time by hand with the button above.</p>` : ''}
+  `;
+}
+
+function goalsSummary() {
+  const total = state.goals.length, done = state.goals.filter(g => g.done).length;
+  return { total, done, pct: total ? Math.round((done / total) * 100) : 0, next: state.goals.filter(g => !g.done).slice(0, 3) };
+}
+
+function renderGoals() {
+  const g = goalsSummary();
+  const open = state.goals.filter(x => !x.done), done = state.goals.filter(x => x.done);
+  const item = x => `<li class="check-item ${x.done ? 'done' : ''}">
+      <label><input type="checkbox" data-goal="${x.id}" ${x.done ? 'checked' : ''}><span class="box" aria-hidden="true"></span>
+      <span class="txt"><span class="gt">${esc(x.text)}</span>${x.done && x.doneAt ? `<span class="when">ticked off ${fmtDate(x.doneAt)}</span>` : ''}</span></label>
+      <button class="icon-btn" data-action="edit-goal" data-id="${x.id}" aria-label="Edit goal">✎</button>
+      <button class="icon-btn" data-action="del-goal" data-id="${x.id}" aria-label="Delete goal">✕</button>
+    </li>`;
+  return `
+    <div class="page-head">
+      <div><h2>Goals Checklist</h2><p class="sub">Your reading goals — tick them off one by one.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <label class="btn" style="cursor:pointer">⇧ Upload my list<input type="file" accept=".txt,.csv,.md,.docx,text/plain,text/csv,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document" id="goals-file" class="sr-only"></label>
+        <button class="btn ghost" data-action="paste-goals">✎ Paste a list</button>
+      </div>
+    </div>
+
+    <form class="add-goal" data-goal-form>
+      <input type="text" id="new-goal" placeholder="Add a goal, e.g. “Read one classic every month”" aria-label="New goal">
+      <button class="btn" type="submit">＋ Add</button>
+    </form>
+
+    ${g.total ? `
+      <div class="goal" style="margin-bottom:18px">
+        <div class="nums" style="margin-top:0"><span>${g.done} of ${g.total} goals ticked off</span><span>${g.pct}%</span></div>
+        <div class="bar big butter"><span style="width:${g.pct}%"></span></div>
+        ${g.done === g.total ? '<p class="muted" style="margin:8px 0 0">Every goal ticked off — what a reader! 🎉</p>' : ''}
+      </div>
+      ${open.length ? `<ul class="checklist">${open.map(item).join('')}</ul>` : ''}
+      ${done.length ? `<div class="divider">DONE ✿</div><ul class="checklist">${done.map(item).join('')}</ul>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
+        <button class="btn small ghost" data-action="download-goals">⇩ Download my checklist</button>
+        ${done.length ? `<button class="btn small ghost" data-action="clear-done-goals">Remove ticked-off goals</button>` : ''}
+      </div>`
+    : `<div class="empty"><div class="big">No goals yet</div>
+        <p>Type a goal above, or upload a list you’ve already written —<br>a Word document (<b>.docx</b>) or a <b>.txt</b> / <b>.csv</b> file, with one goal per line.</p>
+        <p class="muted">Tip: lines starting with <code>[x]</code> or <code>✓</code> are added as already done.</p></div>`}
+  `;
+}
+
+// Turn uploaded/pasted text into checklist items: one goal per line.
+function parseGoals(text, isCsv) {
+  const out = [];
+  for (let line of text.split(/\r?\n/)) {
+    if (isCsv) {
+      const m = line.match(/^\s*"((?:[^"]|"")*)"|^([^,]*)/);
+      line = m ? (m[1] != null ? m[1].replace(/""/g, '"') : m[2]) : line;
+    }
+    line = line.trim();
+    if (!line) continue;
+    let done = false;
+    line = line.replace(/^(?:[-*•+]\s+)?/, '');
+    const box = line.match(/^\[([ xX✓✔]?)\]\s*/);
+    if (box) { done = box[1].trim() !== ''; line = line.slice(box[0].length); }
+    const tick = line.match(/^[✓✔☑✅]\s*/);
+    if (tick) { done = true; line = line.slice(tick[0].length); }
+    line = line.replace(/^[☐□]\s*/, '').replace(/^\d+[.)]\s+/, '').replace(/^#+\s*/, '').trim();
+    if (!line || /^(goals?|reading goals?|my reading goals?)\s*:?$/i.test(line)) continue;
+    out.push({ text: line, done });
+  }
+  // drop duplicates (within the list and against existing goals)
+  const seen = new Set(state.goals.map(g => g.text.toLowerCase()));
+  return out.filter(g => { const k = g.text.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+
+// Word documents: load the mammoth reader only when one is uploaded (needs internet the first time).
+function docxText(file) {
+  const run = async () => (await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() })).value;
+  if (window.mammoth) return run();
+  return new Promise((res, rej) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+    sc.onload = () => run().then(res, rej);
+    sc.onerror = () => rej(new Error('Reading Word files needs an internet connection'));
+    document.head.appendChild(sc);
+  });
+}
+
+let pendingGoals = [];
+function goalsPreviewModal(items, source) {
+  pendingGoals = items;
+  if (!items.length) { toast('No new goals found in that list'); return; }
+  openModal(`
+    <h3>Add these goals?</h3>
+    <p class="muted" style="margin-top:-6px">Found ${items.length} goal${items.length > 1 ? 's' : ''} in ${esc(source)}. Untick any you don’t want.</p>
+    <ul class="checklist">${items.map((g, i) => `<li class="check-item"><label><input type="checkbox" data-pending="${i}" checked><span class="box" aria-hidden="true"></span><span class="txt">${esc(g.text)}${g.done ? '<span class="when">already done</span>' : ''}</span></label></li>`).join('')}</ul>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="confirm-goals">Add to my checklist</button></div>
+  `, { narrow: true });
+}
+
+function pasteGoalsModal() {
+  openModal(`
+    <h3>Paste your goals</h3>
+    <label class="field">One goal per line<textarea id="paste-goals" style="min-height:200px" placeholder="Read 24 books this year&#10;Read one classic&#10;Finish a series&#10;Read 30 minutes before bed"></textarea></label>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="parse-pasted-goals">Next</button></div>
+  `, { narrow: true });
+}
+
+function editGoalModal(g) {
+  openModal(`
+    <h3>Edit goal</h3>
+    <label class="field">Goal<input type="text" id="edit-goal-text" value="${esc(g.text)}"></label>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="save-goal-edit" data-id="${g.id}">Save</button></div>
+  `, { narrow: true });
+}
+
+async function addGoals(items) {
+  const now = Date.now();
+  items.forEach((g, i) => state.goals.push({ id: uid(), text: g.text, done: !!g.done, doneAt: g.done ? today() : '', addedAt: now + i }));
+  await saveGoals();
+}
+
+function renderLog() {
+  const list = [...state.sessions].sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
+  return `
+    <div class="page-head">
+      <div><h2>Reading Log</h2><p class="sub">Every sitting, in one place.</p></div>
+      <button class="btn" data-action="log-session">＋ Log reading time</button>
+    </div>
+    ${list.length ? `<div class="table-wrap"><table class="log">
+      <thead><tr><th>Date</th><th>Book</th><th>Time</th><th>Pages</th><th>Note</th><th></th></tr></thead>
+      <tbody>${list.map(s => {
+        const b = bookById(s.bookId);
+        return `<tr><td class="num">${fmtDate(s.date)}</td><td>${b ? esc(b.title) : '<span class="muted">(removed book)</span>'}</td>
+          <td class="num">${fmtMins(s.minutes || 0)}</td><td class="num">${s.pages ? s.pages : '—'}</td><td>${esc(s.note || '')}</td>
+          <td><button class="icon-btn" data-action="del-session" data-id="${s.id}" aria-label="Delete entry">✕</button></td></tr>`;
+      }).join('')}</tbody></table></div>`
+      : `<div class="empty"><div class="big">No reading logged yet</div><p>Use the timer on a book, or log time by hand.</p></div>`}`;
+}
+
+function renderQuotes() {
+  const all = [];
+  state.books.forEach(b => (b.quotes || []).forEach(q => all.push({ ...q, book: b })));
+  return `
+    <div class="page-head">
+      <div><h2>Favourite Quotes</h2><p class="sub">Lines worth keeping, gathered from every book.</p></div>
+    </div>
+    ${all.length ? `<div class="quotes">${all.map(q => `<figure class="quote"><p>${esc(q.text)}</p>
+      <figcaption class="src">— ${esc(q.book.title)}${q.book.author ? ', ' + esc(q.book.author) : ''}${q.page ? ' · p. ' + esc(q.page) : ''}</figcaption></figure>`).join('')}</div>`
+      : `<div class="empty"><div class="big">No quotes yet</div><p>Open any book and add a quote you loved — it will appear here.</p></div>`}`;
+}
+
+function renderKeep() {
+  const S = state.settings;
+  const totalFiles = state.fileIndex.reduce((a, f) => a + (f.size || 0), 0);
+  return `
+    <div class="page-head"><div><h2>Settings &amp; Backup</h2><p class="sub">Your books live on this device. Keep a backup somewhere safe.</p></div></div>
+    <div class="goal-row">
+      <div class="goal">
+        <h4>Goals</h4>
+        <p class="muted">Books per year: <b>${S.yearGoal}</b> · Minutes per day: <b>${S.dailyMinutesGoal}</b> · Minutes per week: <b>${S.weekMinutesGoal}</b></p>
+        <button class="btn" data-action="edit-goals">✎ Edit goals</button>
+      </div>
+      <div class="goal">
+        <h4>Backup</h4>
+        <p class="muted">${state.books.length} books · ${state.goals.length} goals · ${state.sessions.length} log entries · ${state.fileIndex.length} files (${fmtSize(totalFiles)})</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" data-action="export">⇩ Download backup</button>
+          <label class="btn ghost" style="cursor:pointer">⇧ Restore backup<input type="file" accept="application/json,.json" id="import-file" class="sr-only"></label>
+        </div>
+      </div>
+    </div>
+    <div class="divider">INSTALL AS AN APP</div>
+    <div class="goal">${installHTML()}</div>
+    <div class="divider">GOOD TO KNOW</div>
+    <div class="goal">
+      <ul style="margin:0;padding-left:20px">
+        <li><b>Finding books online:</b> when adding a book, type a title and press <i>Search</i> — Book Nook looks it up in the free Open Library catalogue and fills in the author, cover and page count. This needs an internet connection; everything else works offline.</li>
+        <li><b>Photos:</b> use <i>Upload photo</i> to pick a picture of the cover, or <i>Take photo</i> on a phone to snap it with the camera.</li>
+        <li><b>Files:</b> open a book and attach anything — an e-book PDF, your notes, a receipt. Files are kept with the book.</li>
+        <li><b>Your data</b> is stored in this browser only. Use <i>Download backup</i> now and then, and <i>Restore backup</i> to move to a new computer or phone.</li>
+      </ul>
+    </div>
+    <div class="divider">FRESH START</div>
+    <button class="btn danger" data-action="reset">Erase everything</button>
+  `;
+}
+
+/* ---------- timer ---------- */
+let timerTick = null;
+function getTimer() { try { return JSON.parse(localStorage.getItem('booknook.timer') || 'null'); } catch (e) { return null; } }
+function setTimer(t) { try { t ? localStorage.setItem('booknook.timer', JSON.stringify(t)) : localStorage.removeItem('booknook.timer'); } catch (e) {} }
+function renderTimer() {
+  const t = getTimer();
+  const slot = $('#timer-slot');
+  clearInterval(timerTick);
+  if (!t) { slot.innerHTML = ''; return; }
+  const b = bookById(t.bookId);
+  slot.innerHTML = `<div class="timer-pill" role="status"><span class="dot"></span><span class="t" id="timer-t">0:00</span><span class="b">${b ? esc(b.title) : ''}</span>
+    <button class="btn small" data-action="stop-timer">■ Stop &amp; log</button>
+    <button class="icon-btn" style="color:#fffdf6" data-action="cancel-timer" aria-label="Cancel timer">✕</button></div>`;
+  const upd = () => {
+    const sec = Math.floor((Date.now() - t.start) / 1000);
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    const el = $('#timer-t'); if (el) el.textContent = (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  };
+  upd(); timerTick = setInterval(upd, 1000);
+}
+
+/* ---------- modals ---------- */
+function openModal(html, { narrow = false } = {}) {
+  $('#modal-slot').innerHTML = `<div class="modal-back" data-backdrop><div class="modal ${narrow ? 'narrow' : ''}" role="dialog" aria-modal="true">
+    <button class="icon-btn close" data-action="close" aria-label="Close">✕</button>${html}</div></div>`;
+  const first = $('#modal-slot input:not([type=file]), #modal-slot select, #modal-slot textarea');
+  if (first) setTimeout(() => first.focus(), 30);
+}
+function closeModal() {
+  // Files attached to a book that was never saved shouldn't linger.
+  if (draft && draft._isNew) {
+    const orphans = state.fileIndex.filter(f => f.bookId === draft.id);
+    orphans.forEach(f => DB.del('files', f.id));
+    state.fileIndex = state.fileIndex.filter(f => f.bookId !== draft.id);
+  }
+  $('#modal-slot').innerHTML = ''; draft = null;
+}
+
+let draft = null; // book being edited in the modal
+
+function bookModal(book, status) {
+  const isNew = !book;
+  draft = book ? JSON.parse(JSON.stringify(book)) : { id: uid(), title: '', author: '', status: status || 'wishlist', cover: '', pages: '', currentPage: 0, rating: 0, genre: '', startDate: '', finishDate: '', notes: '', quotes: [], priority: 'normal', addedAt: Date.now() };
+  draft._isNew = isNew;
+  renderBookModal();
+}
+
+function renderBookModal() {
+  const b = draft;
+  const sess = state.sessions.filter(s => s.bookId === b.id).sort((x, y) => y.date.localeCompare(x.date));
+  const files = state.fileIndex.filter(f => f.bookId === b.id);
+  const minsTotal = sess.reduce((a, s) => a + (s.minutes || 0), 0);
+  const coverPreview = b.cover
+    ? `<div class="cover"><img src="${esc(b.cover)}" alt="Cover preview"></div>`
+    : `<div class="cover placeholder" style="background-color:${colorFor(b.title || 'x')}"><div class="pt">${esc(b.title || 'Your book')}</div><div class="pa">${esc(b.author || '')}</div></div>`;
+  openModal(`
+    <h3>${b._isNew ? 'Add a book' : esc(b.title || 'Book')}</h3>
+    ${b._isNew ? `<div class="search-online">
+      <div class="row"><input type="search" id="ol-q" placeholder="Find it online — title, author or ISBN" aria-label="Search online"><button class="btn" data-action="ol-search">Search</button></div>
+      <div class="hint">Searches the free Open Library catalogue and fills in the details & cover for you.</div>
+      <div class="results" id="ol-results"></div>
+    </div>` : ''}
+    <div class="book-form">
+      <div class="cover-col">
+        <div id="cover-preview">${coverPreview}</div>
+        <label class="btn small" style="cursor:pointer">🖼 Upload photo<input type="file" accept="image/*" class="sr-only" data-cover-input></label>
+        <label class="btn small butter" style="cursor:pointer">📷 Take photo<input type="file" accept="image/*" capture="environment" class="sr-only" data-cover-input></label>
+        ${b.cover ? `<button class="btn small ghost" data-action="remove-cover">Remove cover</button>` : ''}
+      </div>
+      <div class="fields">
+        <label class="field">Title<input type="text" data-f="title" value="${esc(b.title)}" required></label>
+        <label class="field">Author<input type="text" data-f="author" value="${esc(b.author)}"></label>
+        <div class="grid-2">
+          <label class="field">Shelf<select data-f="status">
+            ${Object.entries(STATUS_LABEL).map(([v, l]) => `<option value="${v}" ${b.status === v ? 'selected' : ''}>${l}</option>`).join('')}
+          </select></label>
+          <label class="field">Genre<input type="text" data-f="genre" value="${esc(b.genre)}" list="genres" placeholder="e.g. Mystery"></label>
+        </div>
+        <div class="grid-3">
+          <label class="field">Total pages<input type="number" min="0" data-f="pages" value="${esc(b.pages)}"></label>
+          <label class="field">Current page<input type="number" min="0" data-f="currentPage" value="${esc(b.currentPage || 0)}"></label>
+          ${b.status === 'wishlist'
+            ? `<label class="field">Priority<select data-f="priority"><option value="normal" ${b.priority !== 'high' ? 'selected' : ''}>Someday</option><option value="high" ${b.priority === 'high' ? 'selected' : ''}>Must read!</option></select></label>`
+            : `<div class="field">My rating<div class="star-input" role="radiogroup" aria-label="Rating">${[1, 2, 3, 4, 5].map(n => `<button type="button" class="${(b.rating || 0) >= n ? 'on' : ''}" data-action="rate" data-n="${n}" aria-label="${n} star${n > 1 ? 's' : ''}">★</button>`).join('')}</div></div>`}
+        </div>
+        ${b.status !== 'wishlist' ? `<div class="grid-2">
+          <label class="field">Started<input type="date" data-f="startDate" value="${esc(b.startDate)}"></label>
+          <label class="field">Finished<input type="date" data-f="finishDate" value="${esc(b.finishDate)}"></label>
+        </div>` : ''}
+        <label class="field">${b.status === 'wishlist' ? 'Why I want it / where to find it' : 'My thoughts'}<textarea data-f="notes">${esc(b.notes)}</textarea></label>
+      </div>
+    </div>
+    <datalist id="genres">${['Fiction', 'Mystery', 'Romance', 'Fantasy', 'Historical fiction', 'Biography', 'Memoir', 'Self-help', 'Faith', 'Classics', 'Poetry', 'Cookbook', 'Gardening', 'Children’s', 'Non-fiction', 'Thriller'].map(g => `<option value="${g}">`).join('')}</datalist>
+
+    <div class="divider">QUOTES I LOVED</div>
+    <div class="sublist">
+      ${(b.quotes || []).map((q, i) => `<div class="subitem"><span class="grow q">“${esc(q.text)}”${q.page ? ` <span class="muted">p. ${esc(q.page)}</span>` : ''}</span><button class="icon-btn" data-action="del-quote" data-i="${i}" aria-label="Remove quote">✕</button></div>`).join('')}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="text" id="new-quote" placeholder="Type a line you loved…" style="flex:1 1 240px">
+        <input type="text" id="new-quote-page" placeholder="Page" style="width:80px">
+        <button class="btn small" data-action="add-quote">Add</button>
+      </div>
+    </div>
+
+    <div class="divider">FILES</div>
+    <div class="sublist">
+      ${files.map(f => `<div class="subitem"><span>📎</span><span class="grow">${esc(f.name)} <span class="muted">${fmtSize(f.size || 0)}</span></span>
+        <button class="btn small ghost" data-action="open-file" data-id="${f.id}">Open</button>
+        <button class="icon-btn" data-action="del-file" data-id="${f.id}" aria-label="Delete file">✕</button></div>`).join('') || '<p class="muted" style="margin:0">Attach an e-book, PDF, notes, a receipt — anything that belongs with this book.</p>'}
+      <label class="btn small ghost" style="cursor:pointer;align-self:flex-start">＋ Attach files<input type="file" multiple class="sr-only" id="attach-files"></label>
+    </div>
+
+    ${!b._isNew ? `<div class="divider">READING TIME</div>
+      ${sess.length ? `<p class="muted" style="margin-top:0">${fmtMins(minsTotal)} across ${sess.length} sitting${sess.length > 1 ? 's' : ''}.</p>
+        <div class="sublist">${sess.slice(0, 8).map(s => `<div class="subitem"><span class="grow">${fmtDate(s.date)} · ${fmtMins(s.minutes || 0)}${s.pages ? ` · ${s.pages} pages` : ''}${s.note ? ` · <i>${esc(s.note)}</i>` : ''}</span></div>`).join('')}</div>`
+        : '<p class="muted" style="margin-top:0">No reading time logged for this book yet.</p>'}
+      <div style="margin-top:10px"><button class="btn small ghost" data-action="log-session" data-id="${b.id}">＋ Log time for this book</button></div>` : ''}
+
+    <div class="actions">
+      ${!b._isNew ? `<button class="btn danger" data-action="delete-book">Delete book</button>` : ''}
+      <span class="spacer"></span>
+      <button class="btn ghost" data-action="close">Cancel</button>
+      <button class="btn" data-action="save-book">${b._isNew ? 'Add to my nook' : 'Save'}</button>
+    </div>
+  `);
+}
+
+// Pull current form values into the draft (so re-rendering keeps typed text).
+function syncDraft() {
+  if (!draft) return;
+  document.querySelectorAll('#modal-slot [data-f]').forEach(el => {
+    const f = el.dataset.f;
+    draft[f] = el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value;
+  });
+}
+
+async function saveDraft() {
+  syncDraft();
+  const b = draft;
+  if (!b.title.trim()) { toast('Please give the book a title'); $('#modal-slot [data-f=title]').focus(); return; }
+  b.title = b.title.trim(); b.author = (b.author || '').trim();
+  b.pages = b.pages === '' ? '' : Math.max(0, Number(b.pages) || 0);
+  b.currentPage = Math.max(0, Number(b.currentPage) || 0);
+  if (b.pages && b.currentPage > b.pages) b.currentPage = b.pages;
+  if (b.status === 'read') {
+    if (!b.finishDate) b.finishDate = today();
+    if (b.pages) b.currentPage = b.pages;
+  }
+  if (b.status === 'reading' && !b.startDate) b.startDate = today();
+  b.updatedAt = Date.now();
+  const isNew = b._isNew; delete b._isNew;
+  const idx = state.books.findIndex(x => x.id === b.id);
+  if (idx >= 0) state.books[idx] = b; else state.books.push(b);
+  await saveBook(b);
+  closeModal();
+  toast(isNew ? `“${b.title}” added ✿` : 'Saved ✿');
+  render();
+}
+
+async function olSearch() {
+  const q = $('#ol-q').value.trim();
+  const box = $('#ol-results');
+  if (!q) return;
+  box.innerHTML = '<p class="muted">Searching…</p>';
+  try {
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=10&fields=key,title,author_name,cover_i,number_of_pages_median,first_publish_year,subject`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    const docs = data.docs || [];
+    if (!docs.length) { box.innerHTML = '<p class="muted">No books found — try fewer words, or fill it in by hand below.</p>'; return; }
+    window._olDocs = docs;
+    box.innerHTML = docs.map((d, i) => `<button type="button" class="result" data-action="ol-pick" data-i="${i}">
+      ${d.cover_i ? `<img src="https://covers.openlibrary.org/b/id/${d.cover_i}-S.jpg" alt="">` : '<span class="noimg"></span>'}
+      <span><div class="rt">${esc(d.title)}</div><div class="ra">${esc((d.author_name || []).slice(0, 2).join(', '))}${d.first_publish_year ? ' · ' + d.first_publish_year : ''}${d.number_of_pages_median ? ' · ' + d.number_of_pages_median + ' pages' : ''}</div></span>
+    </button>`).join('');
+  } catch (e) {
+    box.innerHTML = '<p class="muted">Couldn’t reach the online catalogue (are you offline?). You can still fill the details in by hand.</p>';
+  }
+}
+
+function olPick(i) {
+  const d = (window._olDocs || [])[i]; if (!d) return;
+  syncDraft();
+  draft.title = d.title || draft.title;
+  draft.author = (d.author_name || []).slice(0, 2).join(', ');
+  if (d.number_of_pages_median) draft.pages = d.number_of_pages_median;
+  if (d.cover_i) draft.cover = `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg`;
+  if (!draft.genre && d.subject) {
+    const known = ['Fiction', 'Mystery', 'Romance', 'Fantasy', 'Biography', 'Poetry', 'Thriller', 'History', 'Science fiction', 'Classics'];
+    const hit = known.find(k => d.subject.some(s => s.toLowerCase().includes(k.toLowerCase())));
+    if (hit) draft.genre = hit;
+  }
+  const scrollTop = $('.modal-back')?.scrollTop;
+  renderBookModal();
+  $('#ol-results').innerHTML = `<p class="muted">✓ Filled in from Open Library — check the details and press “Add to my nook”.</p>`;
+  if (scrollTop) $('.modal-back').scrollTop = scrollTop;
+}
+
+function goalsModal() {
+  const S = state.settings;
+  openModal(`
+    <h3>My reading goals</h3>
+    <div class="fields">
+      <label class="field">Books to read this year<input type="number" min="1" id="g-year" value="${S.yearGoal}"></label>
+      <label class="field">Minutes of reading per day<input type="number" min="0" id="g-day" value="${S.dailyMinutesGoal}"></label>
+      <label class="field">Minutes of reading per week<input type="number" min="0" id="g-week" value="${S.weekMinutesGoal}"></label>
+    </div>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="save-goals">Save goals</button></div>
+  `, { narrow: true });
+}
+
+function sessionModal(bookId, minutes) {
+  const reading = state.books.filter(b => b.status === 'reading');
+  const others = state.books.filter(b => b.status !== 'reading');
+  if (!state.books.length) { toast('Add a book first ✿'); return; }
+  const sel = bookId || (reading[0] || state.books[0]).id;
+  const b = bookById(sel);
+  openModal(`
+    <h3>${minutes != null ? 'Lovely reading session!' : 'Log reading time'}</h3>
+    <div class="fields">
+      <label class="field">Book<select id="s-book">
+        ${reading.length ? `<optgroup label="Reading now">${reading.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.title)}</option>`).join('')}</optgroup>` : ''}
+        ${others.length ? `<optgroup label="Other books">${others.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.title)}</option>`).join('')}</optgroup>` : ''}
+      </select></label>
+      <div class="grid-2">
+        <label class="field">Date<input type="date" id="s-date" value="${today()}" max="${today()}"></label>
+        <label class="field">Minutes read<input type="number" min="1" id="s-min" value="${minutes != null ? minutes : 30}"></label>
+      </div>
+      <label class="field">I’m now on page<input type="number" min="0" id="s-page" value="${b ? (b.currentPage || 0) : 0}" placeholder="optional"></label>
+      <label class="field">A little note (optional)<input type="text" id="s-note" placeholder="e.g. Read in the garden"></label>
+      <label style="display:flex;gap:8px;align-items:center;font-size:.9rem"><input type="checkbox" id="s-finished"> I finished this book! 🎉</label>
+    </div>
+    <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="save-session">Save to my log</button></div>
+  `, { narrow: true });
+}
+
+async function saveSession() {
+  const bookId = $('#s-book').value;
+  const b = bookById(bookId);
+  const minutes = Math.max(0, Number($('#s-min').value) || 0);
+  const date = $('#s-date').value || today();
+  const pageVal = $('#s-page').value;
+  const finished = $('#s-finished').checked;
+  if (!minutes && !finished) { toast('Add the minutes you read'); return; }
+  let pages = 0;
+  if (b && pageVal !== '') {
+    let newPage = Math.max(0, Number(pageVal) || 0);
+    if (b.pages) newPage = Math.min(newPage, b.pages);
+    pages = Math.max(0, newPage - (b.currentPage || 0));
+    b.currentPage = newPage;
+  }
+  if (b && finished) {
+    if (b.pages) { pages += Math.max(0, b.pages - (b.currentPage || 0)); b.currentPage = b.pages; }
+    b.status = 'read'; b.finishDate = date;
+  }
+  if (b) {
+    if (b.status === 'wishlist') { b.status = 'reading'; }
+    if (!b.startDate) b.startDate = date;
+    b.updatedAt = Date.now();
+    await saveBook(b);
+  }
+  if (minutes) {
+    const s = { id: uid(), bookId, date, minutes, pages, note: $('#s-note').value.trim(), createdAt: Date.now() };
+    state.sessions.push(s);
+    await DB.put('sessions', s);
+  }
+  closeModal();
+  toast(finished ? `Hooray — “${b.title}” is finished! 🎉` : `Logged ${fmtMins(minutes)} ✿`);
+  render();
+}
+
+/* ---------- backup ---------- */
+function blobToDataURL(blob) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); }); }
+async function exportData() {
+  const files = await DB.all('files');
+  const packed = await Promise.all(files.map(async f => ({ ...f, blob: undefined, data: await blobToDataURL(f.blob) })));
+  const out = { app: 'book-nook', version: 1, exportedAt: new Date().toISOString(), settings: state.settings, goals: state.goals, books: state.books, sessions: state.sessions, files: packed };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+  const a = document.createElement('a'); a.href = url; a.download = `book-nook-backup-${today()}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('Backup downloaded ✿');
+}
+async function importData(file) {
+  try {
+    const data = JSON.parse(await file.text());
+    if (data.app !== 'book-nook') throw new Error('not a Book Nook backup');
+    if (!confirm(`Restore ${data.books.length} books and ${data.sessions.length} log entries? This replaces what is on this device now.`)) return;
+    for (const s of ['books', 'sessions', 'files']) await DB.clear(s);
+    for (const b of data.books) await DB.put('books', b);
+    for (const s of data.sessions) await DB.put('sessions', s);
+    for (const f of data.files || []) {
+      const blob = await (await fetch(f.data)).blob();
+      await DB.put('files', { id: f.id, bookId: f.bookId, name: f.name, type: f.type, size: f.size, blob });
+    }
+    state.settings = Object.assign(state.settings, data.settings || {});
+    await saveSettings();
+    if (Array.isArray(data.goals)) { state.goals = data.goals; await saveGoals(); }
+    await load();
+    render();
+    toast('Backup restored ✿');
+  } catch (e) {
+    alert('Sorry, that file could not be restored: ' + e.message);
+  }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', async e => {
+  if (e.target.matches('[data-backdrop]')) { closeModal(); return; }
+  const el = e.target.closest('[data-action], [data-tab]');
+  if (!el) return;
+  if (el.dataset.tab) {
+    state.tab = el.dataset.tab; state.filter.q = '';
+    try { localStorage.setItem('booknook.tab', state.tab); } catch (err) {}
+    render(); return;
+  }
+  const a = el.dataset.action, id = el.dataset.id;
+  switch (a) {
+    case 'close': closeModal(); break;
+    case 'add': bookModal(null, el.dataset.status); break;
+    case 'open': bookModal(bookById(id)); break;
+    case 'save-book': await saveDraft(); break;
+    case 'ol-search': await olSearch(); break;
+    case 'ol-pick': olPick(Number(el.dataset.i)); break;
+    case 'rate': syncDraft(); draft.rating = draft.rating === Number(el.dataset.n) ? 0 : Number(el.dataset.n); renderBookModal(); break;
+    case 'remove-cover': syncDraft(); draft.cover = ''; renderBookModal(); break;
+    case 'add-quote': {
+      const text = $('#new-quote').value.trim(); if (!text) return;
+      syncDraft(); draft.quotes = [...(draft.quotes || []), { text, page: $('#new-quote-page').value.trim() }];
+      renderBookModal(); $('#new-quote').focus(); break;
+    }
+    case 'del-quote': syncDraft(); draft.quotes.splice(Number(el.dataset.i), 1); renderBookModal(); break;
+    case 'delete-book': {
+      if (!confirm(`Delete “${draft.title}” and its log entries and files?`)) return;
+      const bid = draft.id;
+      state.books = state.books.filter(b => b.id !== bid);
+      await DB.del('books', bid);
+      for (const s of state.sessions.filter(s => s.bookId === bid)) await DB.del('sessions', s.id);
+      state.sessions = state.sessions.filter(s => s.bookId !== bid);
+      for (const f of state.fileIndex.filter(f => f.bookId === bid)) await DB.del('files', f.id);
+      state.fileIndex = state.fileIndex.filter(f => f.bookId !== bid);
+      const t = getTimer(); if (t && t.bookId === bid) setTimer(null);
+      closeModal(); toast('Book deleted'); render(); break;
+    }
+    case 'move': {
+      e.stopPropagation();
+      const b = bookById(id); b.status = el.dataset.to; if (!b.startDate) b.startDate = today(); b.updatedAt = Date.now();
+      await saveBook(b); toast(`Moved to Reading Now ✿`); render(); break;
+    }
+    case 'start-timer': {
+      e.stopPropagation();
+      const t = getTimer();
+      if (t && !confirm('A timer is already running. Start a new one for this book instead?')) return;
+      setTimer({ bookId: id, start: Date.now() }); renderTimer(); toast('Timer started — happy reading ✿'); break;
+    }
+    case 'stop-timer': {
+      const t = getTimer(); if (!t) return;
+      const mins = Math.max(1, Math.round((Date.now() - t.start) / 60000));
+      setTimer(null); renderTimer();
+      if (bookById(t.bookId)) sessionModal(t.bookId, mins); else toast('That book was removed');
+      break;
+    }
+    case 'cancel-timer': if (confirm('Stop the timer without logging?')) { setTimer(null); renderTimer(); } break;
+    case 'log-session': closeModal(); sessionModal(id); break;
+    case 'save-session': await saveSession(); break;
+    case 'del-session': {
+      if (!confirm('Delete this log entry?')) return;
+      state.sessions = state.sessions.filter(s => s.id !== id); await DB.del('sessions', id); render(); break;
+    }
+    case 'edit-goals': goalsModal(); break;
+    case 'save-goals': {
+      state.settings.yearGoal = Math.max(1, Number($('#g-year').value) || 1);
+      state.settings.dailyMinutesGoal = Math.max(0, Number($('#g-day').value) || 0);
+      state.settings.weekMinutesGoal = Math.max(0, Number($('#g-week').value) || 0);
+      await saveSettings(); closeModal(); toast('Goals saved ✿'); render(); break;
+    }
+    case 'open-file': {
+      const f = await DB.get('files', id); if (!f) return;
+      const url = URL.createObjectURL(f.blob);
+      const w = window.open(url, '_blank');
+      if (!w) { const a2 = document.createElement('a'); a2.href = url; a2.download = f.name; a2.click(); }
+      setTimeout(() => URL.revokeObjectURL(url), 60000); break;
+    }
+    case 'del-file': {
+      if (!confirm('Delete this file?')) return;
+      syncDraft(); await DB.del('files', id); state.fileIndex = state.fileIndex.filter(f => f.id !== id); renderBookModal(); render(); break;
+    }
+    case 'export': await exportData(); break;
+    case 'install': {
+      if (!installPrompt) return;
+      installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      installPrompt = null;
+      if (choice.outcome === 'accepted') toast('Book Nook is installed ✿');
+      render(); break;
+    }
+    case 'paste-goals': pasteGoalsModal(); break;
+    case 'parse-pasted-goals': {
+      const items = parseGoals($('#paste-goals').value, false);
+      if (!items.length) { toast('No new goals found'); return; }
+      goalsPreviewModal(items, 'your list'); break;
+    }
+    case 'confirm-goals': {
+      const keep = pendingGoals.filter((_, i) => $(`[data-pending="${i}"]`)?.checked);
+      await addGoals(keep); pendingGoals = [];
+      closeModal(); toast(`${keep.length} goal${keep.length === 1 ? '' : 's'} added ✿`);
+      state.tab = 'goals'; render(); break;
+    }
+    case 'edit-goal': { const g = state.goals.find(x => x.id === id); if (g) editGoalModal(g); break; }
+    case 'save-goal-edit': {
+      const g = state.goals.find(x => x.id === id); const text = $('#edit-goal-text').value.trim();
+      if (g && text) { g.text = text; await saveGoals(); }
+      closeModal(); render(); break;
+    }
+    case 'del-goal': {
+      if (!confirm('Delete this goal?')) return;
+      state.goals = state.goals.filter(g => g.id !== id); await saveGoals(); render(); break;
+    }
+    case 'clear-done-goals': {
+      if (!confirm('Remove all ticked-off goals from the list?')) return;
+      state.goals = state.goals.filter(g => !g.done); await saveGoals(); render(); break;
+    }
+    case 'download-goals': {
+      const txt = 'My reading goals\n\n' + state.goals.map(g => `[${g.done ? 'x' : ' '}] ${g.text}`).join('\n') + '\n';
+      const url = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
+      const a3 = document.createElement('a'); a3.href = url; a3.download = 'my-reading-goals.txt'; a3.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000); break;
+    }
+    case 'reset': {
+      if (!confirm('Erase ALL books, logs, goals and files from this device? This cannot be undone.')) return;
+      for (const s of ['books', 'sessions', 'files']) await DB.clear(s);
+      state.books = []; state.sessions = []; state.fileIndex = []; state.goals = []; await saveGoals(); setTimer(null);
+      toast('All cleared'); render(); break;
+    }
+  }
+});
+
+document.addEventListener('submit', async e => {
+  if (!e.target.matches('[data-goal-form]')) return;
+  e.preventDefault();
+  const input = $('#new-goal'); const text = input.value.trim();
+  if (!text) return;
+  if (state.goals.some(g => g.text.toLowerCase() === text.toLowerCase())) { toast('That goal is already on your list'); return; }
+  await addGoals([{ text, done: false }]);
+  render(); $('#new-goal').focus();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('#modal-slot').innerHTML) closeModal();
+  if (e.key === 'Enter' && e.target.id === 'ol-q') { e.preventDefault(); olSearch(); }
+  if (e.key === 'Enter' && e.target.id === 'new-quote') { e.preventDefault(); $('[data-action=add-quote]').click(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.card[data-action=open]')) { e.preventDefault(); bookModal(bookById(e.target.dataset.id)); }
+});
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') {
+    state.filter.q = e.target.value;
+    const pos = e.target.selectionStart;
+    render();
+    const q = $('#q'); q.focus(); q.setSelectionRange(pos, pos);
+  }
+});
+
+document.addEventListener('change', async e => {
+  const t = e.target;
+  if (t.id === 'sort') { state.filter.sort = t.value; render(); }
+  if (t.matches('[data-cover-input]') && t.files[0]) {
+    try { syncDraft(); draft.cover = await resizeImage(t.files[0]); renderBookModal(); }
+    catch (err) { toast('Couldn’t read that photo'); }
+  }
+  if (t.id === 'attach-files' && t.files.length) {
+    syncDraft();
+    for (const file of t.files) {
+      const f = { id: uid(), bookId: draft.id, name: file.name, type: file.type, size: file.size, blob: file };
+      await DB.put('files', f);
+      state.fileIndex.push({ id: f.id, bookId: f.bookId, name: f.name, type: f.type, size: f.size });
+    }
+    toast(`${t.files.length} file${t.files.length > 1 ? 's' : ''} attached ✿`);
+    renderBookModal(); render();
+  }
+  if (t.dataset.f === 'status' && draft) { syncDraft(); renderBookModal(); }
+  if (t.id === 's-book') {
+    const b = bookById(t.value); if (b) $('#s-page').value = b.currentPage || 0;
+  }
+  if (t.id === 'import-file' && t.files[0]) await importData(t.files[0]);
+  if (t.matches('[data-goal]')) {
+    const g = state.goals.find(x => x.id === t.dataset.goal);
+    if (g) {
+      g.done = t.checked; g.doneAt = t.checked ? today() : '';
+      await saveGoals();
+      if (t.checked) toast('Goal ticked off — well done! ✿');
+      render();
+    }
+  }
+  if (t.id === 'goals-file' && t.files[0]) {
+    const file = t.files[0];
+    if (/\.(doc|pdf|pages)$/i.test(file.name)) { toast('Please save the list as a Word (.docx) or text (.txt) file first'); t.value = ''; return; }
+    try {
+      const text = /\.docx$/i.test(file.name) ? await docxText(file) : await file.text();
+      goalsPreviewModal(parseGoals(text, /\.csv$/i.test(file.name)), file.name);
+    }
+    catch (err) { toast(err && err.message && /internet/.test(err.message) ? err.message : 'Couldn’t read that file'); }
+    t.value = '';
+  }
+});
+
+/* ---------- install as an app ---------- */
+let installPrompt = null;
+const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (state.tab === 'keep') render(); });
+window.addEventListener('appinstalled', () => { installPrompt = null; if (state.tab === 'keep') render(); });
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+function installHTML() {
+  if (isInstalled()) return '<p style="margin:0">✿ You’re using the installed Book Nook app.</p>';
+  if (installPrompt) return `<p style="margin-top:0">Put Book Nook on your desktop or home screen, with its own icon and window. It opens even without internet.</p><button class="btn" data-action="install">⤓ Install Book Nook</button>`;
+  if (location.protocol === 'file:') return `<p style="margin:0">You’ve opened Book Nook straight from a file, and browsers can only install apps from a web address.
+    Open Book Nook from its web address instead (see the README), then come back here.</p>`;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios) return `<p style="margin:0">On iPhone or iPad: tap the <b>Share</b> button <span aria-hidden="true">(□↑)</span> in Safari, then <b>Add to Home Screen</b>.</p>`;
+  return `<ul style="margin:0;padding-left:20px">
+    <li><b>Chrome / Edge on a computer:</b> click the install icon at the right end of the address bar, or open the <b>⋮</b> menu → <b>Cast, save and share</b> → <b>Install page as app</b> (in Edge: <b>Apps</b> → <b>Install this site as an app</b>).</li>
+    <li><b>Android phone:</b> open the browser’s <b>⋮</b> menu → <b>Add to Home screen</b> or <b>Install app</b>.</li>
+    <li><b>Mac Safari:</b> <b>File</b> → <b>Add to Dock</b>.</li></ul>`;
+}
+
+/* ---------- start ---------- */
+load().then(render).catch(err => {
+  $('#page').innerHTML = `<div class="empty"><div class="big">Book Nook couldn’t open its storage</div><p>${esc(err && err.message || err)}. Try a regular (not private) browser window.</p></div>`;
+});
+</script>
+</body>
+</html>
