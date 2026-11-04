@@ -31,8 +31,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
-        // /book-nook/ is a separate app deployed alongside this one; never answer it with this app's page.
-        navigateFallbackDenylist: [/^\/api\//, /\/book-nook(\/|$)/],
+        // budget/ (Penny Plan) and book-nook/ (Book Nook) are separate apps deployed alongside
+        // this one, each with its own offline worker; never answer them with this app's page.
+        navigateFallbackDenylist: [/^\/api\//, /\/budget\//, /\/book-nook(\/|$)/],
       },
     }),
   ],
