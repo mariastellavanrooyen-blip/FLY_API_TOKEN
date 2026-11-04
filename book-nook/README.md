@@ -43,10 +43,11 @@ Your books are kept separately for each browser and device, so use **Download ba
 
 ## Goals checklist
 - Type a goal and press **Add**, or press **Paste a list**.
-- **Upload my list**: pick a Word document (`.docx`) or a `.txt`, `.csv` or `.md` file with one goal per line.
+- **Upload a list or photo**: take or pick a **photo** of a written or printed list (Book Nook reads the words, and you
+  can correct them before adding), or pick a Word document (`.docx`) or a `.txt`, `.csv` or `.md` file with one goal per line.
   You'll see the goals before they're added, so you can untick any you don't want.
   Bullets and numbers at the start of a line are removed. A line starting with `[x]` or `✓` is added as already done.
-  Reading a Word file needs internet the first time.
+  Reading a photo or a Word file needs internet.
 - Tick a goal to mark it done. The app saves the date, and the goal moves to the **Done** list.
 - **Download my checklist** saves your list as a text file, ready to print or keep.
 

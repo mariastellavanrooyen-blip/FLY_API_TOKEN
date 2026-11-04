@@ -742,7 +742,7 @@ function renderGoals() {
     <div class="page-head">
       <div><h2>Goals Checklist</h2><p class="sub">Your reading goals — tick them off one by one.</p></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <label class="btn" style="cursor:pointer">⇧ Upload my list<input type="file" accept=".txt,.csv,.md,.docx,text/plain,text/csv,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document" id="goals-file" class="sr-only"></label>
+        <label class="btn" style="cursor:pointer">⇧ Upload a list or photo<input type="file" accept="image/*,.txt,.csv,.md,.docx,text/plain,text/csv,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document" id="goals-file" class="sr-only"></label>
         <button class="btn ghost" data-action="paste-goals">✎ Paste a list</button>
       </div>
     </div>
@@ -765,7 +765,7 @@ function renderGoals() {
         ${done.length ? `<button class="btn small ghost" data-action="clear-done-goals">Remove ticked-off goals</button>` : ''}
       </div>`
     : `<div class="empty"><div class="big">No goals yet</div>
-        <p>Type a goal above, or upload a list you’ve already written —<br>a Word document (<b>.docx</b>) or a <b>.txt</b> / <b>.csv</b> file, with one goal per line.</p>
+        <p>Type a goal above, or upload a list you’ve already written —<br>a <b>photo</b> of your list, a Word document (<b>.docx</b>) or a <b>.txt</b> file, with one goal per line.</p>
         <p class="muted">Tip: lines starting with <code>[x]</code> or <code>✓</code> are added as already done.</p></div>`}
   `;
 }
@@ -808,6 +808,48 @@ function docxText(file) {
   });
 }
 
+// A file that isn't really text (a photo, a PDF…) reads as gibberish — catch that.
+function looksBinary(text) {
+  if (!text) return false;
+  const sample = text.slice(0, 4000);
+  const bad = (sample.match(/[�\u0000-\u0008\u000E-\u001F]/g) || []).length;
+  return bad / sample.length > 0.02;
+}
+
+// Photo of a goals list: read the words with Tesseract (loaded only when needed, needs internet).
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const sc = document.createElement('script'); sc.src = src;
+    sc.onload = res; sc.onerror = () => rej(new Error('Reading photos needs an internet connection'));
+    document.head.appendChild(sc);
+  });
+}
+async function goalsFromPhoto(file) {
+  openModal(`<h3>Reading your photo…</h3>
+    <p class="muted" style="margin-top:-6px">Picking out the words in your list. The first time can take a little while.</p>
+    <div class="bar big butter"><span id="ocr-bar" style="width:3%"></span></div>
+    <p class="muted" id="ocr-status" style="margin-bottom:0">Getting ready…</p>`, { narrow: true });
+  const setP = (pct, msg) => { const b = $('#ocr-bar'); if (b) b.style.width = Math.max(3, pct) + '%'; const st = $('#ocr-status'); if (st && msg) st.textContent = msg; };
+  let worker;
+  try {
+    const img = await resizeImage(file, 2000);
+    if (!window.Tesseract) await loadScript(window.BOOKNOOK_OCR_SRC || 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+    worker = await Tesseract.createWorker('eng', 1, Object.assign({
+      logger: m => { if (m.status === 'recognizing text') setP(20 + m.progress * 80, 'Reading the words…'); else setP(10, 'Getting ready…'); },
+    }, window.BOOKNOOK_OCR_OPTS || {}));
+    const { data } = await worker.recognize(img);
+    const lines = (data.text || '').split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 1).join('\n');
+    if (!$('#ocr-bar')) return; // closed while working
+    if (!lines) { closeModal(); toast('Couldn’t find any words in that photo — try a clearer, closer picture'); return; }
+    pasteGoalsModal(lines, 'Here’s what I could read from your photo. Fix any words that came out wrong, delete lines you don’t want, then press Next.');
+  } catch (err) {
+    closeModal();
+    toast(err && /internet/.test(err.message || '') ? err.message : 'Couldn’t read that photo');
+  } finally {
+    if (worker) worker.terminate();
+  }
+}
+
 let pendingGoals = [];
 function goalsPreviewModal(items, source) {
   pendingGoals = items;
@@ -820,10 +862,11 @@ function goalsPreviewModal(items, source) {
   `, { narrow: true });
 }
 
-function pasteGoalsModal() {
+function pasteGoalsModal(prefill = '', note = '') {
   openModal(`
-    <h3>Paste your goals</h3>
-    <label class="field">One goal per line<textarea id="paste-goals" style="min-height:200px" placeholder="Read 24 books this year&#10;Read one classic&#10;Finish a series&#10;Read 30 minutes before bed"></textarea></label>
+    <h3>${prefill ? 'Check your goals' : 'Paste your goals'}</h3>
+    ${note ? `<p class="muted" style="margin-top:-6px">${note}</p>` : ''}
+    <label class="field">One goal per line<textarea id="paste-goals" style="min-height:220px" placeholder="Read 24 books this year&#10;Read one classic&#10;Finish a series&#10;Read 30 minutes before bed">${esc(prefill)}</textarea></label>
     <div class="actions"><button class="btn ghost" data-action="close">Cancel</button><button class="btn" data-action="parse-pasted-goals">Next</button></div>
   `, { narrow: true });
 }
@@ -1014,7 +1057,7 @@ function renderBookModal() {
 
     <div class="divider">FILES</div>
     <div class="sublist">
-      ${files.map(f => `<div class="subitem"><span>📎</span><span class="grow">${esc(f.name)} <span class="muted">${fmtSize(f.size || 0)}</span></span>
+      ${files.map(f => `<div class="subitem">${/^image\//.test(f.type || '') ? `<img data-thumb="${f.id}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;background:var(--paper-2)">` : '<span>📎</span>'}<span class="grow">${esc(f.name)} <span class="muted">${fmtSize(f.size || 0)}</span></span>
         <button class="btn small ghost" data-action="open-file" data-id="${f.id}">Open</button>
         <button class="icon-btn" data-action="del-file" data-id="${f.id}" aria-label="Delete file">✕</button></div>`).join('') || '<p class="muted" style="margin:0">Attach an e-book, PDF, notes, a receipt — anything that belongs with this book.</p>'}
       <label class="btn small ghost" style="cursor:pointer;align-self:flex-start">＋ Attach files<input type="file" multiple class="sr-only" id="attach-files"></label>
@@ -1033,6 +1076,10 @@ function renderBookModal() {
       <button class="btn" data-action="save-book">${b._isNew ? 'Add to my nook' : 'Save'}</button>
     </div>
   `);
+  document.querySelectorAll('#modal-slot img[data-thumb]').forEach(async img => {
+    const f = await DB.get('files', img.dataset.thumb);
+    if (f && f.blob) img.src = URL.createObjectURL(f.blob);
+  });
 }
 
 // Pull current form values into the draft (so re-rendering keeps typed text).
@@ -1286,9 +1333,19 @@ document.addEventListener('click', async e => {
     }
     case 'open-file': {
       const f = await DB.get('files', id); if (!f) return;
+      // Only show files the browser can display (photos, PDFs, plain text); download everything else
+      // so it never appears as a screen of garbled characters.
+      const type = f.type || f.blob.type || '';
+      if (/^image\//.test(type)) {
+        const url = URL.createObjectURL(f.blob);
+        openModal(`<h3>${esc(f.name)}</h3><img src="${url}" alt="${esc(f.name)}" style="width:100%;border-radius:10px;display:block">
+          <div class="actions"><a class="btn ghost" href="${url}" download="${esc(f.name)}">⇩ Save to device</a><button class="btn" data-action="close">Close</button></div>`);
+        break;
+      }
       const url = URL.createObjectURL(f.blob);
-      const w = window.open(url, '_blank');
-      if (!w) { const a2 = document.createElement('a'); a2.href = url; a2.download = f.name; a2.click(); }
+      const viewable = /^(application\/pdf|text\/plain)/.test(type);
+      const w = viewable ? window.open(url, '_blank') : null;
+      if (!w) { const a2 = document.createElement('a'); a2.href = url; a2.download = f.name; document.body.appendChild(a2); a2.click(); a2.remove(); }
       setTimeout(() => URL.revokeObjectURL(url), 60000); break;
     }
     case 'del-file': {
@@ -1404,9 +1461,12 @@ document.addEventListener('change', async e => {
   }
   if (t.id === 'goals-file' && t.files[0]) {
     const file = t.files[0];
-    if (/\.(doc|pdf|pages)$/i.test(file.name)) { toast('Please save the list as a Word (.docx) or text (.txt) file first'); t.value = ''; return; }
+    t.value = '';
+    if (/^image\//.test(file.type) || /\.(jpe?g|png|webp|gif|bmp)$/i.test(file.name)) { await goalsFromPhoto(file); return; }
+    if (/\.(doc|pdf|pages|heic)$/i.test(file.name)) { toast('Please use a photo (JPG/PNG), a Word (.docx) file or a text (.txt) file'); return; }
     try {
       const text = /\.docx$/i.test(file.name) ? await docxText(file) : await file.text();
+      if (looksBinary(text)) { toast('That file isn’t a list Book Nook can read — try a photo, a Word (.docx) or a text (.txt) file'); return; }
       goalsPreviewModal(parseGoals(text, /\.csv$/i.test(file.name)), file.name);
     }
     catch (err) { toast(err && err.message && /internet/.test(err.message) ? err.message : 'Couldn’t read that file'); }
