@@ -1,27 +1,47 @@
 # 🌿 Tend
 
-A self-care and mental-care journal styled like a bullet journal: dotted paper, washi-tape labels and handwritten notes.
+A care journal set up like Book Nook: a journal with numbered, coloured index tabs down the side.
+It looks like a bullet journal inside, with dotted paper, washi-tape labels and handwritten notes.
+It has a section each for **self care**, **mental care** and **physical care**.
 
-## Open it
-- **On this computer:** double-click `tend/index.html`. It works without internet (the handwriting fonts need internet the first time).
-- **As an app on your phone or laptop:** once GitHub Pages is deployed (Actions → "Deploy frontend + Book Nook + Tend to GitHub Pages" → Run workflow), open
-  **https://mariastellavanrooyen-blip.github.io/FLY_API_TOKEN/tend/**
-  - iPhone/iPad (Safari): Share → **Add to Home Screen**
-  - Android: browser menu ⋮ → **Install app**
-  - Chrome or Edge on a computer: the install icon at the right end of the address bar
+## Get it as an app (computer or phone)
+Tend is an installable web app. It gets its own icon and window, and it opens without internet.
+Browsers can only install it from a web address, not from a file, so it is published with GitHub Pages at:
 
-## The tabs
-1. **Today**: today's intention, top 3 priorities, to-do list (bring over yesterday's unfinished), weekly habit tracker,
-   water tracker, mood, steps and sleep, a daily affirmation, self-care menu, gratitude, meals and evening reflection.
-   Use ‹ › to visit other days.
-2. **Mind**: check-in (mood, energy, stress and feelings), "Dear diary" with a daily journal prompt, guided breathing
-   (box, 4-7-8, calm), brain dump, 5-4-3-2-1 grounding, your affirmations and your "When I feel low" list.
-3. **Month**: calendar with a mood dot on each day, mood bouquet (one flower per day, coloured by mood), monthly
-   goals and word of the month, full-month habit grid, and monthly averages.
-4. **Past pages**: every day you wrote something, newest first, with search.
-5. **Settings**: your name, habits (with colours), self-care menu, affirmations, "When I feel low" list,
-   backup download and restore, erase.
+**https://mariastellavanrooyen-blip.github.io/FLY_API_TOKEN/tend/**
+
+To put the latest version online, merge this branch into the repo's default branch. Then on GitHub, go to
+**Actions → "Deploy frontend + Book Nook + Tend to GitHub Pages" → Run workflow**. It takes about a minute.
+
+Then install it:
+- **Chrome or Edge on a computer:** open the link, then click the install icon at the right end of the address bar.
+- **iPhone or iPad (Safari):** tap Share (□↑) → **Add to Home Screen**.
+- **Android:** open the browser menu (⋮) → **Install app** or **Add to Home screen**.
+- **Mac Safari:** File → **Add to Dock**.
+
+Inside the app, **Settings & Backup → Install as an app** shows the right steps for your device.
+
+You can still just double-click `index.html` to use it without installing.
+
+## What's inside (the tabs)
+1. **Today**: your daily planner. It has today's intention, your top 3 priorities and a to-do list. It also shows
+   *Care at a glance*: how today is going for self care, mental care and physical care.
+   There's a mood picker, today's habits and a note with an affirmation for you.
+2. **Self Care**: self-care menu (tap the icons), "something just for me", gratitude, evening reflection and affirmations.
+3. **Mental Care**: check-in (mood, stress, feelings), "Dear diary" with a daily prompt, guided breathing
+   (box, 4-7-8, calm), brain dump, 5-4-3-2-1 grounding and your "When I feel low" list.
+4. **Physical Care**: water glasses and sleep (bedtime, wake time, hours, quality).
+   Movement (what you did, minutes, steps), a body-care checklist (vitamins, stretch, fruit & veg…) and meals.
+   A body check-in for energy, aches or tension, cycle and how your body feels.
+5. **Habit Tracker**: this week's habits as circles, plus the whole month as a grid with totals.
+6. **Monthly Spread**: calendar with mood dots and a mood bouquet with one flower per day, coloured by mood.
+   Monthly goals, word of the month, and monthly totals (sleep, water, active minutes, self-care days).
+7. **Past Pages**: every day you wrote something, newest first, with search.
+8. **Settings & Backup**: your name and install help. You can change your habits and their colours, the self-care menu,
+   the body-care list, the "When I feel low" list and your affirmations. Download or restore a backup, or erase everything.
+
+Use the ‹ › arrows at the top of a page to fill in or look back at other days.
 
 ## Your privacy
-Everything stays in this browser on this device. Nothing is uploaded. Use **Settings → Download backup**
-now and then, and **Restore backup** to move your journal to another device or browser.
+Everything stays in this browser on this device. Nothing is uploaded. Each browser and device keeps its own journal,
+so use **Download backup** and **Restore backup** to move it.

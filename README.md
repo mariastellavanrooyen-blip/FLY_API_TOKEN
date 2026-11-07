@@ -38,7 +38,7 @@ install it from there the same way.
 
 ## 🌿 Tend: self-care journal
 
-A bullet-journal style app for self-care and mental care (intentions, habits, mood, gratitude, reflection, breathing and grounding).
+A care journal set up like Book Nook, with index tabs for self care, mental care and physical care.
 It lives in [`tend/`](tend/README.md). Open `tend/index.html` directly, or use it at `/FLY_API_TOKEN/tend/` once GitHub Pages is deployed.
 
 ## Features
