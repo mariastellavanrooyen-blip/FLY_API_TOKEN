@@ -36,6 +36,11 @@ Don't want to touch GitHub settings? You can also just run it locally — see
 `http://localhost:4173` in Chrome/Edge after `npm run build && npm run preview` and
 install it from there the same way.
 
+## 🌿 Tend: self-care journal
+
+A bullet-journal style app for self-care and mental care (intentions, habits, mood, gratitude, reflection, breathing and grounding).
+It lives in [`tend/`](tend/README.md). Open `tend/index.html` directly, or use it at `/FLY_API_TOKEN/tend/` once GitHub Pages is deployed.
+
 ## Features
 
 - **Dashboard** — upcoming assignments, today's habits, goals in progress, your burrow at a glance, tip of the day

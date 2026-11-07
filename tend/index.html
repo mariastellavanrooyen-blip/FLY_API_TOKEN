@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tend Journal</title>
+<meta name="description" content="A bullet-journal style app for self-care and mental care: daily intentions, habits, mood, gratitude, reflection and calm tools.">
+<meta name="theme-color" content="#f5eee3">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: a dotted notebook page; cards are paper notes held by washi-tape labels, flowing in columns like a spread. */
+:root {
+  --paper: #f5eee3;
+  --card: #fdfaf4;
+  --ink: #5b4535;
+  --ink-soft: #8c7664;
+  --line: #e2d4c1;
+  --dot: #dccdb8;
+  --tape-sage: #b9c6a8;
+  --tape-rose: #e8bdb6;
+  --tape-peach: #efcaa8;
+  --tape-tan: #dfc8a6;
+  --tape-ink: #4f3f31;
+  --accent: #b5786d;
+  --sage: #8fa383;
+  --shadow: 0 1px 0 rgba(91,69,53,.05), 0 8px 24px -14px rgba(91,69,53,.35);
+  --m-happy: #9fb48b; --m-calm: #c9c58c; --m-productive: #e6a87f;
+  --m-tired: #cf9894; --m-anxious: #b8a1c4; --m-sad: #95a6b8;
+  --script: "Parisienne", "Snell Roundhand", "Segoe Script", cursive;
+  --serif: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
+  --hand: "Patrick Hand", "Comic Neue", "Segoe Print", "Bradley Hand", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #2a221c; --card: #342a22; --ink: #f0e4d4; --ink-soft: #bfab96; --line: #4d3f33; --dot: #45382d;
+    --tape-sage: #6f7d62; --tape-rose: #8c6460; --tape-peach: #93704f; --tape-tan: #86704f; --tape-ink: #fbf3e8;
+    --accent: #e0a397; --sage: #a9bb9c; --shadow: 0 10px 26px -16px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #2a221c; --card: #342a22; --ink: #f0e4d4; --ink-soft: #bfab96; --line: #4d3f33; --dot: #45382d;
+  --tape-sage: #6f7d62; --tape-rose: #8c6460; --tape-peach: #93704f; --tape-tan: #86704f; --tape-ink: #fbf3e8;
+  --accent: #e0a397; --sage: #a9bb9c; --shadow: 0 10px 26px -16px rgba(0,0,0,.7);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh;
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--dot) 1.1px, transparent 1.3px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font: 1.08rem/1.45 var(--hand);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px dashed var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+
+/* ---------- header ---------- */
+header.top { text-align: center; padding: 26px 0 6px; position: relative; }
+.brand { font: 400 clamp(3rem, 9vw, 4.6rem)/1 var(--script); margin: 0; color: var(--ink); }
+.tagline { font: 1.15rem var(--hand); color: var(--ink-soft); margin: 4px 0 0; letter-spacing: .04em; }
+.tagline .heart { color: var(--accent); }
+.sprig { width: 90px; height: 26px; color: var(--ink-soft); vertical-align: middle; }
+.saved { position: absolute; right: 0; top: 14px; font: 600 .78rem var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); opacity: 0; transition: opacity .4s; }
+.saved.on { opacity: 1; }
+
+/* ---------- washi tabs ---------- */
+nav.tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; margin: 18px 0 22px; }
+.tape {
+  display: inline-block; padding: 6px 18px 5px;
+  background: var(--t, var(--tape-sage));
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.10) 0 6px, transparent 6px 12px);
+  color: var(--tape-ink);
+  font: 700 .82rem/1.1 var(--serif); letter-spacing: .16em; text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, 97.5% 30%, 100% 55%, 97% 100%, 0 100%, 2.5% 70%, 0 40%);
+  border: 0;
+}
+.tab { --t: var(--tape-tan); transform: rotate(-1deg); opacity: .78; transition: transform .2s, opacity .2s; font-size: .9rem; padding: 9px 22px 8px; }
+.tab:nth-child(2n) { transform: rotate(1deg); }
+.tab:hover { opacity: 1; }
+.tab[aria-current="page"] { opacity: 1; transform: rotate(0) translateY(-2px); }
+.tab[data-tab="today"] { --t: var(--tape-sage); }
+.tab[data-tab="mind"] { --t: var(--tape-rose); }
+.tab[data-tab="month"] { --t: var(--tape-peach); }
+.tab[data-tab="pages"] { --t: var(--tape-tan); }
+.tab[data-tab="settings"] { --t: var(--tape-sage); }
+
+/* ---------- day bar ---------- */
+.daybar { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+.daybar h2 { margin: 0; font: 400 clamp(1.9rem, 5vw, 2.5rem)/1.1 var(--script); text-align: center; min-width: 0; }
+.daybar .sub { display: block; font: 600 .8rem var(--serif); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); }
+.round { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card); display: grid; place-items: center; font-size: 1.2rem; line-height: 1; }
+.round:hover { border-color: var(--ink-soft); }
+.chip-btn { border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 14px; font: 600 .78rem var(--serif); letter-spacing: .12em; text-transform: uppercase; }
+.chip-btn:hover { border-color: var(--ink-soft); }
+
+/* ---------- cards ---------- */
+.flow { columns: 3 320px; column-gap: 22px; }
+.flow > * { break-inside: avoid; margin-bottom: 26px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 26px; align-items: start; }
+.card {
+  position: relative; background: var(--card); border: 1.5px solid var(--line); border-radius: 16px;
+  padding: 26px 20px 18px; box-shadow: var(--shadow); min-width: 0;
+}
+.card > .tape { position: relative; display: table; margin: -39px auto 14px; transform: rotate(-1.5deg); white-space: nowrap; }
+.card.note { border-radius: 4px; background: var(--card); transform: rotate(-.6deg); }
+.card.note::before { content: ""; display: block; margin: -38px auto 14px; width: 86px; height: 24px; transform: rotate(2deg); background: var(--tape-tan); opacity: .85; clip-path: polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%); }
+.card.grid-paper { background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 20px 20px; background-position: -1px -1px; background-color: var(--card); }
+.hint { color: var(--ink-soft); font-size: .95rem; margin: 0 0 10px; }
+.serif-label { font: 700 .74rem var(--serif); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+.script-line { font: 400 1.6rem/1.3 var(--script); }
+.heart-mark { color: var(--accent); }
+
+/* writing surfaces */
+.line-input { width: 100%; border: 0; border-bottom: 1.5px dotted var(--ink-soft); background: transparent; padding: 4px 2px; outline: none; font-size: 1.08rem; }
+.line-input:focus { border-bottom-style: solid; border-bottom-color: var(--accent); }
+.lined {
+  width: 100%; border: 0; resize: vertical; background: transparent; outline: none;
+  line-height: 30px; padding: 0 2px; font-size: 1.08rem; min-height: 92px;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 29px, var(--line) 29px 30px);
+  background-attachment: local;
+}
+.lined:focus { background-image: repeating-linear-gradient(to bottom, transparent 0 29px, var(--ink-soft) 29px 30px); }
+::placeholder { color: var(--ink-soft); opacity: .6; }
+
+/* intention */
+.intention .lined { font: 400 1.55rem/30px var(--script); min-height: 62px; text-align: center; }
+
+/* priorities */
+.prio { display: flex; flex-direction: column; gap: 12px; }
+.prio label { display: flex; align-items: center; gap: 12px; }
+.num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--tape-rose); color: var(--tape-ink); display: grid; place-items: center; font: 700 1rem var(--serif); }
+.prio .heart-mark { flex: none; }
+
+/* checklists */
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.checks li { display: flex; align-items: center; gap: 10px; min-height: 30px; }
+.checks li .txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.checks li.done .txt { text-decoration: line-through; text-decoration-color: var(--accent); color: var(--ink-soft); }
+.box { flex: none; width: 20px; height: 20px; border: 1.6px solid var(--ink-soft); border-radius: 3px; background: transparent; padding: 0; display: grid; place-items: center; color: var(--accent); }
+.box svg { width: 15px; height: 15px; opacity: 0; transition: opacity .15s; }
+.box[aria-pressed="true"] svg { opacity: 1; }
+.x { border: 0; background: none; color: var(--ink-soft); opacity: .45; font-size: 1.1rem; padding: 0 4px; }
+.x:hover { opacity: 1; color: var(--accent); }
+.add-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.add-row .line-input { flex: 1; min-width: 0; }
+
+/* habits week */
+.habits { width: 100%; border-collapse: collapse; font-size: 1rem; }
+.habits th { font: 700 .72rem var(--serif); letter-spacing: .1em; color: var(--ink-soft); padding: 0 0 6px; text-align: center; }
+.habits th.today-col { color: var(--accent); }
+.habits td { padding: 3px 0; text-align: center; }
+.habits td.name { text-align: left; padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.habits td.name i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.hdot { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--ink-soft); background: transparent; padding: 0; opacity: .7; transition: transform .15s; }
+.hdot:hover { transform: scale(1.15); opacity: 1; }
+.hdot.on { background: var(--c); border-color: var(--c); opacity: 1; }
+.hdot.future { opacity: .25; }
+
+/* wellness mini-cards */
+.well { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mini { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 10px 12px; text-align: center; min-width: 0; }
+.mini.span { grid-column: 1 / -1; }
+.mini .serif-label { display: block; margin-bottom: 8px; }
+.cups { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.cup { border: 0; background: none; padding: 0; width: 26px; height: 32px; color: var(--ink-soft); }
+.cup svg { width: 100%; height: 100%; }
+.cup .fill { fill: transparent; transition: fill .2s; }
+.cup.on .fill { fill: var(--m-sad); opacity: .75; }
+.small-in { width: 70px; text-align: center; border: 0; border-bottom: 1.5px dotted var(--ink-soft); background: transparent; outline: none; font-size: 1.1rem; }
+.bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 8px; }
+.bar > span { display: block; height: 100%; background: var(--sage); border-radius: 99px; }
+
+/* moods */
+.moods { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; }
+.mood { display: flex; flex-direction: column; align-items: center; gap: 3px; border: 0; background: none; padding: 2px; font-size: .9rem; color: var(--ink-soft); }
+.mood .m { width: 28px; height: 28px; border-radius: 50%; background: var(--c); opacity: .45; border: 2px solid transparent; transition: all .15s; }
+.mood:hover .m { opacity: .8; }
+.mood[aria-pressed="true"] { color: var(--ink); }
+.mood[aria-pressed="true"] .m { opacity: 1; border-color: var(--ink); transform: scale(1.1); }
+.legend { display: flex; flex-direction: column; gap: 8px; }
+.legend span { display: flex; align-items: center; gap: 10px; }
+.legend i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); }
+
+.scale { display: flex; justify-content: center; gap: 8px; align-items: center; }
+.scale button { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink-soft); background: transparent; padding: 0; }
+.scale button.on { background: var(--c, var(--sage)); border-color: var(--c, var(--sage)); }
+.scale small { color: var(--ink-soft); font-size: .85rem; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1.5px solid var(--line); background: transparent; border-radius: 999px; padding: 2px 12px; font-size: .98rem; }
+.chip[aria-pressed="true"] { background: var(--tape-rose); border-color: var(--tape-rose); color: var(--tape-ink); }
+
+/* self care icons */
+.care { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 14px 8px; }
+.care button { border: 0; background: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: .92rem; color: var(--ink-soft); min-width: 0; }
+.care .ic { width: 54px; height: 54px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); display: grid; place-items: center; color: var(--ink-soft); transition: all .2s; }
+.care .ic svg { width: 26px; height: 26px; }
+.care button[aria-pressed="true"] { color: var(--ink); }
+.care button[aria-pressed="true"] .ic { background: var(--tape-peach); border-color: var(--tape-peach); color: var(--tape-ink); }
+.care span.lbl { text-align: center; overflow-wrap: anywhere; }
+
+/* gratitude */
+.grat { display: flex; flex-direction: column; gap: 10px; }
+.grat label { display: flex; align-items: center; gap: 10px; }
+.grat .heart-mark { flex: none; font-size: 1rem; }
+
+/* meals */
+.meals { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: end; }
+.meals .serif-label { padding-bottom: 6px; }
+
+/* reflection */
+.refl { display: flex; flex-direction: column; gap: 14px; }
+.refl label { display: block; }
+.refl .q { display: block; font-size: 1.02rem; }
+.refl .lined { min-height: 60px; }
+
+/* affirmation note */
+.affirm { text-align: center; }
+.affirm p { font: 400 1.7rem/1.35 var(--script); margin: 6px 0 4px; text-wrap: balance; }
+
+.streak { text-align: center; color: var(--ink-soft); margin: -8px 0 20px; font-size: 1.02rem; }
+
+/* breathing */
+.breath { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.orb-wrap { width: 190px; height: 190px; display: grid; place-items: center; position: relative; }
+.orb-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px dashed var(--line); }
+.orb { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--tape-rose), var(--tape-sage)); transition: transform 4s ease-in-out; display: grid; place-items: center; }
+.orb.big { transform: scale(1.95); }
+.orb-label { position: relative; font: 400 1.5rem var(--script); color: var(--tape-ink); }
+.orb-count { font: 600 .8rem var(--serif); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); min-height: 1.2em; }
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 4px 12px; font: 600 .74rem var(--serif); letter-spacing: .1em; text-transform: uppercase; }
+.seg button[aria-pressed="true"] { background: var(--tape-sage); color: var(--tape-ink); }
+
+/* grounding */
+.ground { display: flex; flex-direction: column; gap: 10px; }
+.ground label { display: grid; grid-template-columns: 34px 1fr; column-gap: 8px; align-items: end; }
+.ground .n { grid-row: 1 / 3; font: 400 2rem/1 var(--script); color: var(--accent); text-align: center; align-self: center; }
+.ground .what { font-size: .9rem; color: var(--ink-soft); }
+
+/* month */
+.cal { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.cal th { background: var(--tape-rose); color: var(--tape-ink); font: 700 .78rem var(--serif); letter-spacing: .1em; padding: 5px 0; }
+.cal td { text-align: center; padding: 3px 0; }
+.cal button { width: 100%; max-width: 44px; aspect-ratio: 1; border: 0; background: none; border-radius: 50%; padding: 0; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.02rem; position: relative; }
+.cal button:hover { background: var(--paper); }
+.cal button.is-today { outline: 1.5px solid var(--accent); }
+.cal button i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, transparent); margin-top: 1px; }
+.monthbar { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 20px; }
+.monthbar h2 { margin: 0; font: 400 clamp(2rem, 6vw, 2.8rem)/1.1 var(--script); min-width: 0; text-align: center; }
+.bouquet { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
+.bouquet text { font: 11px var(--hand); fill: var(--ink); }
+.bq-wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+@media (max-width: 520px) { .bq-wrap { grid-template-columns: 1fr; } .legend { flex-direction: row; flex-wrap: wrap; justify-content: center; } }
+
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.mgrid { border-collapse: collapse; font-size: .95rem; }
+.mgrid th { font: 700 .66rem var(--serif); color: var(--ink-soft); padding: 2px 0; width: 20px; min-width: 20px; text-align: center; }
+.mgrid td { border: 1px solid var(--line); padding: 0; text-align: center; height: 22px; }
+.mgrid td.name { border: 0; border-right: 1px solid var(--line); text-align: left; padding: 0 10px 0 0; white-space: nowrap; position: sticky; left: 0; background: var(--card); }
+.mgrid button { width: 20px; height: 20px; border: 0; background: none; padding: 0; display: grid; place-items: center; }
+.mgrid button i { width: 11px; height: 11px; border-radius: 50%; }
+.mgrid button.on i { background: var(--c); }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+.stat { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; text-align: center; }
+.stat b { display: block; font: 600 1.9rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+.stat span { font: 700 .7rem var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* pages (archive) */
+.entries { display: flex; flex-direction: column; gap: 22px; }
+.entry { cursor: default; }
+.entry h3 { margin: 0 0 4px; font: 400 1.8rem/1.2 var(--script); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.entry h3 i { width: 14px; height: 14px; border-radius: 50%; background: var(--c); display: inline-block; }
+.entry .meta { color: var(--ink-soft); font-size: .95rem; margin-bottom: 8px; }
+.entry p { margin: 6px 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.entry .serif-label { margin-right: 6px; }
+.search { max-width: 420px; margin: 0 auto 22px; display: block; }
+.empty { text-align: center; color: var(--ink-soft); padding: 30px 10px; }
+.empty .script-line { color: var(--ink); }
+
+/* settings */
+.edit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.edit-list li { display: flex; gap: 8px; align-items: center; }
+.edit-list .line-input { flex: 1; min-width: 0; }
+.swatches { display: flex; gap: 4px; }
+.sw { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; background: var(--c); padding: 0; }
+.sw[aria-pressed="true"] { border-color: var(--ink); }
+.btn { border: 1.5px solid var(--ink-soft); background: var(--card); border-radius: 999px; padding: 6px 18px; font: 700 .78rem var(--serif); letter-spacing: .14em; text-transform: uppercase; }
+.btn:hover { background: var(--paper); }
+.btn.danger { border-color: var(--accent); color: var(--accent); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.small { font-size: .95rem; color: var(--ink-soft); }
+
+footer.quote { text-align: center; margin-top: 18px; }
+footer.quote p { font: 400 1.5rem/1.3 var(--hand); margin: 0 0 12px; }
+footer.quote .tape { --t: var(--tape-sage); font-size: .78rem; padding: 8px 24px; }
+
+@media (max-width: 560px) {
+  .card { padding: 26px 14px 16px; }
+  .habits td.name { max-width: 104px; font-size: .95rem; }
+  .hdot { width: 18px; height: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">Tend</h1>
+    <p class="tagline">~ plan · track · reflect · grow <span class="heart">♡</span></p>
+    <p class="tagline" id="owner" hidden></p>
+    <span class="saved" id="saved" aria-live="polite">Saved ✓</span>
+  </header>
+  <nav class="tabs" id="tabs" aria-label="Journal sections">
+    <button class="tape tab" data-act="tab" data-tab="today">Today</button>
+    <button class="tape tab" data-act="tab" data-tab="mind">Mind</button>
+    <button class="tape tab" data-act="tab" data-tab="month">Month</button>
+    <button class="tape tab" data-act="tab" data-tab="pages">Past pages</button>
+    <button class="tape tab" data-act="tab" data-tab="settings">Settings</button>
+  </nav>
+  <main id="main"></main>
+  <footer class="quote">
+    <p>“Small steps every day lead to big changes.” <span class="heart-mark">♡</span></p>
+    <span class="tape">Discipline today, freedom tomorrow ♡</span>
+  </footer>
+</div>
+<input type="file" id="restore-file" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+/* ================= data ================= */
+const KEY = 'tend.journal.v1';
+const MOODS = [
+  { id: 'happy', label: 'happy' },
+  { id: 'calm', label: 'calm' },
+  { id: 'productive', label: 'productive' },
+  { id: 'tired', label: 'tired' },
+  { id: 'anxious', label: 'anxious' },
+  { id: 'sad', label: 'sad' },
+];
+const moodVar = id => `var(--m-${id})`;
+const COLORS = ['#9fb48b', '#e6a87f', '#cf9894', '#95a6b8', '#c9c58c', '#b8a1c4', '#d7b98f', '#a7c0b8'];
+const FEELINGS = ['grateful', 'hopeful', 'calm', 'content', 'proud', 'loved', 'motivated', 'tired', 'overwhelmed', 'anxious', 'lonely', 'irritable', 'sad', 'restless', 'numb'];
+const PROMPTS = [
+  'What is taking up the most space in my mind right now?',
+  'What do I need more of this week, and what do I need less of?',
+  'Describe a moment today when I felt most like myself.',
+  'What would I say to a friend who felt the way I feel today?',
+  'What is one boundary that would protect my peace?',
+  'What am I carrying that isn\'t mine to carry?',
+  'What small thing made today softer?',
+  'Where in my body do I feel stress, and what does it need?',
+  'What am I proud of that nobody else saw?',
+  'What does rest look like for me right now?',
+  'What is one worry I can set down for tonight?',
+  'Who or what helped me today?',
+  'What would make tomorrow 1% kinder to myself?',
+  'Which thought keeps repeating, and is it true?',
+];
+const DEFAULT_AFFIRM = [
+  'I am enough.', 'I am capable.', 'I am becoming my best version.', 'I attract good things.',
+  'Be proud of how far you\'ve come.', 'I choose to show up for myself today.',
+  'My feelings are valid, and they will pass.', 'I am allowed to rest.',
+  'I can do hard things, gently.', 'Progress, not perfection.',
+];
+const DEFAULT_TOOLBOX = ['Drink a glass of water', 'Step outside for 5 minutes', 'Box breathing, 4 rounds', 'Text someone I love', 'Shower and fresh clothes', 'Put on a comfort playlist', 'Write it all in the brain dump'];
+
+function defaults() {
+  return {
+    v: 1, name: '',
+    habits: [
+      { id: 'h1', name: 'Wake up early', c: COLORS[4] },
+      { id: 'h2', name: 'Morning routine', c: COLORS[1] },
+      { id: 'h3', name: 'Drink water', c: COLORS[3] },
+      { id: 'h4', name: 'Move my body', c: COLORS[0] },
+      { id: 'h5', name: 'Eat healthy', c: COLORS[7] },
+      { id: 'h6', name: 'Read', c: COLORS[6] },
+      { id: 'h7', name: 'No screen at night', c: COLORS[5] },
+      { id: 'h8', name: 'Sleep on time', c: COLORS[2] },
+    ],
+    selfcare: ['Skincare', 'Stretch', 'Read', 'Meditate', 'Journaling', 'Me time', 'Fresh air', 'Connect'],
+    toolbox: DEFAULT_TOOLBOX.slice(),
+    affirmations: DEFAULT_AFFIRM.slice(),
+    days: {}, months: {},
+  };
+}
+function blankDay() {
+  return {
+    intention: '', priorities: ['', '', ''], todos: [], habits: {}, water: 0, mood: '', energy: 0, stress: 0,
+    feelings: [], sleep: '', steps: '', gratitude: ['', '', ''], selfcare: {},
+    meals: { breakfast: '', lunch: '', dinner: '', snacks: '' },
+    reflection: { happy: '', improve: '', learn: '', tomorrow: '' },
+    journal: '', brain: '', grounding: { see: '', touch: '', hear: '', smell: '', taste: '' },
+  };
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) return Object.assign(defaults(), JSON.parse(raw));
+  } catch (e) {}
+  return defaults();
+}
+let S = load();
+let storageOk = true;
+let saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); storageOk = true; flashSaved('Saved ✓'); }
+    catch (e) { storageOk = false; flashSaved('Not saved: storage is blocked'); }
+  }, 350);
+}
+let savedTimer;
+function flashSaved(msg) {
+  const el = document.getElementById('saved');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(savedTimer); savedTimer = setTimeout(() => el.classList.remove('on'), 1600);
+}
+
+/* ================= dates ================= */
+const pad = n => String(n).padStart(2, '0');
+const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); };
+const todayKey = () => keyOf(new Date());
+const mondayOf = k => { const d = parseKey(k); const wd = (d.getDay() + 6) % 7; d.setDate(d.getDate() - wd); return keyOf(d); };
+const fmtLong = k => parseKey(k).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const fmtDay = k => parseKey(k).toLocaleDateString(undefined, { weekday: 'long' });
+const fmtShort = k => parseKey(k).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+const hashStr = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+
+/* ================= helpers ================= */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+function getDay(k, create) {
+  if (S.days[k]) {
+    const d = S.days[k], b = blankDay();
+    for (const f in b) if (d[f] === undefined) d[f] = b[f];
+    return d;
+  }
+  const d = blankDay();
+  if (create) S.days[k] = d;
+  return d;
+}
+function getMonth(mk) { return S.months[mk] || (S.months[mk] = { goals: [], word: '' }); }
+function setPath(obj, path, val) {
+  const parts = path.split('.');
+  let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]];
+  o[parts[parts.length - 1]] = val;
+}
+function hasContent(d) {
+  if (!d) return false;
+  const txt = [d.intention, d.journal, d.brain, d.sleep, d.steps, ...(d.priorities || []), ...(d.gratitude || []),
+    ...Object.values(d.reflection || {}), ...Object.values(d.meals || {}), ...Object.values(d.grounding || {})];
+  return !!(d.mood || d.water || d.energy || d.stress || (d.todos && d.todos.length) || (d.feelings && d.feelings.length)
+    || Object.values(d.habits || {}).some(Boolean) || Object.values(d.selfcare || {}).some(Boolean) || txt.some(t => t && String(t).trim()));
+}
+function streak() {
+  let k = todayKey(), n = 0;
+  if (!hasContent(S.days[k])) k = addDays(k, -1);
+  while (hasContent(S.days[k])) { n++; k = addDays(k, -1); }
+  return n;
+}
+
+const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4"/></svg>';
+const SPRIG = '<svg class="sprig" viewBox="0 0 90 26" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true"><path d="M4 22C30 18 56 12 86 4"/><path d="M20 19c-2-5 1-9 6-10-1 5-2 8-6 10zM36 16c-1-6 3-9 8-9-1 5-3 8-8 9zM52 12c0-6 4-8 9-8-2 5-4 7-9 8zM26 20c5-1 9 1 10 5-5 0-8-1-10-5zM44 15c5-2 9 0 10 4-5 1-8-1-10-4zM62 10c5-2 9 0 10 4-5 1-8-1-10-4z"/></svg>';
+
+const ICONS = {
+  bottle: '<path d="M10 2.5h4v3h-4zM9 5.5h6l1.5 3.5v11a1.5 1.5 0 0 1-1.5 1.5H9A1.5 1.5 0 0 1 7.5 20V9z M7.5 12h9"/>',
+  stretch: '<circle cx="12" cy="4.5" r="2"/><path d="M12 7v6.5M5 8.5l7 2.5 7-2.5M12 13.5l-4 7M12 13.5l4 7"/>',
+  book: '<path d="M3 5.5c3-1.2 6-1 9 1 3-2 6-2.2 9-1v13.5c-3-1.2-6-1-9 1-3-2-6-2.2-9-1zM12 6.5v13.5"/>',
+  candle: '<path d="M8.5 11h7v10h-7zM12 2.5c1.8 2.2 1.8 4 0 5.5-1.8-1.5-1.8-3.3 0-5.5zM12 8v3"/>',
+  journal: '<path d="M6.5 3h11v18h-11zM10 7.5h5M10 11h5M4.5 6.5h3M4.5 10.5h3M4.5 14.5h3"/>',
+  cup: '<path d="M5 10h11v4.5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 11h1.8a2.2 2.2 0 0 1 0 4.4H16M9 3c-1 1.5 1 2.5 0 4.5M12.5 3c-1 1.5 1 2.5 0 4.5"/>',
+  leaf: '<path d="M5 19.5C5 10.5 11 5 20 4c-.8 9-6.5 15.5-15 15.5zM5 19.5l8.5-8.5"/>',
+  heart: '<path d="M12 20s-7.5-4.5-7.5-10.2A4.2 4.2 0 0 1 12 7.2a4.2 4.2 0 0 1 7.5 2.6C19.5 15.5 12 20 12 20z"/>',
+  bath: '<path d="M3 12h18v2a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5.5A2 2 0 0 1 10 5M7 19l-1 2M17 19l1 2"/>',
+  music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+  moon: '<path d="M19 15A8 8 0 0 1 9 5a8 8 0 1 0 10 10z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+};
+function iconFor(name) {
+  const n = name.toLowerCase();
+  const map = [['skin', 'bottle'], ['face', 'bottle'], ['stretch', 'stretch'], ['yoga', 'stretch'], ['walk', 'stretch'], ['move', 'stretch'], ['exercise', 'stretch'],
+    ['read', 'book'], ['book', 'book'], ['medit', 'candle'], ['pray', 'candle'], ['candle', 'candle'], ['journal', 'journal'], ['write', 'journal'],
+    ['me time', 'cup'], ['tea', 'cup'], ['coffee', 'cup'], ['air', 'leaf'], ['nature', 'leaf'], ['outside', 'leaf'], ['garden', 'leaf'],
+    ['bath', 'bath'], ['shower', 'bath'], ['music', 'music'], ['song', 'music'], ['sleep', 'moon'], ['nap', 'moon'], ['rest', 'moon'], ['sun', 'sun']];
+  for (const [k, v] of map) if (n.includes(k)) return v;
+  return 'heart';
+}
+const svgIcon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+const CUP = '<svg viewBox="0 0 26 32" aria-hidden="true"><path class="fill" d="M6.2 12h13.6l-1.3 15.5H7.5z"/><path d="M4 4h18l-2.2 24.5H6.2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+
+/* ================= view state ================= */
+const view = { tab: 'today', day: todayKey(), month: todayKey().slice(0, 7), q: '', breath: null, pattern: 'box', confirmReset: false };
+try { const t = localStorage.getItem('tend.tab'); if (t) view.tab = t; } catch (e) {}
+
+/* ================= renderers ================= */
+function card(label, tapeColor, body, cls = '') {
+  return `<section class="card ${cls}">${label ? `<span class="tape" style="--t:var(--tape-${tapeColor})">${esc(label)}</span>` : ''}${body}</section>`;
+}
+function bind(path, extra = '') { return `data-bind="${path}" ${extra}`; }
+
+function moodPicker(d) {
+  return `<div class="moods" role="group" aria-label="Mood">${MOODS.map(m =>
+    `<button class="mood" style="--c:${moodVar(m.id)}" data-act="mood" data-v="${m.id}" aria-pressed="${d.mood === m.id}"><span class="m"></span>${m.label}</button>`).join('')}</div>`;
+}
+function scale(act, val, color, lo, hi) {
+  let b = '';
+  for (let i = 1; i <= 5; i++) b += `<button class="${i <= val ? 'on' : ''}" data-act="${act}" data-v="${i}" aria-label="${i} of 5" aria-pressed="${i === val}"></button>`;
+  return `<div class="scale" style="--c:${color}"><small>${lo}</small>${b}<small>${hi}</small></div>`;
+}
+
+function renderToday() {
+  const k = view.day, d = getDay(k), isToday = k === todayKey();
+  const affirmations = S.affirmations.length ? S.affirmations : DEFAULT_AFFIRM;
+  const aff = affirmations[hashStr(k) % affirmations.length];
+  const st = streak();
+  const wk = mondayOf(k);
+  const weekKeys = Array.from({ length: 7 }, (_, i) => addDays(wk, i));
+  const tk = todayKey();
+
+  const habitRows = S.habits.map(h => `<tr><td class="name" title="${esc(h.name)}"><i style="background:${h.c}"></i>${esc(h.name)}</td>${weekKeys.map(wkKey => {
+    const on = !!(S.days[wkKey] && S.days[wkKey].habits[h.id]);
+    return `<td><button class="hdot ${on ? 'on' : ''} ${wkKey > tk ? 'future' : ''}" style="--c:${h.c}" data-act="habit" data-k="${wkKey}" data-id="${h.id}" aria-pressed="${on}" aria-label="${esc(h.name)} on ${fmtDay(wkKey)}"></button></td>`;
+  }).join('')}</tr>`).join('');
+
+  const prevTodos = (S.days[addDays(k, -1)] || {}).todos || [];
+  const carry = prevTodos.some(t => !t.done && !d.todos.some(x => x.t === t.t));
+
+  const steps = parseInt(String(d.steps).replace(/\D/g, ''), 10) || 0;
+
+  return `
+  <div class="daybar">
+    <button class="round" data-act="day" data-v="-1" aria-label="Previous day">‹</button>
+    <h2>${esc(fmtDay(k))}<span class="sub">${esc(fmtShort(k))}</span></h2>
+    <button class="round" data-act="day" data-v="1" aria-label="Next day">›</button>
+    ${isToday ? '' : '<button class="chip-btn" data-act="gotoday">Back to today</button>'}
+  </div>
+  <p class="streak">${st ? `You've shown up for yourself <b>${st}</b> day${st === 1 ? '' : 's'} in a row <span class="heart-mark">♡</span>` : 'A fresh page. Write one small thing to begin <span class="heart-mark">♡</span>'}</p>
+  <div class="flow">
+    ${card("Today's intention", 'tan', `<textarea class="lined" rows="2" ${bind('intention')} placeholder="I choose to show up for myself today.">${esc(d.intention)}</textarea>`, 'intention')}
+
+    ${card('Top 3 priorities', 'rose', `<div class="prio">${[0, 1, 2].map(i =>
+      `<label><span class="num">${i + 1}</span><input class="line-input" ${bind('priorities.' + i)} value="${esc(d.priorities[i])}" aria-label="Priority ${i + 1}"><span class="heart-mark">♡</span></label>`).join('')}</div>`)}
+
+    ${card('Daily to-do list', 'sage', `
+      <ul class="checks">${d.todos.map((t, i) => `<li class="${t.done ? 'done' : ''}">
+        <button class="box" data-act="todo" data-i="${i}" aria-pressed="${!!t.done}" aria-label="Mark done">${CHECK}</button>
+        <span class="txt">${esc(t.t)}</span><button class="x" data-act="todo-del" data-i="${i}" aria-label="Remove">×</button></li>`).join('')}</ul>
+      ${d.todos.length ? '' : '<p class="hint">Nothing here yet. Add the little things that matter today.</p>'}
+      <div class="add-row"><input class="line-input" id="todo-new" placeholder="Add a to-do and press Enter" aria-label="New to-do"><button class="chip-btn" data-act="todo-add">Add</button></div>
+      ${carry ? '<p class="small" style="margin:10px 0 0"><button class="chip-btn" data-act="carry">Bring over yesterday\'s unfinished</button></p>' : ''}`)}
+
+    ${card('Habit tracker', 'peach', `
+      <div class="scroll-x"><table class="habits"><thead><tr><th></th>${weekKeys.map(wkKey => `<th class="${wkKey === k ? 'today-col' : ''}">${parseKey(wkKey).toLocaleDateString(undefined, { weekday: 'narrow' })}</th>`).join('')}</tr></thead>
+      <tbody>${habitRows}</tbody></table></div>
+      ${S.habits.length ? '' : '<p class="hint">Add habits in Settings.</p>'}`)}
+
+    ${card('Wellness', 'sage', `<div class="well">
+      <div class="mini span"><span class="serif-label">Water tracker</span>
+        <div class="cups">${Array.from({ length: 8 }, (_, i) => `<button class="cup ${i < d.water ? 'on' : ''}" data-act="water" data-v="${i + 1}" aria-label="${i + 1} glasses">${CUP}</button>`).join('')}</div>
+        <span class="small">${d.water} of 8 glasses</span></div>
+      <div class="mini span"><span class="serif-label">Mood</span>${moodPicker(d)}</div>
+      <div class="mini"><span class="serif-label">Steps goal</span>
+        <input class="small-in" inputmode="numeric" ${bind('steps')} value="${esc(d.steps)}" aria-label="Steps"> <span class="small">/ 10,000</span>
+        <div class="bar"><span style="width:${Math.min(100, steps / 100)}%"></span></div></div>
+      <div class="mini"><span class="serif-label">Sleep</span>
+        <input class="small-in" inputmode="decimal" ${bind('sleep')} value="${esc(d.sleep)}" aria-label="Hours slept"> <span class="small">hrs</span></div>
+    </div>`)}
+
+    ${card('', '', `<span class="serif-label">A note for you</span><p>${esc(aff)}</p><span class="heart-mark">♡</span>`, 'note affirm')}
+
+    ${card('Self care', 'peach', `<div class="care">${S.selfcare.map(n =>
+      `<button data-act="care" data-v="${esc(n)}" aria-pressed="${!!d.selfcare[n]}"><span class="ic">${svgIcon(iconFor(n))}</span><span class="lbl">${esc(n)}</span></button>`).join('')}</div>`)}
+
+    ${card('Gratitude', 'rose', `<div class="grat">${[0, 1, 2].map(i =>
+      `<label><span class="heart-mark">♥</span><input class="line-input" ${bind('gratitude.' + i)} value="${esc(d.gratitude[i])}" placeholder="${['I\'m grateful for…', 'Someone who helped me…', 'A small moment…'][i]}" aria-label="Gratitude ${i + 1}"></label>`).join('')}</div>`)}
+
+    ${card('Meals', 'tan', `<div class="meals">${['breakfast', 'lunch', 'dinner', 'snacks'].map(m =>
+      `<span class="serif-label">${m}</span><input class="line-input" ${bind('meals.' + m)} value="${esc(d.meals[m])}" aria-label="${m}">`).join('')}</div>`)}
+
+    ${card('Reflection', 'sage', `<div class="refl">${[
+      ['happy', 'What made me happy today?'], ['improve', 'What could I improve?'], ['learn', 'What did I learn?'], ['tomorrow', 'Tomorrow I will…']].map(([f, q]) =>
+      `<label><span class="q">${q}</span><textarea class="lined" rows="2" ${bind('reflection.' + f)}>${esc(d.reflection[f])}</textarea></label>`).join('')}</div>`)}
+  </div>`;
+}
+
+let breathTimer = null;
+const PATTERNS = {
+  box: { name: 'Box 4-4-4-4', steps: [['Breathe in', 4, true], ['Hold', 4, true], ['Breathe out', 4, false], ['Hold', 4, false]] },
+  relax: { name: '4-7-8', steps: [['Breathe in', 4, true], ['Hold', 7, true], ['Breathe out', 8, false]] },
+  calm: { name: 'Calm 5-5', steps: [['Breathe in', 5, true], ['Breathe out', 5, false]] },
+};
+function renderMind() {
+  const k = view.day, d = getDay(k);
+  const prompt = PROMPTS[hashStr(k + 'p') % PROMPTS.length];
+  const isToday = k === todayKey();
+  const g = [['5', 'see', 'things I can see'], ['4', 'touch', 'things I can touch'], ['3', 'hear', 'things I can hear'], ['2', 'smell', 'things I can smell'], ['1', 'taste', 'thing I can taste']];
+  return `
+  <div class="daybar">
+    <button class="round" data-act="day" data-v="-1" aria-label="Previous day">‹</button>
+    <h2>Mind &amp; heart<span class="sub">${esc(fmtLong(k))}</span></h2>
+    <button class="round" data-act="day" data-v="1" aria-label="Next day">›</button>
+    ${isToday ? '' : '<button class="chip-btn" data-act="gotoday">Back to today</button>'}
+  </div>
+  <div class="flow">
+    ${card('Check-in', 'rose', `
+      <p class="hint">How am I, really? No right answers.</p>
+      <span class="serif-label">Mood</span>${moodPicker(d)}
+      <div style="display:grid;gap:12px;margin-top:16px">
+        <div><span class="serif-label">Energy</span>${scale('energy', d.energy, 'var(--m-productive)', 'low', 'high')}</div>
+        <div><span class="serif-label">Stress</span>${scale('stress', d.stress, 'var(--m-tired)', 'calm', 'heavy')}</div>
+      </div>
+      <div style="margin-top:16px"><span class="serif-label">I'm feeling</span>
+        <div class="chips" style="margin-top:8px">${FEELINGS.map(f => `<button class="chip" data-act="feel" data-v="${f}" aria-pressed="${d.feelings.includes(f)}">${f}</button>`).join('')}</div></div>`)}
+
+    ${card('Dear diary', 'tan', `<p class="hint"><i>Prompt:</i> ${esc(prompt)}</p>
+      <textarea class="lined" rows="8" ${bind('journal')} placeholder="Write freely…">${esc(d.journal)}</textarea>`)}
+
+    ${card('Breathe', 'sage', `<div class="breath">
+      <div class="seg" role="group" aria-label="Breathing pattern">${Object.entries(PATTERNS).map(([id, p]) => `<button data-act="pattern" data-v="${id}" aria-pressed="${view.pattern === id}">${p.name}</button>`).join('')}</div>
+      <div class="orb-wrap"><div class="orb-ring"></div><div class="orb" id="orb"><span class="orb-label" id="orb-label">ready</span></div></div>
+      <div class="orb-count" id="orb-count">${view.breath ? '' : 'Press start and follow the circle'}</div>
+      <button class="btn" data-act="breathe">${view.breath ? 'Stop' : 'Start'}</button></div>`)}
+
+    ${card('Brain dump', 'sage', `<p class="hint">ideas · random thoughts · worries · things to do · reminders</p>
+      <textarea class="lined" rows="7" ${bind('brain')} placeholder="Empty your head here…">${esc(d.brain)}</textarea>`, 'grid-paper')}
+
+    ${card('5 · 4 · 3 · 2 · 1 grounding', 'peach', `<p class="hint">When everything feels loud, come back to your senses.</p>
+      <div class="ground">${g.map(([n, f, w]) => `<label><span class="n">${n}</span><span class="what">${w}</span><input class="line-input" ${bind('grounding.' + f)} value="${esc(d.grounding[f])}" aria-label="${n} ${w}"></label>`).join('')}</div>`)}
+
+    ${card('Daily affirmations', 'rose', `<ul class="checks">${(S.affirmations.length ? S.affirmations : DEFAULT_AFFIRM).map(a => `<li><span class="heart-mark">♡</span><span class="txt">${esc(a)}</span></li>`).join('')}</ul>
+      <p class="small" style="margin:10px 0 0">Edit these in Settings.</p>`)}
+
+    ${card('When I feel low', 'tan', `<p class="hint">Small things that help me. Try one.</p>
+      <ul class="checks">${S.toolbox.map(t => `<li><span class="heart-mark">•</span><span class="txt">${esc(t)}</span></li>`).join('')}</ul>
+      <p class="small" style="margin:10px 0 0">Edit this list in Settings.</p>`, 'note')}
+  </div>`;
+}
+
+function monthDays(mk) {
+  const [y, m] = mk.split('-').map(Number);
+  const n = new Date(y, m, 0).getDate();
+  return Array.from({ length: n }, (_, i) => `${mk}-${pad(i + 1)}`);
+}
+function bouquet(days) {
+  const W = 460, ox = 230, oy = 292;
+  const rings = [[8, 92], [11, 150], [12, 208]];
+  let i = 0, stems = '', blooms = '', leaves = '';
+  rings.forEach(([count, r], ri) => {
+    const spread = ri === 0 ? 62 : 72;
+    for (let j = 0; j < count && i < days.length; j++, i++) {
+      const a = (-spread + (2 * spread) * (count === 1 ? .5 : j / (count - 1))) * Math.PI / 180;
+      const x = ox + Math.sin(a) * r, y = oy - Math.cos(a) * r;
+      const x0 = ox + Math.sin(a) * 14, cx = x0 + (x - x0) * .25, cy = (oy + y) / 2;
+      stems += `<path d="M${x0.toFixed(1)} ${oy} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}"/>`;
+      if ((i + ri) % 3 === 0) {
+        const lx = x0 + (x - x0) * .45, ly = oy + (y - oy) * .45, rot = (a * 180 / Math.PI) + (j % 2 ? 50 : -50);
+        leaves += `<ellipse cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" rx="9" ry="3.6" transform="rotate(${rot.toFixed(0)} ${lx.toFixed(1)} ${ly.toFixed(1)})"/>`;
+      }
+      const dk = days[i], mood = S.days[dk] && S.days[dk].mood;
+      blooms += `<g data-act="open" data-k="${dk}" style="cursor:pointer"><title>${esc(fmtShort(dk))}${mood ? ' · ' + mood : ''}</title><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="13.5" fill="${mood ? moodVar(mood) : 'var(--card)'}" stroke="var(--ink-soft)" stroke-width="1.1"/><text x="${x.toFixed(1)}" y="${(y + 3.8).toFixed(1)}" text-anchor="middle">${i + 1}</text></g>`;
+    }
+  });
+  const vase = `<path d="M196 ${oy} h68 v7 q24 12 24 46 v40 q0 12 -12 12 h-92 q-12 0 -12 -12 v-40 q0 -34 24 -46 z" fill="var(--tape-sage)" fill-opacity=".55" stroke="var(--ink-soft)" stroke-width="1.2"/>
+    <path d="M196 ${oy + 9} q34 8 68 0" fill="none" stroke="var(--ink-soft)" stroke-width="1.1"/>
+    <path d="M222 ${oy + 9} q-10 12 -16 18 M238 ${oy + 9} q10 12 16 18 M230 ${oy + 9} q-14 -8 -14 -2 q0 6 14 2 q14 4 14 -2 q0 -6 -14 2" fill="none" stroke="var(--ink-soft)" stroke-width="1.1"/>`;
+  return `<svg class="bouquet" viewBox="0 0 ${W} 405" role="img" aria-label="Mood bouquet: one flower per day, coloured by mood">
+    <g fill="none" stroke="var(--sage)" stroke-width="1.2">${stems}</g><g fill="var(--sage)" fill-opacity=".7">${leaves}</g>${vase}${blooms}</svg>`;
+}
+function renderMonth() {
+  const mk = view.month, days = monthDays(mk), [y, m] = mk.split('-').map(Number);
+  const first = new Date(y, m - 1, 1), lead = (first.getDay() + 6) % 7;
+  const tk = todayKey();
+  const mo = getMonth(mk);
+  const cells = Array(lead).fill('').concat(days);
+  while (cells.length % 7) cells.push('');
+  let rows = '';
+  for (let r = 0; r < cells.length; r += 7) {
+    rows += '<tr>' + cells.slice(r, r + 7).map(dk => {
+      if (!dk) return '<td></td>';
+      const mood = S.days[dk] && S.days[dk].mood;
+      return `<td><button class="${dk === tk ? 'is-today' : ''}" data-act="open" data-k="${dk}" aria-label="Open ${esc(fmtLong(dk))}" style="--c:${mood ? moodVar(mood) : 'transparent'}">${Number(dk.slice(8))}<i></i></button></td>`;
+    }).join('') + '</tr>';
+  }
+  const logged = days.filter(dk => hasContent(S.days[dk]));
+  const sleeps = days.map(dk => parseFloat(S.days[dk] && S.days[dk].sleep)).filter(n => !isNaN(n) && n > 0);
+  const waters = days.map(dk => S.days[dk] && S.days[dk].water).filter(n => n > 0);
+  const counts = {};
+  days.forEach(dk => { const md = S.days[dk] && S.days[dk].mood; if (md) counts[md] = (counts[md] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const avg = a => a.length ? (a.reduce((s, n) => s + n, 0) / a.length) : 0;
+  const grid = `<div class="scroll-x"><table class="mgrid"><thead><tr><th></th>${days.map(dk => `<th>${Number(dk.slice(8))}</th>`).join('')}</tr></thead><tbody>
+    ${S.habits.map(h => `<tr><td class="name">${esc(h.name)}</td>${days.map(dk => {
+      const on = !!(S.days[dk] && S.days[dk].habits[h.id]);
+      return `<td><button class="${on ? 'on' : ''}" style="--c:${h.c}" data-act="habit" data-k="${dk}" data-id="${h.id}" aria-pressed="${on}" aria-label="${esc(h.name)}, ${esc(fmtShort(dk))}"><i></i></button></td>`;
+    }).join('')}</tr>`).join('')}</tbody></table></div>`;
+  return `
+  <div class="monthbar">
+    <button class="round" data-act="month" data-v="-1" aria-label="Previous month">‹</button>
+    <h2>${esc(first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))}</h2>
+    <button class="round" data-act="month" data-v="1" aria-label="Next month">›</button>
+  </div>
+  <div class="grid2">
+    <div style="display:grid;gap:26px">
+      ${card('This month', 'rose', `<table class="cal"><thead><tr>${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+        <p class="small" style="margin:10px 0 0">Tap a day to open its page. The dot shows that day's mood.</p>`)}
+      ${card('Monthly goals', 'sage', `
+        <label class="serif-label" for="m-word">My word for the month</label>
+        <input class="line-input" id="m-word" data-mbind="word" value="${esc(mo.word)}" placeholder="e.g. gentle" style="font:400 1.5rem var(--script);margin-bottom:14px">
+        <ul class="checks">${mo.goals.map((gl, i) => `<li class="${gl.done ? 'done' : ''}"><button class="box" data-act="goal" data-i="${i}" aria-pressed="${!!gl.done}" aria-label="Mark goal done">${CHECK}</button><span class="txt">${esc(gl.t)}</span><button class="x" data-act="goal-del" data-i="${i}" aria-label="Remove">×</button></li>`).join('')}</ul>
+        ${mo.goals.length ? '' : '<p class="hint">Read 4 books? Drink more water? Be more positive? Add a few.</p>'}
+        <div class="add-row"><input class="line-input" id="goal-new" placeholder="Add a goal and press Enter" aria-label="New goal"><button class="chip-btn" data-act="goal-add">Add</button></div>`)}
+      ${card('Month at a glance', 'tan', `<div class="stats">
+        <div class="stat"><b>${logged.length}</b><span>days journaled</span></div>
+        <div class="stat"><b>${sleeps.length ? avg(sleeps).toFixed(1) : '–'}</b><span>avg sleep hrs</span></div>
+        <div class="stat"><b>${waters.length ? avg(waters).toFixed(1) : '–'}</b><span>avg glasses</span></div>
+        <div class="stat"><b style="font-size:1.4rem;padding:6px 0">${top ? esc(top[0]) : '–'}</b><span>most often</span></div></div>`)}
+    </div>
+    <div style="display:grid;gap:26px">
+      ${card('Mood tracker', 'rose', `<div class="bq-wrap">${bouquet(days)}
+        <div class="legend">${MOODS.map(md => `<span><i style="--c:${moodVar(md.id)}"></i>${md.label}</span>`).join('')}</div></div>`)}
+      ${card('Habit tracker', 'peach', S.habits.length ? grid : '<p class="hint">Add habits in Settings.</p>')}
+    </div>
+  </div>`;
+}
+
+function renderPages() {
+  return `
+  <div class="monthbar"><h2>Past pages</h2></div>
+  <input class="line-input search" id="search" value="${esc(view.q)}" placeholder="Search your journal…" aria-label="Search entries">
+  <div id="entries">${entriesHTML()}</div>`;
+}
+function entriesHTML() {
+  const q = view.q.trim().toLowerCase();
+  const keys = Object.keys(S.days).filter(k => hasContent(S.days[k])).sort().reverse();
+  const list = keys.filter(k => !q || JSON.stringify(S.days[k]).toLowerCase().includes(q) || fmtLong(k).toLowerCase().includes(q));
+  if (!list.length) return `<div class="empty"><p class="script-line">${keys.length ? 'Nothing matches that search.' : 'Your pages will gather here.'}</p><p>${keys.length ? 'Try another word.' : 'Every day you write something, it appears in this list so you can look back.'}</p></div>`;
+  return `<div class="entries">${list.slice(0, 120).map(k => {
+    const d = getDay(k);
+    const grat = d.gratitude.filter(Boolean);
+    const habitsDone = S.habits.filter(h => d.habits[h.id]).length;
+    const bits = [];
+    if (d.intention) bits.push(`<p><span class="serif-label">Intention</span>${esc(d.intention)}</p>`);
+    if (d.feelings.length) bits.push(`<p><span class="serif-label">Feeling</span>${esc(d.feelings.join(', '))}</p>`);
+    if (d.journal) bits.push(`<p><span class="serif-label">Diary</span>${esc(d.journal.length > 420 ? d.journal.slice(0, 420) + '…' : d.journal)}</p>`);
+    if (grat.length) bits.push(`<p><span class="serif-label">Grateful for</span>${esc(grat.join(' · '))}</p>`);
+    if (d.reflection.happy) bits.push(`<p><span class="serif-label">Made me happy</span>${esc(d.reflection.happy)}</p>`);
+    const meta = [d.mood && d.mood, habitsDone && `${habitsDone}/${S.habits.length} habits`, d.water && `${d.water} glasses`, d.sleep && `${d.sleep} hrs sleep`].filter(Boolean).join(' · ');
+    return `<article class="card entry"><h3>${d.mood ? `<i style="--c:${moodVar(d.mood)}"></i>` : ''}${esc(fmtLong(k))}</h3>
+      ${meta ? `<div class="meta">${esc(meta)}</div>` : ''}${bits.join('')}
+      <div class="row" style="margin-top:10px"><button class="chip-btn" data-act="open" data-k="${k}">Open this day</button></div></article>`;
+  }).join('')}</div>`;
+}
+
+function editList(kind, items, ph) {
+  return `<ul class="edit-list">${items.map((t, i) => `<li><input class="line-input" data-lbind="${kind}" data-i="${i}" value="${esc(t)}" aria-label="${kind} ${i + 1}"><button class="x" data-act="ldel" data-kind="${kind}" data-i="${i}" aria-label="Remove">×</button></li>`).join('')}</ul>
+    <div class="add-row"><input class="line-input" id="new-${kind}" placeholder="${ph}" aria-label="${ph}"><button class="chip-btn" data-act="ladd" data-kind="${kind}">Add</button></div>`;
+}
+function renderSettings() {
+  return `
+  <div class="monthbar"><h2>Settings</h2></div>
+  <div class="flow">
+    ${card('About me', 'sage', `<label class="serif-label" for="s-name">Whose journal is this?</label>
+      <input class="line-input" id="s-name" data-sbind="name" value="${esc(S.name)}" placeholder="Your name" style="font:400 1.6rem var(--script)">`)}
+    ${card('Habits', 'peach', `<p class="hint">Tap a colour to change a habit's ink.</p>
+      <ul class="edit-list">${S.habits.map((h, i) => `<li style="flex-wrap:wrap"><input class="line-input" data-hbind="${i}" value="${esc(h.name)}" aria-label="Habit ${i + 1}">
+        <span class="swatches">${COLORS.map(c => `<button class="sw" style="--c:${c}" data-act="hcolor" data-i="${i}" data-v="${c}" aria-pressed="${h.c === c}" aria-label="Colour"></button>`).join('')}</span>
+        <button class="x" data-act="hdel" data-i="${i}" aria-label="Remove habit">×</button></li>`).join('')}</ul>
+      <div class="add-row"><input class="line-input" id="new-habit" placeholder="New habit" aria-label="New habit"><button class="chip-btn" data-act="hadd">Add</button></div>`)}
+    ${card('Self-care menu', 'rose', editList('selfcare', S.selfcare, 'e.g. Bubble bath'))}
+    ${card('Affirmations', 'tan', editList('affirmations', S.affirmations, 'Add an affirmation'))}
+    ${card('When I feel low', 'sage', editList('toolbox', S.toolbox, 'Something that helps'))}
+    ${card('Backup', 'peach', `<p class="hint">Your journal lives only on this device, in this browser. Download a backup now and then, and use it to move your journal to another device.</p>
+      <div class="row"><button class="btn" data-act="export">Download backup</button><button class="btn" data-act="import">Restore backup</button></div>
+      ${storageOk ? '' : '<p class="small" style="color:var(--accent)">This browser is blocking storage, so entries will disappear when you close the page.</p>'}
+      <p class="small" style="margin-top:16px">Install it like an app: on iPhone tap Share → Add to Home Screen. On Android or in Chrome/Edge, use the browser menu → Install app.</p>`)}
+    ${card('Start over', 'rose', `<p class="hint">Erase every entry and setting on this device. Download a backup first if you might want them back.</p>
+      <button class="btn danger" data-act="reset">${view.confirmReset ? 'Tap again to erase everything' : 'Erase journal'}</button>`)}
+  </div>`;
+}
+
+/* ================= render ================= */
+const main = document.getElementById('main');
+function render() {
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-current', t.dataset.tab === view.tab ? 'page' : 'false'));
+  const owner = document.getElementById('owner');
+  owner.hidden = !S.name; owner.textContent = S.name ? `${S.name}'s journal` : '';
+  if (view.tab !== 'mind') stopBreath();
+  main.innerHTML = ({ today: renderToday, mind: renderMind, month: renderMonth, pages: renderPages, settings: renderSettings }[view.tab] || renderToday)();
+}
+
+/* ================= breathing ================= */
+function stopBreath() { clearTimeout(breathTimer); breathTimer = null; view.breath = null; }
+function runBreath() {
+  const p = PATTERNS[view.pattern];
+  let si = 0, left = p.steps[0][1];
+  const tick = () => {
+    const orb = document.getElementById('orb'); if (!orb || !view.breath) return stopBreath();
+    const [label, secs, big] = p.steps[si];
+    if (left === secs) { orb.style.transitionDuration = secs + 's'; orb.classList.toggle('big', big); document.getElementById('orb-label').textContent = label.toLowerCase(); }
+    document.getElementById('orb-count').textContent = `${label} · ${left}`;
+    left--;
+    if (left === 0) { si = (si + 1) % p.steps.length; left = p.steps[si][1]; if (si === 0) view.breath.rounds++; }
+    breathTimer = setTimeout(tick, 1000);
+  };
+  tick();
+}
+
+/* ================= events ================= */
+function addFromInput(id, fn) {
+  const el = document.getElementById(id); if (!el) return;
+  const v = el.value.trim(); if (!v) { el.focus(); return; }
+  fn(v); save(); render();
+  const again = document.getElementById(id); if (again) again.focus();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, v = b.dataset.v, i = Number(b.dataset.i);
+  const d = () => getDay(view.day, true);
+  if (act !== 'reset') view.confirmReset = false;
+  switch (act) {
+    case 'tab': view.tab = b.dataset.tab; try { localStorage.setItem('tend.tab', view.tab); } catch (err) {} break;
+    case 'day': view.day = addDays(view.day, Number(v)); break;
+    case 'gotoday': view.day = todayKey(); break;
+    case 'open': view.day = b.dataset.k; view.tab = 'today'; window.scrollTo({ top: 0 }); break;
+    case 'month': { const [y, m] = view.month.split('-').map(Number); const dt = new Date(y, m - 1 + Number(v), 1); view.month = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}`; break; }
+    case 'todo': d().todos[i].done = !d().todos[i].done; save(); break;
+    case 'todo-del': d().todos.splice(i, 1); save(); break;
+    case 'todo-add': return addFromInput('todo-new', t => d().todos.push({ t, done: false }));
+    case 'carry': { const prev = (S.days[addDays(view.day, -1)] || {}).todos || []; const cur = d(); prev.filter(t => !t.done && !cur.todos.some(x => x.t === t.t)).forEach(t => cur.todos.push({ t: t.t, done: false })); save(); break; }
+    case 'habit': { const day = getDay(b.dataset.k, true); day.habits[b.dataset.id] = !day.habits[b.dataset.id]; save(); break; }
+    case 'water': { const dd = d(); dd.water = dd.water === Number(v) ? Number(v) - 1 : Number(v); save(); break; }
+    case 'mood': { const dd = d(); dd.mood = dd.mood === v ? '' : v; save(); break; }
+    case 'energy': case 'stress': { const dd = d(); dd[act] = dd[act] === Number(v) ? 0 : Number(v); save(); break; }
+    case 'feel': { const dd = d(); dd.feelings = dd.feelings.includes(v) ? dd.feelings.filter(f => f !== v) : dd.feelings.concat(v); save(); break; }
+    case 'care': { const dd = d(); dd.selfcare[v] = !dd.selfcare[v]; save(); break; }
+    case 'goal': { const g = getMonth(view.month).goals[i]; g.done = !g.done; save(); break; }
+    case 'goal-del': getMonth(view.month).goals.splice(i, 1); save(); break;
+    case 'goal-add': return addFromInput('goal-new', t => getMonth(view.month).goals.push({ t, done: false }));
+    case 'pattern': view.pattern = v; stopBreath(); break;
+    case 'breathe': if (view.breath) { stopBreath(); } else { render(); view.breath = { rounds: 0 }; document.querySelector('[data-act="breathe"]').textContent = 'Stop'; runBreath(); return; } break;
+    case 'hcolor': S.habits[i].c = v; save(); break;
+    case 'hdel': S.habits.splice(i, 1); save(); break;
+    case 'hadd': return addFromInput('new-habit', t => S.habits.push({ id: uid(), name: t, c: COLORS[S.habits.length % COLORS.length] }));
+    case 'ldel': S[b.dataset.kind].splice(i, 1); save(); break;
+    case 'ladd': return addFromInput('new-' + b.dataset.kind, t => S[b.dataset.kind].push(t));
+    case 'export': exportBackup(); return;
+    case 'import': document.getElementById('restore-file').click(); return;
+    case 'reset':
+      if (!view.confirmReset) { view.confirmReset = true; break; }
+      view.confirmReset = false; S = defaults(); try { localStorage.removeItem(KEY); } catch (err) {} flashSaved('Journal erased'); break;
+    default: return;
+  }
+  render();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  const id = e.target.id;
+  const map = { 'todo-new': 'todo-add', 'goal-new': 'goal-add', 'new-habit': 'hadd', 'new-selfcare': 'ladd', 'new-affirmations': 'ladd', 'new-toolbox': 'ladd' };
+  if (map[id]) { e.preventDefault(); const sel = id.startsWith('new-') && map[id] === 'ladd' ? `[data-act="ladd"][data-kind="${id.slice(4)}"]` : `[data-act="${map[id]}"]`; document.querySelector(sel).click(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.bind) { setPath(getDay(view.day, true), t.dataset.bind, t.value); save(); if (t.dataset.bind === 'steps') { const bar = t.closest('.mini').querySelector('.bar span'); const n = parseInt(t.value.replace(/\D/g, ''), 10) || 0; bar.style.width = Math.min(100, n / 100) + '%'; } }
+  else if (t.dataset.mbind) { getMonth(view.month)[t.dataset.mbind] = t.value; save(); }
+  else if (t.dataset.sbind) { S[t.dataset.sbind] = t.value; save(); const o = document.getElementById('owner'); o.hidden = !S.name; o.textContent = S.name ? `${S.name}'s journal` : ''; }
+  else if (t.dataset.hbind) { S.habits[Number(t.dataset.hbind)].name = t.value; save(); }
+  else if (t.dataset.lbind) { S[t.dataset.lbind][Number(t.dataset.i)] = t.value; save(); }
+  else if (t.id === 'search') { view.q = t.value; document.getElementById('entries').innerHTML = entriesHTML(); }
+});
+
+/* ================= backup ================= */
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `tend-journal-${todayKey()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  flashSaved('Backup downloaded');
+}
+document.getElementById('restore-file').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!data || typeof data !== 'object' || !data.days) throw new Error('not a Tend backup');
+      S = Object.assign(defaults(), data); save(); render(); flashSaved('Backup restored');
+    } catch (err) { flashSaved('That file is not a Tend backup'); }
+    e.target.value = '';
+  };
+  r.readAsText(f);
+});
+
+/* keep "today" correct if the app stays open past midnight */
+let lastToday = todayKey();
+setInterval(() => { const t = todayKey(); if (t !== lastToday) { if (view.day === lastToday) view.day = t; lastToday = t; if (!document.activeElement || !document.activeElement.matches('input,textarea')) render(); } }, 60000);
+
+render();
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
