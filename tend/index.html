@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tend Journal</title>
+<meta name="description" content="A bullet-journal style care journal with index tabs for self care, mental care and physical care.">
+<meta name="theme-color" content="#f5eee3">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tend">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Parisienne&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: a closed journal with numbered washi index tabs down the right edge (like Book Nook); inside, dotted pages hold taped paper notes. */
+:root {
+  --desk: #efe6d8;
+  --paper: #f8f2e8;
+  --card: #fdfaf4;
+  --page-edge: #e9dfcf;
+  --ink: #5b4535;
+  --ink-soft: #8c7664;
+  --line: #e2d4c1;
+  --dot: #ddcfba;
+  --tape-sage: #b9c6a8;
+  --tape-rose: #e8bdb6;
+  --tape-peach: #efcaa8;
+  --tape-tan: #dfc8a6;
+  --tape-mauve: #d3c2db;
+  --tape-butter: #ecdca2;
+  --tape-ink: #4f3f31;
+  --accent: #b5786d;
+  --sage: #8fa383;
+  --shadow: 0 1px 0 rgba(91,69,53,.05), 0 8px 24px -14px rgba(91,69,53,.35);
+  --book-shadow: 0 14px 34px -18px rgba(91,69,53,.45), 0 2px 6px rgba(91,69,53,.08);
+  --m-happy: #9fb48b; --m-calm: #c9c58c; --m-productive: #e6a87f;
+  --m-tired: #cf9894; --m-anxious: #b8a1c4; --m-sad: #95a6b8;
+  --script: "Parisienne", "Snell Roundhand", "Segoe Script", cursive;
+  --serif: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
+  --hand: "Patrick Hand", "Comic Neue", "Segoe Print", "Bradley Hand", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --desk: #221b16; --paper: #2c241e; --card: #352b23; --page-edge: #3d3229;
+    --ink: #f0e4d4; --ink-soft: #bfab96; --line: #4d3f33; --dot: #45382d;
+    --tape-sage: #6f7d62; --tape-rose: #8c6460; --tape-peach: #93704f; --tape-tan: #86704f; --tape-mauve: #76627f; --tape-butter: #857645; --tape-ink: #fbf3e8;
+    --accent: #e0a397; --sage: #a9bb9c; --shadow: 0 10px 26px -16px rgba(0,0,0,.7); --book-shadow: 0 16px 36px -16px rgba(0,0,0,.8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --desk: #221b16; --paper: #2c241e; --card: #352b23; --page-edge: #3d3229;
+  --ink: #f0e4d4; --ink-soft: #bfab96; --line: #4d3f33; --dot: #45382d;
+  --tape-sage: #6f7d62; --tape-rose: #8c6460; --tape-peach: #93704f; --tape-tan: #86704f; --tape-mauve: #76627f; --tape-butter: #857645; --tape-ink: #fbf3e8;
+  --accent: #e0a397; --sage: #a9bb9c; --shadow: 0 10px 26px -16px rgba(0,0,0,.7); --book-shadow: 0 16px 36px -16px rgba(0,0,0,.8);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; background: var(--desk); color: var(--ink);
+  font: 1.08rem/1.45 var(--hand);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px dashed var(--accent); outline-offset: 2px; }
+
+/* ---------- header ---------- */
+header.top { max-width: 1240px; margin: 0 auto; padding: 24px 0 10px; display: flex; align-items: center; gap: 16px; position: relative; }
+header.top svg.logo { flex: none; width: 70px; height: 70px; }
+.brand { font: 400 clamp(2.8rem, 8vw, 4rem)/1 var(--script); margin: 0; }
+.tagline { font: 1.1rem var(--hand); color: var(--ink-soft); margin: 2px 0 0; letter-spacing: .03em; }
+.heart, .heart-mark { color: var(--accent); }
+.saved { position: absolute; right: 0; top: 18px; font: 600 .78rem var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); opacity: 0; transition: opacity .4s; }
+.saved.on { opacity: 1; }
+
+/* ---------- book with index tabs ---------- */
+.book { max-width: 1240px; margin: 8px auto 26px; display: grid; grid-template-columns: minmax(0, 1fr) 200px; align-items: start; }
+.pages {
+  --spine: var(--tape-sage);
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--dot) 1.1px, transparent 1.3px);
+  background-size: 22px 22px;
+  border-radius: 16px 4px 4px 16px;
+  border-left: 14px solid var(--spine);
+  box-shadow: var(--book-shadow), 6px 0 0 var(--page-edge), 10px 0 0 var(--line), 13px 0 0 var(--page-edge);
+  min-height: 680px; padding: 30px 30px 36px; min-width: 0; transition: border-color .3s;
+}
+nav.tabs { display: flex; flex-direction: column; gap: 6px; padding-top: 24px; padding-left: 13px; }
+nav.tabs button {
+  border: 0; display: flex; align-items: center; gap: 10px; text-align: left;
+  background: var(--t); color: var(--tape-ink);
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.10) 0 6px, transparent 6px 12px);
+  font: 700 .84rem/1.15 var(--serif); letter-spacing: .12em; text-transform: uppercase;
+  padding: 12px 14px; border-radius: 0 12px 12px 0;
+  box-shadow: 2px 2px 4px rgba(0,0,0,.08);
+  transition: transform .15s ease, padding .15s ease;
+}
+nav.tabs .num { width: auto; height: auto; display: inline; background: none; color: inherit; font: 400 1.35rem/1 var(--script); text-transform: none; letter-spacing: 0; min-width: 18px; opacity: .85; }
+nav.tabs button:hover { transform: translateX(4px); }
+nav.tabs button[aria-selected="true"] { transform: translateX(-10px); padding-left: 24px; }
+nav.tabs .gap { height: 8px; }
+
+@media (max-width: 860px) {
+  .book { grid-template-columns: 1fr; }
+  nav.tabs { order: -1; flex-direction: row; overflow-x: auto; padding: 0 0 0 4px; gap: 4px; scrollbar-width: none; }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs .gap { display: none; }
+  nav.tabs button { border-radius: 12px 12px 0 0; padding: 10px 12px; white-space: nowrap; font-size: .76rem; }
+  nav.tabs button:hover { transform: none; }
+  nav.tabs button[aria-selected="true"] { transform: translateY(3px); padding-left: 12px; }
+  .pages { border-left-width: 0; border-top: 8px solid var(--spine); padding: 24px 14px 28px; border-radius: 4px 4px 16px 16px; box-shadow: var(--book-shadow); min-height: 480px; }
+  header.top svg.logo { width: 52px; height: 52px; }
+}
+
+/* ---------- page heading ---------- */
+.page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 18px; margin-bottom: 28px; }
+.page-head h2 { margin: 0; font: 400 clamp(2rem, 5vw, 2.7rem)/1.05 var(--script); text-wrap: balance; }
+.page-head .sub { margin: 4px 0 0; font: 600 .8rem var(--serif); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+.daynav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.daynav .when { font: 1.05rem var(--hand); min-width: 0; text-align: center; line-height: 1.2; }
+.round { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card); display: grid; place-items: center; font-size: 1.2rem; line-height: 1; padding: 0; }
+.round:hover { border-color: var(--ink-soft); }
+.chip-btn { border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 14px; font: 600 .78rem var(--serif); letter-spacing: .12em; text-transform: uppercase; }
+.chip-btn:hover { border-color: var(--ink-soft); }
+.streak { color: var(--ink-soft); margin: -16px 0 30px; font-size: 1.02rem; }
+
+/* ---------- cards ---------- */
+.tape {
+  display: inline-block; padding: 6px 18px 5px;
+  background: var(--t, var(--tape-sage));
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.10) 0 6px, transparent 6px 12px);
+  color: var(--tape-ink); font: 700 .82rem/1.1 var(--serif); letter-spacing: .16em; text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, 97.5% 30%, 100% 55%, 97% 100%, 0 100%, 2.5% 70%, 0 40%);
+}
+.flow { columns: 2 330px; column-gap: 22px; }
+.flow > * { break-inside: avoid; margin-bottom: 30px; }
+.card { position: relative; background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: 26px 20px 18px; box-shadow: var(--shadow); min-width: 0; }
+.card > .tape { position: relative; display: table; margin: -39px auto 14px; transform: rotate(-1.5deg); white-space: nowrap; }
+.card.note { border-radius: 4px; transform: rotate(-.6deg); }
+.card.note::before { content: ""; display: block; margin: -38px auto 14px; width: 86px; height: 24px; transform: rotate(2deg); background: var(--tape-tan); opacity: .85; clip-path: polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%); }
+.card.grid-paper { background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 20px 20px; background-position: -1px -1px; }
+.hint { color: var(--ink-soft); font-size: .95rem; margin: 0 0 10px; }
+.serif-label { font: 700 .74rem var(--serif); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+.script-line { font: 400 1.6rem/1.3 var(--script); }
+.small { font-size: .95rem; color: var(--ink-soft); }
+.stack { display: grid; gap: 16px; }
+
+/* writing surfaces */
+.line-input { width: 100%; border: 0; border-bottom: 1.5px dotted var(--ink-soft); background: transparent; padding: 4px 2px; outline: none; font-size: 1.08rem; }
+.line-input:focus { border-bottom-style: solid; border-bottom-color: var(--accent); }
+.lined { width: 100%; border: 0; resize: vertical; background: transparent; outline: none; line-height: 30px; padding: 0 2px; font-size: 1.08rem; min-height: 92px;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 29px, var(--line) 29px 30px); background-attachment: local; }
+.lined:focus { background-image: repeating-linear-gradient(to bottom, transparent 0 29px, var(--ink-soft) 29px 30px); }
+::placeholder { color: var(--ink-soft); opacity: .6; }
+.intention .lined { font: 400 1.55rem/30px var(--script); min-height: 62px; text-align: center; }
+
+.prio { display: flex; flex-direction: column; gap: 12px; }
+.prio label { display: flex; align-items: center; gap: 12px; }
+.num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--tape-rose); color: var(--tape-ink); display: grid; place-items: center; font: 700 1rem var(--serif); }
+
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.checks li { display: flex; align-items: center; gap: 10px; min-height: 30px; }
+.checks li .txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.checks li.done .txt { text-decoration: line-through; text-decoration-color: var(--accent); color: var(--ink-soft); }
+.box { flex: none; width: 20px; height: 20px; border: 1.6px solid var(--ink-soft); border-radius: 3px; background: transparent; padding: 0; display: grid; place-items: center; color: var(--accent); }
+.box svg { width: 15px; height: 15px; opacity: 0; transition: opacity .15s; }
+.box[aria-pressed="true"] svg { opacity: 1; }
+.x { border: 0; background: none; color: var(--ink-soft); opacity: .45; font-size: 1.1rem; padding: 0 4px; }
+.x:hover { opacity: 1; color: var(--accent); }
+.add-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.add-row .line-input { flex: 1; min-width: 0; }
+
+/* habits */
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.habits { width: 100%; border-collapse: collapse; font-size: 1rem; }
+.habits th { font: 700 .72rem var(--serif); letter-spacing: .1em; color: var(--ink-soft); padding: 0 0 6px; text-align: center; }
+.habits th.today-col { color: var(--accent); }
+.habits td { padding: 4px 0; text-align: center; }
+.habits td.name { text-align: left; padding-right: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+.habits td.name i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.hdot { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--ink-soft); background: transparent; padding: 0; opacity: .7; transition: transform .15s; }
+.hdot:hover { transform: scale(1.15); opacity: 1; }
+.hdot.on { background: var(--c); border-color: var(--c); opacity: 1; }
+.hdot.future { opacity: .25; }
+.mgrid { border-collapse: collapse; font-size: .95rem; }
+.mgrid th { font: 700 .66rem var(--serif); color: var(--ink-soft); padding: 2px 0; width: 22px; min-width: 22px; text-align: center; }
+.mgrid th.today-col { color: var(--accent); }
+.mgrid td { border: 1px solid var(--line); padding: 0; text-align: center; height: 24px; }
+.mgrid td.name { border: 0; border-right: 1px solid var(--line); text-align: left; padding: 0 10px 0 0; white-space: nowrap; position: sticky; left: 0; background: var(--card); z-index: 1; }
+.mgrid td.count { border: 0; padding-left: 8px; font: 600 .9rem var(--serif); color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mgrid button { width: 22px; height: 22px; border: 0; background: none; padding: 0; display: grid; place-items: center; }
+.mgrid button i { width: 12px; height: 12px; border-radius: 50%; }
+.mgrid button.on i { background: var(--c); }
+
+/* wellness pieces */
+.well { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mini { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 10px 12px; text-align: center; min-width: 0; }
+.mini .serif-label { display: block; margin-bottom: 8px; }
+.cups { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.cup { border: 0; background: none; padding: 0; width: 30px; height: 36px; color: var(--ink-soft); }
+.cup svg { width: 100%; height: 100%; }
+.cup .fill { fill: transparent; transition: fill .2s; }
+.cup.on .fill { fill: var(--m-sad); opacity: .75; }
+.small-in { width: 80px; text-align: center; border: 0; border-bottom: 1.5px dotted var(--ink-soft); background: transparent; outline: none; font-size: 1.1rem; }
+.bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 8px; }
+.bar > span { display: block; height: 100%; background: var(--c, var(--sage)); border-radius: 99px; }
+.pair { display: grid; grid-template-columns: auto 1fr; gap: 10px 12px; align-items: end; }
+.pair .serif-label { padding-bottom: 6px; }
+input[type="time"].line-input { max-width: 150px; }
+
+.moods { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; }
+.mood { display: flex; flex-direction: column; align-items: center; gap: 3px; border: 0; background: none; padding: 2px; font-size: .9rem; color: var(--ink-soft); }
+.mood .m { width: 28px; height: 28px; border-radius: 50%; background: var(--c); opacity: .45; border: 2px solid transparent; transition: all .15s; }
+.mood:hover .m { opacity: .8; }
+.mood[aria-pressed="true"] { color: var(--ink); }
+.mood[aria-pressed="true"] .m { opacity: 1; border-color: var(--ink); transform: scale(1.1); }
+.legend { display: flex; flex-direction: column; gap: 8px; }
+.legend span { display: flex; align-items: center; gap: 10px; }
+.legend i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); }
+
+.scale { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.scale button { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--ink-soft); background: transparent; padding: 0; }
+.scale button.on { background: var(--c, var(--sage)); border-color: var(--c, var(--sage)); }
+.scale small { color: var(--ink-soft); font-size: .85rem; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1.5px solid var(--line); background: transparent; border-radius: 999px; padding: 2px 12px; font-size: .98rem; }
+.chip[aria-pressed="true"] { background: var(--c, var(--tape-rose)); border-color: var(--c, var(--tape-rose)); color: var(--tape-ink); }
+
+.care { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 14px 8px; }
+.care button { border: 0; background: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: .92rem; color: var(--ink-soft); min-width: 0; }
+.care .ic { width: 54px; height: 54px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--paper); display: grid; place-items: center; color: var(--ink-soft); transition: all .2s; }
+.care .ic svg { width: 26px; height: 26px; }
+.care button[aria-pressed="true"] { color: var(--ink); }
+.care button[aria-pressed="true"] .ic { background: var(--c, var(--tape-peach)); border-color: var(--c, var(--tape-peach)); color: var(--tape-ink); }
+.care span.lbl { text-align: center; overflow-wrap: anywhere; }
+
+.grat { display: flex; flex-direction: column; gap: 10px; }
+.grat label { display: flex; align-items: center; gap: 10px; }
+.refl { display: flex; flex-direction: column; gap: 14px; }
+.refl label { display: block; }
+.refl .lined { min-height: 60px; }
+.affirm { text-align: center; }
+.affirm p { font: 400 1.7rem/1.35 var(--script); margin: 6px 0 4px; text-wrap: balance; }
+
+/* today: care at a glance */
+.glance { display: flex; flex-direction: column; gap: 14px; }
+.glance-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; border-bottom: 1.5px dotted var(--line); padding-bottom: 12px; }
+.glance-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.glance-row h3 { margin: 0; font: 400 1.6rem/1.1 var(--script); }
+.glance-row p { margin: 0; grid-column: 1; color: var(--ink-soft); font-size: 1rem; }
+.glance-row .bar { grid-column: 1 / -1; margin-top: 4px; }
+.glance-row .chip-btn { grid-row: 1 / 3; grid-column: 2; }
+
+/* breathing */
+.breath { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.orb-wrap { width: 190px; height: 190px; display: grid; place-items: center; position: relative; }
+.orb-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px dashed var(--line); }
+.orb { width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, var(--tape-rose), var(--tape-mauve)); transition: transform 4s ease-in-out; display: grid; place-items: center; }
+.orb.big { transform: scale(1.95); }
+.orb-label { font: 400 1.5rem var(--script); color: var(--tape-ink); }
+.orb-count { font: 600 .8rem var(--serif); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); min-height: 1.2em; text-align: center; }
+.seg { display: inline-flex; flex-wrap: wrap; justify-content: center; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 4px 12px; font: 600 .74rem var(--serif); letter-spacing: .1em; text-transform: uppercase; }
+.seg button[aria-pressed="true"] { background: var(--tape-mauve); color: var(--tape-ink); }
+
+.ground { display: flex; flex-direction: column; gap: 10px; }
+.ground label { display: grid; grid-template-columns: 34px 1fr; column-gap: 8px; align-items: end; }
+.ground .n { grid-row: 1 / 3; font: 400 2rem/1 var(--script); color: var(--accent); text-align: center; align-self: center; }
+.ground .what { font-size: .9rem; color: var(--ink-soft); }
+
+/* month */
+.cal { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.cal th { background: var(--tape-rose); color: var(--tape-ink); font: 700 .78rem var(--serif); letter-spacing: .1em; padding: 5px 0; }
+.cal td { text-align: center; padding: 3px 0; }
+.cal button { width: 100%; max-width: 44px; aspect-ratio: 1; border: 0; background: none; border-radius: 50%; padding: 0; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.02rem; }
+.cal button:hover { background: var(--paper); }
+.cal button.is-today { outline: 1.5px solid var(--accent); }
+.cal button i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, transparent); margin-top: 1px; }
+.bouquet { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
+.bouquet text { font: 11px var(--hand); fill: var(--ink); }
+.bq-wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+@media (max-width: 520px) { .bq-wrap { grid-template-columns: 1fr; } .legend { flex-direction: row; flex-wrap: wrap; justify-content: center; } }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 12px; }
+.stat { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; text-align: center; }
+.stat b { display: block; font: 600 1.9rem/1.1 var(--serif); font-variant-numeric: tabular-nums; }
+.stat span { font: 700 .7rem var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* past pages */
+.entries { display: flex; flex-direction: column; gap: 30px; }
+.entry h3 { margin: 0 0 4px; font: 400 1.8rem/1.2 var(--script); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.entry h3 i { width: 14px; height: 14px; border-radius: 50%; background: var(--c); display: inline-block; }
+.entry .meta { color: var(--ink-soft); font-size: .95rem; margin-bottom: 8px; }
+.entry p { margin: 6px 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.entry .serif-label { margin-right: 6px; }
+.search { max-width: 420px; display: block; }
+.empty { text-align: center; color: var(--ink-soft); padding: 30px 10px; }
+.empty .script-line { color: var(--ink); }
+
+/* settings */
+.edit-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.edit-list li { display: flex; gap: 8px; align-items: center; }
+.edit-list .line-input { flex: 1; min-width: 0; }
+.swatches { display: flex; gap: 4px; }
+.sw { width: 18px; height: 18px; border-radius: 50%; border: 2px solid transparent; background: var(--c); padding: 0; }
+.sw[aria-pressed="true"] { border-color: var(--ink); }
+.btn { border: 1.5px solid var(--ink-soft); background: var(--card); border-radius: 999px; padding: 6px 18px; font: 700 .78rem var(--serif); letter-spacing: .14em; text-transform: uppercase; }
+.btn:hover { background: var(--paper); }
+.btn.danger { border-color: var(--accent); color: var(--accent); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.card ul.plain { margin: 0; padding-left: 20px; }
+
+footer.quote { text-align: center; }
+footer.quote p { font: 400 1.4rem/1.3 var(--hand); margin: 0 0 12px; }
+footer.quote .tape { --t: var(--tape-sage); font-size: .78rem; padding: 8px 24px; }
+
+@media (max-width: 560px) {
+  .card { padding: 26px 14px 16px; }
+  .habits td.name { max-width: 110px; font-size: .95rem; }
+  .hdot { width: 20px; height: 20px; }
+  .daynav { width: 100%; justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <svg class="logo" viewBox="0 0 80 80" aria-hidden="true">
+    <path d="M14 66 C 30 50, 42 36, 64 12" stroke="#8fa383" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <ellipse cx="26" cy="50" rx="10" ry="4.5" transform="rotate(-50 26 50)" fill="#9fb48b"/>
+    <ellipse cx="38" cy="38" rx="11" ry="4.8" transform="rotate(30 38 38)" fill="#b9c6a8"/>
+    <ellipse cx="46" cy="24" rx="9" ry="4.2" transform="rotate(-55 46 24)" fill="#9fb48b"/>
+    <ellipse cx="22" cy="62" rx="8" ry="3.8" transform="rotate(25 22 62)" fill="#b9c6a8"/>
+    <g transform="translate(62 14)">
+      <circle r="5.2" cx="0" cy="-6" fill="#f2d3ce"/><circle r="5.2" cx="5.7" cy="-1.8" fill="#e8bdb6"/>
+      <circle r="5.2" cx="3.5" cy="4.8" fill="#f2d3ce"/><circle r="5.2" cx="-3.5" cy="4.8" fill="#e8bdb6"/>
+      <circle r="5.2" cx="-5.7" cy="-1.8" fill="#f2d3ce"/><circle r="2.8" fill="#e6a87f"/>
+    </g>
+  </svg>
+  <div>
+    <h1 class="brand">Tend</h1>
+    <p class="tagline" id="tagline">self care · mental care · physical care <span class="heart">♡</span></p>
+  </div>
+  <span class="saved" id="saved" aria-live="polite">Saved ✓</span>
+</header>
+
+<div class="book">
+  <main class="pages" id="main"></main>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Journal sections"></nav>
+</div>
+
+<footer class="quote">
+  <p>“Small steps every day lead to big changes.” <span class="heart-mark">♡</span></p>
+  <span class="tape">Plan your day · track your habits · care for yourself ♡</span>
+</footer>
+<input type="file" id="restore-file" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+/* ================= constants ================= */
+const KEY = 'tend.journal.v1';
+const TABS = [
+  { id: 'today',  label: 'Today',             t: 'var(--tape-tan)' },
+  { id: 'self',   label: 'Self Care',         t: 'var(--tape-rose)' },
+  { id: 'mind',   label: 'Mental Care',       t: 'var(--tape-mauve)' },
+  { id: 'body',   label: 'Physical Care',     t: 'var(--tape-sage)' },
+  { gap: true },
+  { id: 'habits', label: 'Habit Tracker',     t: 'var(--tape-peach)' },
+  { id: 'month',  label: 'Monthly Spread',    t: 'var(--tape-butter)' },
+  { id: 'pages',  label: 'Past Pages',        t: 'var(--tape-rose)' },
+  { id: 'keep',   label: 'Settings & Backup', t: 'var(--tape-sage)' },
+];
+const MOODS = ['happy', 'calm', 'productive', 'tired', 'anxious', 'sad'];
+const moodVar = id => `var(--m-${id})`;
+const COLORS = ['#9fb48b', '#e6a87f', '#cf9894', '#95a6b8', '#c9c58c', '#b8a1c4', '#d7b98f', '#a7c0b8'];
+const FEELINGS = ['grateful', 'hopeful', 'calm', 'content', 'proud', 'loved', 'motivated', 'tired', 'overwhelmed', 'anxious', 'lonely', 'irritable', 'sad', 'restless', 'numb'];
+const BODY_AREAS = ['head', 'jaw', 'neck', 'shoulders', 'back', 'chest', 'stomach', 'hips', 'legs', 'feet'];
+const CYCLE = ['spotting', 'light', 'medium', 'heavy'];
+const MOVE_KINDS = ['walk', 'yoga', 'pilates', 'stretch', 'gym', 'run', 'dance', 'swim', 'cycle', 'rest day'];
+const PROMPTS = [
+  'What is taking up the most space in my mind right now?',
+  'What do I need more of this week, and what do I need less of?',
+  'Describe a moment today when I felt most like myself.',
+  'What would I say to a friend who felt the way I feel today?',
+  'What is one boundary that would protect my peace?',
+  'What am I carrying that isn\'t mine to carry?',
+  'What small thing made today softer?',
+  'Where in my body do I feel stress, and what does it need?',
+  'What am I proud of that nobody else saw?',
+  'What does rest look like for me right now?',
+  'What is one worry I can set down for tonight?',
+  'Who or what helped me today?',
+  'What would make tomorrow 1% kinder to myself?',
+  'Which thought keeps repeating, and is it true?',
+];
+const DEFAULT_AFFIRM = [
+  'I am enough.', 'I am capable.', 'I am becoming my best version.', 'I attract good things.',
+  'Be proud of how far you\'ve come.', 'I choose to show up for myself today.',
+  'My feelings are valid, and they will pass.', 'I am allowed to rest.',
+  'I can do hard things, gently.', 'Progress, not perfection.',
+];
+
+function defaults() {
+  return {
+    v: 2, name: '',
+    habits: [
+      { id: 'h1', name: 'Wake up early', c: COLORS[4] },
+      { id: 'h2', name: 'Morning routine', c: COLORS[1] },
+      { id: 'h3', name: 'Drink water', c: COLORS[3] },
+      { id: 'h4', name: 'Move my body', c: COLORS[0] },
+      { id: 'h5', name: 'Eat healthy', c: COLORS[7] },
+      { id: 'h6', name: 'Read', c: COLORS[6] },
+      { id: 'h7', name: 'No screen at night', c: COLORS[5] },
+      { id: 'h8', name: 'Sleep on time', c: COLORS[2] },
+    ],
+    selfcare: ['Skincare', 'Read', 'Journaling', 'Me time', 'Music', 'Bath', 'Connect', 'Rest'],
+    physical: ['Vitamins', 'Stretch', 'Fruit & veg', 'Fresh air', 'Shower', 'Early night'],
+    toolbox: ['Drink a glass of water', 'Step outside for 5 minutes', 'Box breathing, 4 rounds', 'Text someone I love', 'Shower and fresh clothes', 'Put on a comfort playlist', 'Write it all in the brain dump'],
+    affirmations: DEFAULT_AFFIRM.slice(),
+    days: {}, months: {},
+  };
+}
+function blankDay() {
+  return {
+    intention: '', priorities: ['', '', ''], todos: [], habits: {}, water: 0, mood: '', energy: 0, stress: 0,
+    feelings: [], sleep: '', steps: '', gratitude: ['', '', ''], selfcare: {}, physical: {}, metime: '',
+    meals: { breakfast: '', lunch: '', dinner: '', snacks: '' },
+    reflection: { happy: '', improve: '', learn: '', tomorrow: '' },
+    journal: '', brain: '', grounding: { see: '', touch: '', hear: '', smell: '', taste: '' },
+    sleepQ: 0, bed: '', wake: '', move: [], moveMin: '', pain: [], bodyNote: '', cycle: '',
+  };
+}
+
+/* ================= storage ================= */
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) return Object.assign(defaults(), JSON.parse(raw)); } catch (e) {}
+  return defaults();
+}
+let S = load();
+let storageOk = true, saveTimer = null, savedTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); storageOk = true; flashSaved('Saved ✓'); }
+    catch (e) { storageOk = false; flashSaved('Not saved: storage is blocked'); }
+  }, 350);
+}
+function flashSaved(msg) {
+  const el = document.getElementById('saved');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(savedTimer); savedTimer = setTimeout(() => el.classList.remove('on'), 1600);
+}
+
+/* ================= dates ================= */
+const pad = n => String(n).padStart(2, '0');
+const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); };
+const todayKey = () => keyOf(new Date());
+const mondayOf = k => { const d = parseKey(k); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return keyOf(d); };
+const fmtLong = k => parseKey(k).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const fmtDay = k => parseKey(k).toLocaleDateString(undefined, { weekday: 'long' });
+const fmtShort = k => parseKey(k).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+const hashStr = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+
+/* ================= helpers ================= */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+function getDay(k, create) {
+  if (S.days[k]) { const d = S.days[k], b = blankDay(); for (const f in b) if (d[f] === undefined) d[f] = b[f]; return d; }
+  const d = blankDay(); if (create) S.days[k] = d; return d;
+}
+function getMonth(mk) { return S.months[mk] || (S.months[mk] = { goals: [], word: '' }); }
+function setPath(obj, path, val) { const p = path.split('.'); let o = obj; for (let i = 0; i < p.length - 1; i++) o = o[p[i]]; o[p[p.length - 1]] = val; }
+const filled = o => Object.values(o || {}).some(v => v && String(v).trim());
+function hasContent(d) {
+  if (!d) return false;
+  return !!(d.mood || d.water || d.energy || d.stress || d.sleepQ || d.cycle || (d.todos && d.todos.length) || (d.feelings && d.feelings.length)
+    || (d.move && d.move.length) || (d.pain && d.pain.length) || Object.values(d.habits || {}).some(Boolean)
+    || Object.values(d.selfcare || {}).some(Boolean) || Object.values(d.physical || {}).some(Boolean)
+    || [d.intention, d.journal, d.brain, d.sleep, d.steps, d.metime, d.bed, d.wake, d.moveMin, d.bodyNote, ...(d.priorities || []), ...(d.gratitude || [])].some(t => t && String(t).trim())
+    || filled(d.reflection) || filled(d.meals) || filled(d.grounding));
+}
+function streak() {
+  let k = todayKey(), n = 0;
+  if (!hasContent(S.days[k])) k = addDays(k, -1);
+  while (hasContent(S.days[k])) { n++; k = addDays(k, -1); }
+  return n;
+}
+const countOn = (obj, list) => list.filter(n => obj && obj[n]).length;
+
+/* ================= icons ================= */
+const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4"/></svg>';
+const ICONS = {
+  bottle: '<path d="M10 2.5h4v3h-4zM9 5.5h6l1.5 3.5v11a1.5 1.5 0 0 1-1.5 1.5H9A1.5 1.5 0 0 1 7.5 20V9z M7.5 12h9"/>',
+  stretch: '<circle cx="12" cy="4.5" r="2"/><path d="M12 7v6.5M5 8.5l7 2.5 7-2.5M12 13.5l-4 7M12 13.5l4 7"/>',
+  book: '<path d="M3 5.5c3-1.2 6-1 9 1 3-2 6-2.2 9-1v13.5c-3-1.2-6-1-9 1-3-2-6-2.2-9-1zM12 6.5v13.5"/>',
+  candle: '<path d="M8.5 11h7v10h-7zM12 2.5c1.8 2.2 1.8 4 0 5.5-1.8-1.5-1.8-3.3 0-5.5zM12 8v3"/>',
+  journal: '<path d="M6.5 3h11v18h-11zM10 7.5h5M10 11h5M4.5 6.5h3M4.5 10.5h3M4.5 14.5h3"/>',
+  cup: '<path d="M5 10h11v4.5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 11h1.8a2.2 2.2 0 0 1 0 4.4H16M9 3c-1 1.5 1 2.5 0 4.5M12.5 3c-1 1.5 1 2.5 0 4.5"/>',
+  leaf: '<path d="M5 19.5C5 10.5 11 5 20 4c-.8 9-6.5 15.5-15 15.5zM5 19.5l8.5-8.5"/>',
+  heart: '<path d="M12 20s-7.5-4.5-7.5-10.2A4.2 4.2 0 0 1 12 7.2a4.2 4.2 0 0 1 7.5 2.6C19.5 15.5 12 20 12 20z"/>',
+  bath: '<path d="M3 12h18v2a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5.5A2 2 0 0 1 10 5M7 19l-1 2M17 19l1 2"/>',
+  music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+  moon: '<path d="M19 15A8 8 0 0 1 9 5a8 8 0 1 0 10 10z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+  pill: '<rect x="3.5" y="8.5" width="17" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M9.6 8.6l4.8 6.8"/>',
+  apple: '<path d="M12 7.5c-2-1.5-6.5-1-6.5 4 0 4.5 3 8.5 4.5 8.5 1 0 1.3-.6 2-.6s1 .6 2 .6c1.5 0 4.5-4 4.5-8.5 0-5-4.5-5.5-6.5-4zM12 7.5c0-2 1-3.5 3-4"/>',
+  drop: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+};
+function iconFor(name) {
+  const n = name.toLowerCase();
+  const map = [['skin', 'bottle'], ['face', 'bottle'], ['lotion', 'bottle'], ['stretch', 'stretch'], ['yoga', 'stretch'], ['walk', 'stretch'], ['move', 'stretch'], ['exercise', 'stretch'], ['workout', 'stretch'],
+    ['read', 'book'], ['book', 'book'], ['medit', 'candle'], ['pray', 'candle'], ['candle', 'candle'], ['journal', 'journal'], ['write', 'journal'],
+    ['me time', 'cup'], ['tea', 'cup'], ['coffee', 'cup'], ['air', 'leaf'], ['nature', 'leaf'], ['outside', 'leaf'], ['garden', 'leaf'],
+    ['bath', 'bath'], ['shower', 'bath'], ['music', 'music'], ['song', 'music'], ['sleep', 'moon'], ['nap', 'moon'], ['rest', 'moon'], ['night', 'moon'], ['sun', 'sun'],
+    ['vitamin', 'pill'], ['med', 'pill'], ['pill', 'pill'], ['tablet', 'pill'], ['supplement', 'pill'], ['fruit', 'apple'], ['veg', 'apple'], ['eat', 'apple'], ['meal', 'apple'], ['water', 'drop'], ['hydrat', 'drop'],
+    ['connect', 'chat'], ['call', 'chat'], ['friend', 'chat'], ['talk', 'chat']];
+  for (const [k, v] of map) if (n.includes(k)) return v;
+  return 'heart';
+}
+const svgIcon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+const CUP = '<svg viewBox="0 0 26 32" aria-hidden="true"><path class="fill" d="M6.2 12h13.6l-1.3 15.5H7.5z"/><path d="M4 4h18l-2.2 24.5H6.2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+
+/* ================= view state ================= */
+const view = { tab: 'today', day: todayKey(), month: todayKey().slice(0, 7), q: '', breath: null, pattern: 'box', confirmReset: false };
+try { const t = localStorage.getItem('tend.tab'); if (t && TABS.some(x => x.id === t)) view.tab = t; } catch (e) {}
+
+/* ================= building blocks ================= */
+function card(label, tape, body, cls = '') {
+  return `<section class="card ${cls}">${label ? `<span class="tape" style="--t:var(--tape-${tape})">${esc(label)}</span>` : ''}${body}</section>`;
+}
+const bind = path => `data-bind="${path}"`;
+function head(title, sub, dayNav) {
+  const k = view.day, isToday = k === todayKey();
+  const nav = dayNav ? `<div class="daynav">
+      <button class="round" data-act="day" data-v="-1" aria-label="Previous day">‹</button>
+      <span class="when">${esc(isToday ? 'Today' : fmtDay(k))}<br><span class="small">${esc(fmtShort(k))}</span></span>
+      <button class="round" data-act="day" data-v="1" aria-label="Next day">›</button>
+      ${isToday ? '' : '<button class="chip-btn" data-act="gotoday">Back to today</button>'}</div>` : '';
+  return `<div class="page-head"><div><h2>${title}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}</div>${nav}</div>`;
+}
+function moodPicker(d) {
+  return `<div class="moods" role="group" aria-label="Mood">${MOODS.map(m =>
+    `<button class="mood" style="--c:${moodVar(m)}" data-act="mood" data-v="${m}" aria-pressed="${d.mood === m}"><span class="m"></span>${m}</button>`).join('')}</div>`;
+}
+function scale(field, val, color, lo, hi) {
+  let b = '';
+  for (let i = 1; i <= 5; i++) b += `<button class="${i <= val ? 'on' : ''}" data-act="scale" data-f="${field}" data-v="${i}" aria-label="${i} of 5" aria-pressed="${i === val}"></button>`;
+  return `<div class="scale" style="--c:${color}"><small>${lo}</small>${b}<small>${hi}</small></div>`;
+}
+function iconGrid(listName, d, color) {
+  return `<div class="care">${S[listName].map(n =>
+    `<button style="--c:${color}" data-act="tick" data-list="${listName}" data-v="${esc(n)}" aria-pressed="${!!(d[listName] && d[listName][n])}"><span class="ic">${svgIcon(iconFor(n))}</span><span class="lbl">${esc(n)}</span></button>`).join('')}</div>
+    ${S[listName].length ? '' : '<p class="hint">Add items in Settings &amp; Backup.</p>'}`;
+}
+function chips(field, options, d, color) {
+  return `<div class="chips">${options.map(o => `<button class="chip" style="--c:${color}" data-act="chip" data-f="${field}" data-v="${o}" aria-pressed="${(d[field] || []).includes(o)}">${o}</button>`).join('')}</div>`;
+}
+function affirmationFor(k) { const a = S.affirmations.length ? S.affirmations : DEFAULT_AFFIRM; return a[hashStr(k) % a.length]; }
+const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+const noteCard = k => card('', '', `<span class="serif-label">A note for you</span><p>${esc(affirmationFor(k))}</p><span class="heart-mark">♡</span>`, 'note affirm');
+
+/* ================= 1 · today ================= */
+function renderToday() {
+  const k = view.day, d = getDay(k), st = streak();
+  const sc = countOn(d.selfcare, S.selfcare), pc = countOn(d.physical, S.physical), gr = d.gratitude.filter(Boolean).length;
+  const mindBits = [d.mood && `feeling ${d.mood}`, d.stress && `stress ${d.stress}/5`, d.journal.trim() && 'diary written'].filter(Boolean);
+  const bodyBits = [`${d.water}/8 glasses`, d.sleep && `${d.sleep} hrs sleep`, d.moveMin && `${d.moveMin} min moving`, pc && `${pc}/${S.physical.length} body care`].filter(Boolean);
+  const habitsDone = S.habits.filter(h => d.habits[h.id]).length;
+  const prevTodos = (S.days[addDays(k, -1)] || {}).todos || [];
+  const carry = prevTodos.some(t => !t.done && !d.todos.some(x => x.t === t.t));
+  return `${head(esc(fmtDay(k)), esc(fmtShort(k)) + ' · daily planner', true)}
+  <p class="streak">${st ? `You've shown up for yourself <b>${st}</b> day${st === 1 ? '' : 's'} in a row <span class="heart-mark">♡</span>` : 'A fresh page. Write one small thing to begin <span class="heart-mark">♡</span>'}</p>
+  <div class="flow">
+    ${card("Today's intention", 'tan', `<textarea class="lined" rows="2" ${bind('intention')} placeholder="I choose to show up for myself today.">${esc(d.intention)}</textarea>`, 'intention')}
+    ${card('Care at a glance', 'sage', `<div class="glance">
+      <div class="glance-row"><h3>Self care</h3><p>${sc} of ${S.selfcare.length} done${gr ? ` · ${gr} gratitude${gr === 1 ? '' : 's'}` : ''}</p><button class="chip-btn" data-act="tab" data-tab="self">Open</button><div class="bar" style="--c:var(--tape-rose)"><span style="width:${pct(sc, S.selfcare.length)}%"></span></div></div>
+      <div class="glance-row"><h3>Mental care</h3><p>${mindBits.length ? esc(mindBits.join(' · ')) : 'No check-in yet'}</p><button class="chip-btn" data-act="tab" data-tab="mind">Open</button><div class="bar" style="--c:var(--tape-mauve)"><span style="width:${pct((d.mood ? 1 : 0) + (d.stress ? 1 : 0) + (d.journal.trim() ? 1 : 0), 3)}%"></span></div></div>
+      <div class="glance-row"><h3>Physical care</h3><p>${esc(bodyBits.join(' · '))}</p><button class="chip-btn" data-act="tab" data-tab="body">Open</button><div class="bar" style="--c:var(--tape-sage)"><span style="width:${pct(d.water + pc, 8 + S.physical.length)}%"></span></div></div>
+    </div>`)}
+    ${card('Top 3 priorities', 'rose', `<div class="prio">${[0, 1, 2].map(i =>
+      `<label><span class="num">${i + 1}</span><input class="line-input" ${bind('priorities.' + i)} value="${esc(d.priorities[i])}" aria-label="Priority ${i + 1}"><span class="heart-mark">♡</span></label>`).join('')}</div>`)}
+    ${noteCard(k)}
+    ${card('Daily to-do list', 'sage', `
+      <ul class="checks">${d.todos.map((t, i) => `<li class="${t.done ? 'done' : ''}">
+        <button class="box" data-act="todo" data-i="${i}" aria-pressed="${!!t.done}" aria-label="Mark done">${CHECK}</button>
+        <span class="txt">${esc(t.t)}</span><button class="x" data-act="todo-del" data-i="${i}" aria-label="Remove">×</button></li>`).join('')}</ul>
+      ${d.todos.length ? '' : '<p class="hint">Nothing here yet. Add the little things that matter today.</p>'}
+      <div class="add-row"><input class="line-input" id="todo-new" placeholder="Add a to-do and press Enter" aria-label="New to-do"><button class="chip-btn" data-act="todo-add">Add</button></div>
+      ${carry ? '<p style="margin:10px 0 0"><button class="chip-btn" data-act="carry">Bring over yesterday\'s unfinished</button></p>' : ''}`)}
+    ${card('Mood', 'mauve', moodPicker(d))}
+    ${card("Today's habits", 'peach', `<ul class="checks">${S.habits.map(h => `<li class="${d.habits[h.id] ? 'done' : ''}">
+      <button class="box" data-act="habit" data-k="${k}" data-id="${h.id}" aria-pressed="${!!d.habits[h.id]}" aria-label="${esc(h.name)}">${CHECK}</button><span class="txt">${esc(h.name)}</span></li>`).join('')}</ul>
+      <p class="small" style="margin:10px 0 0">${habitsDone} of ${S.habits.length} done · <button class="chip-btn" data-act="tab" data-tab="habits">See the week</button></p>`)}
+  </div>`;
+}
+
+/* ================= 2 · self care ================= */
+function renderSelf() {
+  const k = view.day, d = getDay(k);
+  return `${head('Self care', 'Gentle things that fill my cup', true)}
+  <div class="flow">
+    ${card('Self-care menu', 'rose', `<p class="hint">Tap what you did for yourself today.</p>${iconGrid('selfcare', d, 'var(--tape-rose)')}`)}
+    ${noteCard(k)}
+    ${card('Something just for me', 'peach', `<p class="hint">A small joy, a treat, a quiet moment.</p>
+      <textarea class="lined" rows="2" ${bind('metime')} placeholder="Coffee on the balcony with a good book…">${esc(d.metime)}</textarea>`)}
+    ${card('Gratitude', 'rose', `<div class="grat">${[0, 1, 2].map(i =>
+      `<label><span class="heart-mark">♥</span><input class="line-input" ${bind('gratitude.' + i)} value="${esc(d.gratitude[i])}" placeholder="${['I\'m grateful for…', 'Someone who helped me…', 'A small moment…'][i]}" aria-label="Gratitude ${i + 1}"></label>`).join('')}</div>`)}
+    ${card('Reflection', 'tan', `<div class="refl">${[
+      ['happy', 'What made me happy today?'], ['improve', 'What could I improve?'], ['learn', 'What did I learn?'], ['tomorrow', 'Tomorrow I will…']].map(([f, q]) =>
+      `<label><span>${q}</span><textarea class="lined" rows="2" ${bind('reflection.' + f)}>${esc(d.reflection[f])}</textarea></label>`).join('')}</div>`)}
+    ${card('Daily affirmations', 'butter', `<ul class="checks">${(S.affirmations.length ? S.affirmations : DEFAULT_AFFIRM).map(a => `<li><span class="heart-mark">♡</span><span class="txt">${esc(a)}</span></li>`).join('')}</ul>
+      <p class="small" style="margin:10px 0 0">Edit these in Settings &amp; Backup.</p>`)}
+  </div>`;
+}
+
+/* ================= 3 · mental care ================= */
+let breathTimer = null;
+const PATTERNS = {
+  box: { name: 'Box 4-4-4-4', steps: [['Breathe in', 4, true], ['Hold', 4, true], ['Breathe out', 4, false], ['Hold', 4, false]] },
+  relax: { name: '4-7-8', steps: [['Breathe in', 4, true], ['Hold', 7, true], ['Breathe out', 8, false]] },
+  calm: { name: 'Calm 5-5', steps: [['Breathe in', 5, true], ['Breathe out', 5, false]] },
+};
+function renderMind() {
+  const k = view.day, d = getDay(k);
+  const prompt = PROMPTS[hashStr(k + 'p') % PROMPTS.length];
+  const g = [['5', 'see', 'things I can see'], ['4', 'touch', 'things I can touch'], ['3', 'hear', 'things I can hear'], ['2', 'smell', 'things I can smell'], ['1', 'taste', 'thing I can taste']];
+  return `${head('Mental care', 'Mind &amp; heart check-in', true)}
+  <div class="flow">
+    ${card('Check-in', 'mauve', `
+      <p class="hint">How am I, really? No right answers.</p>
+      <span class="serif-label">Mood</span>${moodPicker(d)}
+      <div style="margin-top:16px"><span class="serif-label">Stress</span>${scale('stress', d.stress, 'var(--m-tired)', 'calm', 'heavy')}</div>
+      <div style="margin-top:16px"><span class="serif-label">I'm feeling</span><div style="margin-top:8px">${chips('feelings', FEELINGS, d, 'var(--tape-mauve)')}</div></div>`)}
+    ${card('Dear diary', 'tan', `<p class="hint"><i>Prompt:</i> ${esc(prompt)}</p>
+      <textarea class="lined" rows="8" ${bind('journal')} placeholder="Write freely…">${esc(d.journal)}</textarea>`)}
+    ${card('Breathe', 'mauve', `<div class="breath">
+      <div class="seg" role="group" aria-label="Breathing pattern">${Object.entries(PATTERNS).map(([id, p]) => `<button data-act="pattern" data-v="${id}" aria-pressed="${view.pattern === id}">${p.name}</button>`).join('')}</div>
+      <div class="orb-wrap"><div class="orb-ring"></div><div class="orb" id="orb"><span class="orb-label" id="orb-label">ready</span></div></div>
+      <div class="orb-count" id="orb-count">Press start and follow the circle</div>
+      <button class="btn" data-act="breathe">Start</button></div>`)}
+    ${card('Brain dump', 'sage', `<p class="hint">ideas · random thoughts · worries · things to do · reminders</p>
+      <textarea class="lined" rows="7" ${bind('brain')} placeholder="Empty your head here…">${esc(d.brain)}</textarea>`, 'grid-paper')}
+    ${card('5 · 4 · 3 · 2 · 1 grounding', 'peach', `<p class="hint">When everything feels loud, come back to your senses.</p>
+      <div class="ground">${g.map(([n, f, w]) => `<label><span class="n">${n}</span><span class="what">${w}</span><input class="line-input" ${bind('grounding.' + f)} value="${esc(d.grounding[f])}" aria-label="${n} ${w}"></label>`).join('')}</div>`)}
+    ${card('When I feel low', 'tan', `<p class="hint">Small things that help me. Try one.</p>
+      <ul class="checks">${S.toolbox.map(t => `<li><span class="heart-mark">•</span><span class="txt">${esc(t)}</span></li>`).join('')}</ul>
+      <p class="small" style="margin:10px 0 0">Edit this list in Settings &amp; Backup.</p>`, 'note')}
+  </div>`;
+}
+
+/* ================= 4 · physical care ================= */
+function renderBody() {
+  const k = view.day, d = getDay(k);
+  const steps = parseInt(String(d.steps).replace(/\D/g, ''), 10) || 0;
+  return `${head('Physical care', 'Listening to my body', true)}
+  <div class="flow">
+    ${card('Hydration', 'sage', `<div class="cups">${Array.from({ length: 8 }, (_, i) => `<button class="cup ${i < d.water ? 'on' : ''}" data-act="water" data-v="${i + 1}" aria-label="${i + 1} glasses">${CUP}</button>`).join('')}</div>
+      <p class="small" style="text-align:center;margin:6px 0 0">${d.water} of 8 glasses</p>`)}
+    ${card('Sleep', 'mauve', `<div class="pair">
+        <span class="serif-label">Bedtime</span><input type="time" class="line-input" ${bind('bed')} value="${esc(d.bed)}" aria-label="Bedtime">
+        <span class="serif-label">Woke up</span><input type="time" class="line-input" ${bind('wake')} value="${esc(d.wake)}" aria-label="Wake time">
+        <span class="serif-label">Hours</span><span><input class="small-in" inputmode="decimal" ${bind('sleep')} value="${esc(d.sleep)}" aria-label="Hours slept"> <span class="small">hrs</span></span>
+      </div>
+      <div style="margin-top:14px"><span class="serif-label">Sleep quality</span>${scale('sleepQ', d.sleepQ, 'var(--m-anxious)', 'restless', 'deep')}</div>`)}
+    ${card('Movement', 'peach', `<span class="serif-label">What I did</span>
+      <div style="margin:8px 0 14px">${chips('move', MOVE_KINDS, d, 'var(--tape-peach)')}</div>
+      <div class="well">
+        <div class="mini"><span class="serif-label">Minutes</span><input class="small-in" inputmode="numeric" ${bind('moveMin')} value="${esc(d.moveMin)}" aria-label="Minutes of movement"></div>
+        <div class="mini"><span class="serif-label">Steps</span><input class="small-in" inputmode="numeric" ${bind('steps')} value="${esc(d.steps)}" aria-label="Steps"> <span class="small">/ 10,000</span>
+          <div class="bar"><span id="steps-bar" style="width:${Math.min(100, steps / 100)}%"></span></div></div>
+      </div>`)}
+    ${card('Body care', 'sage', `<p class="hint">Tap what you did for your body today.</p>${iconGrid('physical', d, 'var(--tape-sage)')}`)}
+    ${card('Body check-in', 'rose', `
+      <span class="serif-label">Energy</span>${scale('energy', d.energy, 'var(--m-productive)', 'drained', 'buzzing')}
+      <div style="margin-top:16px"><span class="serif-label">Aches or tension</span><div style="margin-top:8px">${chips('pain', BODY_AREAS, d, 'var(--tape-rose)')}</div></div>
+      <div style="margin-top:16px"><span class="serif-label">Cycle</span><div class="chips" style="margin-top:8px">${CYCLE.map(c => `<button class="chip" style="--c:var(--m-tired)" data-act="cycle" data-v="${c}" aria-pressed="${d.cycle === c}">${c}</button>`).join('')}</div></div>
+      <div style="margin-top:16px"><label class="serif-label" for="body-note">How my body feels</label>
+        <textarea class="lined" id="body-note" rows="2" ${bind('bodyNote')} placeholder="Tired legs after the walk, but lighter…">${esc(d.bodyNote)}</textarea></div>`)}
+    ${card('Meals', 'tan', `<div class="pair">${['breakfast', 'lunch', 'dinner', 'snacks'].map(m =>
+      `<span class="serif-label">${m}</span><input class="line-input" ${bind('meals.' + m)} value="${esc(d.meals[m])}" aria-label="${m}">`).join('')}</div>`)}
+  </div>`;
+}
+
+/* ================= 5 · habits ================= */
+function monthDays(mk) { const [y, m] = mk.split('-').map(Number); return Array.from({ length: new Date(y, m, 0).getDate() }, (_, i) => `${mk}-${pad(i + 1)}`); }
+function renderHabits() {
+  const k = view.day, tk = todayKey();
+  const weekKeys = Array.from({ length: 7 }, (_, i) => addDays(mondayOf(k), i));
+  const rows = S.habits.map(h => `<tr><td class="name" title="${esc(h.name)}"><i style="background:${h.c}"></i>${esc(h.name)}</td>${weekKeys.map(wk => {
+    const on = !!(S.days[wk] && S.days[wk].habits[h.id]);
+    return `<td><button class="hdot ${on ? 'on' : ''} ${wk > tk ? 'future' : ''}" style="--c:${h.c}" data-act="habit" data-k="${wk}" data-id="${h.id}" aria-pressed="${on}" aria-label="${esc(h.name)} on ${fmtDay(wk)}"></button></td>`;
+  }).join('')}</tr>`).join('');
+  const mk = view.month, days = monthDays(mk), first = parseKey(mk + '-01');
+  const grid = `<div class="scroll-x"><table class="mgrid"><thead><tr><th></th>${days.map(dk => `<th class="${dk === tk ? 'today-col' : ''}">${Number(dk.slice(8))}</th>`).join('')}<th></th></tr></thead><tbody>
+    ${S.habits.map(h => { let n = 0; const cells = days.map(dk => {
+      const on = !!(S.days[dk] && S.days[dk].habits[h.id]); if (on) n++;
+      return `<td><button class="${on ? 'on' : ''}" style="--c:${h.c}" data-act="habit" data-k="${dk}" data-id="${h.id}" aria-pressed="${on}" aria-label="${esc(h.name)}, ${esc(fmtShort(dk))}"><i></i></button></td>`;
+    }).join(''); return `<tr><td class="name">${esc(h.name)}</td>${cells}<td class="count">${n}/${days.length}</td></tr>`; }).join('')}</tbody></table></div>`;
+  return `${head('Habit tracker', 'Little things, done often', true)}
+  <div class="stack" style="gap:34px">
+    ${card('This week', 'peach', `<div class="scroll-x"><table class="habits"><thead><tr><th></th>${weekKeys.map(wk => `<th class="${wk === k ? 'today-col' : ''}">${parseKey(wk).toLocaleDateString(undefined, { weekday: 'short' })}<br>${Number(wk.slice(8))}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+      ${S.habits.length ? '' : '<p class="hint">Add habits in Settings &amp; Backup.</p>'}`)}
+    ${card(first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }), 'butter', `<div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <button class="round" data-act="month" data-v="-1" aria-label="Previous month">‹</button><span class="small">Tap a square to tick it off</span><button class="round" data-act="month" data-v="1" aria-label="Next month">›</button></div>
+      ${S.habits.length ? grid : ''}`)}
+  </div>`;
+}
+
+/* ================= 6 · month ================= */
+function bouquet(days) {
+  const ox = 230, oy = 292, rings = [[8, 92], [11, 150], [12, 208]];
+  let i = 0, stems = '', blooms = '', leaves = '';
+  rings.forEach(([count, r], ri) => {
+    const spread = ri === 0 ? 62 : 72;
+    for (let j = 0; j < count && i < days.length; j++, i++) {
+      const a = (-spread + 2 * spread * (j / (count - 1))) * Math.PI / 180;
+      const x = ox + Math.sin(a) * r, y = oy - Math.cos(a) * r, x0 = ox + Math.sin(a) * 14, cx = x0 + (x - x0) * .25, cy = (oy + y) / 2;
+      stems += `<path d="M${x0.toFixed(1)} ${oy} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}"/>`;
+      if ((i + ri) % 3 === 0) { const lx = x0 + (x - x0) * .45, ly = oy + (y - oy) * .45, rot = a * 180 / Math.PI + (j % 2 ? 50 : -50);
+        leaves += `<ellipse cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" rx="9" ry="3.6" transform="rotate(${rot.toFixed(0)} ${lx.toFixed(1)} ${ly.toFixed(1)})"/>`; }
+      const dk = days[i], mood = S.days[dk] && S.days[dk].mood;
+      blooms += `<g data-act="open" data-k="${dk}" style="cursor:pointer"><title>${esc(fmtShort(dk))}${mood ? ' · ' + mood : ''}</title><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="13.5" fill="${mood ? moodVar(mood) : 'var(--card)'}" stroke="var(--ink-soft)" stroke-width="1.1"/><text x="${x.toFixed(1)}" y="${(y + 3.8).toFixed(1)}" text-anchor="middle">${i + 1}</text></g>`;
+    }
+  });
+  const vase = `<path d="M196 ${oy} h68 v7 q24 12 24 46 v40 q0 12 -12 12 h-92 q-12 0 -12 -12 v-40 q0 -34 24 -46 z" fill="var(--tape-sage)" fill-opacity=".55" stroke="var(--ink-soft)" stroke-width="1.2"/>
+    <path d="M196 ${oy + 9} q34 8 68 0" fill="none" stroke="var(--ink-soft)" stroke-width="1.1"/>
+    <path d="M222 ${oy + 9} q-10 12 -16 18 M238 ${oy + 9} q10 12 16 18 M230 ${oy + 9} q-14 -8 -14 -2 q0 6 14 2 q14 4 14 -2 q0 -6 -14 2" fill="none" stroke="var(--ink-soft)" stroke-width="1.1"/>`;
+  return `<svg class="bouquet" viewBox="0 0 460 405" role="img" aria-label="Mood bouquet: one flower per day, coloured by mood">
+    <g fill="none" stroke="var(--sage)" stroke-width="1.2">${stems}</g><g fill="var(--sage)" fill-opacity=".7">${leaves}</g>${vase}${blooms}</svg>`;
+}
+function renderMonth() {
+  const mk = view.month, days = monthDays(mk), first = parseKey(mk + '-01'), lead = (first.getDay() + 6) % 7, tk = todayKey(), mo = getMonth(mk);
+  const cells = Array(lead).fill('').concat(days); while (cells.length % 7) cells.push('');
+  let rows = '';
+  for (let r = 0; r < cells.length; r += 7) rows += '<tr>' + cells.slice(r, r + 7).map(dk => {
+    if (!dk) return '<td></td>';
+    const mood = S.days[dk] && S.days[dk].mood;
+    return `<td><button class="${dk === tk ? 'is-today' : ''}" data-act="open" data-k="${dk}" aria-label="Open ${esc(fmtLong(dk))}" style="--c:${mood ? moodVar(mood) : 'transparent'}">${Number(dk.slice(8))}<i></i></button></td>`;
+  }).join('') + '</tr>';
+  const ds = days.map(dk => S.days[dk]).filter(Boolean);
+  const nums = f => ds.map(d => parseFloat(d[f])).filter(n => !isNaN(n) && n > 0);
+  const avg = a => a.length ? a.reduce((s, n) => s + n, 0) / a.length : 0;
+  const counts = {}; ds.forEach(d => { if (d.mood) counts[d.mood] = (counts[d.mood] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const sleeps = nums('sleep'), waters = ds.map(d => d.water).filter(n => n > 0), mins = nums('moveMin');
+  const selfDays = ds.filter(d => Object.values(d.selfcare || {}).some(Boolean)).length;
+  return `<div class="page-head"><div><h2>${esc(first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))}</h2><p class="sub">Monthly spread</p></div>
+    <div class="daynav"><button class="round" data-act="month" data-v="-1" aria-label="Previous month">‹</button><button class="round" data-act="month" data-v="1" aria-label="Next month">›</button></div></div>
+  <div class="flow">
+    ${card('This month', 'rose', `<table class="cal"><thead><tr>${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+      <p class="small" style="margin:10px 0 0">Tap a day to open its page. The dot shows that day's mood.</p>`)}
+    ${card('Mood tracker', 'mauve', `<div class="bq-wrap">${bouquet(days)}<div class="legend">${MOODS.map(m => `<span><i style="--c:${moodVar(m)}"></i>${m}</span>`).join('')}</div></div>`)}
+    ${card('Monthly goals', 'sage', `
+      <label class="serif-label" for="m-word">My word for the month</label>
+      <input class="line-input" id="m-word" data-mbind="word" value="${esc(mo.word)}" placeholder="e.g. gentle" style="font:400 1.5rem var(--script);margin-bottom:14px">
+      <ul class="checks">${mo.goals.map((gl, i) => `<li class="${gl.done ? 'done' : ''}"><button class="box" data-act="goal" data-i="${i}" aria-pressed="${!!gl.done}" aria-label="Mark goal done">${CHECK}</button><span class="txt">${esc(gl.t)}</span><button class="x" data-act="goal-del" data-i="${i}" aria-label="Remove">×</button></li>`).join('')}</ul>
+      ${mo.goals.length ? '' : '<p class="hint">Read 4 books? Drink more water? Be more positive? Add a few.</p>'}
+      <div class="add-row"><input class="line-input" id="goal-new" placeholder="Add a goal and press Enter" aria-label="New goal"><button class="chip-btn" data-act="goal-add">Add</button></div>`)}
+    ${card('Month at a glance', 'tan', `<div class="stats">
+      <div class="stat"><b>${ds.filter(hasContent).length}</b><span>days journaled</span></div>
+      <div class="stat"><b style="font-size:1.4rem;padding:6px 0">${top ? esc(top[0]) : '–'}</b><span>most common mood</span></div>
+      <div class="stat"><b>${selfDays}</b><span>self-care days</span></div>
+      <div class="stat"><b>${sleeps.length ? avg(sleeps).toFixed(1) : '–'}</b><span>avg sleep hrs</span></div>
+      <div class="stat"><b>${waters.length ? avg(waters).toFixed(1) : '–'}</b><span>avg glasses</span></div>
+      <div class="stat"><b>${mins.reduce((s, n) => s + n, 0) || '–'}</b><span>active minutes</span></div></div>`)}
+  </div>`;
+}
+
+/* ================= 7 · past pages ================= */
+function renderPages() {
+  return `${head('Past pages', 'Every day you showed up', false)}
+  <input class="line-input search" id="search" value="${esc(view.q)}" placeholder="Search your journal…" aria-label="Search entries" style="margin-bottom:34px">
+  <div id="entries">${entriesHTML()}</div>`;
+}
+function entriesHTML() {
+  const q = view.q.trim().toLowerCase();
+  const keys = Object.keys(S.days).filter(k => hasContent(S.days[k])).sort().reverse();
+  const list = keys.filter(k => !q || JSON.stringify(S.days[k]).toLowerCase().includes(q) || fmtLong(k).toLowerCase().includes(q));
+  if (!list.length) return `<div class="empty"><p class="script-line">${keys.length ? 'Nothing matches that search.' : 'Your pages will gather here.'}</p><p>${keys.length ? 'Try another word.' : 'Every day you write something, it appears here so you can look back.'}</p></div>`;
+  return `<div class="entries">${list.slice(0, 120).map(k => {
+    const d = getDay(k), grat = d.gratitude.filter(Boolean), bits = [];
+    const self = S.selfcare.filter(n => d.selfcare[n]), body = S.physical.filter(n => d.physical[n]);
+    if (d.intention) bits.push(`<p><span class="serif-label">Intention</span>${esc(d.intention)}</p>`);
+    if (self.length || d.metime) bits.push(`<p><span class="serif-label">Self care</span>${esc([self.join(', '), d.metime].filter(Boolean).join(' · '))}</p>`);
+    if (d.feelings.length || d.stress) bits.push(`<p><span class="serif-label">Mind</span>${esc([d.feelings.join(', '), d.stress && `stress ${d.stress}/5`].filter(Boolean).join(' · '))}</p>`);
+    if (d.journal) bits.push(`<p><span class="serif-label">Diary</span>${esc(d.journal.length > 420 ? d.journal.slice(0, 420) + '…' : d.journal)}</p>`);
+    const phys = [d.water && `${d.water} glasses`, d.sleep && `${d.sleep} hrs sleep`, d.move.length && d.move.join(', '), d.moveMin && `${d.moveMin} min`, body.join(', '), d.energy && `energy ${d.energy}/5`].filter(Boolean);
+    if (phys.length) bits.push(`<p><span class="serif-label">Body</span>${esc(phys.join(' · '))}</p>`);
+    if (grat.length) bits.push(`<p><span class="serif-label">Grateful for</span>${esc(grat.join(' · '))}</p>`);
+    const habitsDone = S.habits.filter(h => d.habits[h.id]).length;
+    const meta = [d.mood, habitsDone && `${habitsDone}/${S.habits.length} habits`].filter(Boolean).join(' · ');
+    return `<article class="card entry"><h3>${d.mood ? `<i style="--c:${moodVar(d.mood)}"></i>` : ''}${esc(fmtLong(k))}</h3>
+      ${meta ? `<div class="meta">${esc(meta)}</div>` : ''}${bits.join('')}
+      <div class="row" style="margin-top:10px"><button class="chip-btn" data-act="open" data-k="${k}">Open this day</button></div></article>`;
+  }).join('')}</div>`;
+}
+
+/* ================= 8 · settings & backup ================= */
+function editList(kind, ph) {
+  return `<ul class="edit-list">${S[kind].map((t, i) => `<li><input class="line-input" data-lbind="${kind}" data-i="${i}" value="${esc(t)}" aria-label="Item ${i + 1}"><button class="x" data-act="ldel" data-kind="${kind}" data-i="${i}" aria-label="Remove">×</button></li>`).join('')}</ul>
+    <div class="add-row"><input class="line-input" id="new-${kind}" placeholder="${ph}" aria-label="${ph}"><button class="chip-btn" data-act="ladd" data-kind="${kind}">Add</button></div>`;
+}
+function renderKeep() {
+  return `${head('Settings &amp; backup', 'Make it yours', false)}
+  <div class="flow">
+    ${card('About me', 'sage', `<label class="serif-label" for="s-name">Whose journal is this?</label>
+      <input class="line-input" id="s-name" data-sbind="name" value="${esc(S.name)}" placeholder="Your name" style="font:400 1.6rem var(--script)">`)}
+    ${card('Install as an app', 'butter', installHTML())}
+    ${card('Habits', 'peach', `<p class="hint">Tap a colour to change a habit's ink.</p>
+      <ul class="edit-list">${S.habits.map((h, i) => `<li style="flex-wrap:wrap"><input class="line-input" data-hbind="${i}" value="${esc(h.name)}" aria-label="Habit ${i + 1}">
+        <span class="swatches">${COLORS.map(c => `<button class="sw" style="--c:${c}" data-act="hcolor" data-i="${i}" data-v="${c}" aria-pressed="${h.c === c}" aria-label="Colour"></button>`).join('')}</span>
+        <button class="x" data-act="hdel" data-i="${i}" aria-label="Remove habit">×</button></li>`).join('')}</ul>
+      <div class="add-row"><input class="line-input" id="new-habit" placeholder="New habit" aria-label="New habit"><button class="chip-btn" data-act="hadd">Add</button></div>`)}
+    ${card('Self-care menu', 'rose', editList('selfcare', 'e.g. Face mask'))}
+    ${card('Body care list', 'sage', editList('physical', 'e.g. Iron tablet'))}
+    ${card('When I feel low', 'mauve', editList('toolbox', 'Something that helps'))}
+    ${card('Affirmations', 'tan', editList('affirmations', 'Add an affirmation'))}
+    ${card('Backup', 'peach', `<p class="hint">Your journal is kept only in this browser on this device. Download a backup now and then. Use it to move your journal to another device.</p>
+      <div class="row"><button class="btn" data-act="export">Download backup</button><button class="btn" data-act="import">Restore backup</button></div>
+      ${storageOk ? '' : '<p class="small" style="color:var(--accent)">This browser is blocking storage, so entries will disappear when you close the page.</p>'}`)}
+    ${card('Start over', 'rose', `<p class="hint">Erase every entry and setting on this device. Download a backup first if you might want them back.</p>
+      <button class="btn danger" data-act="reset">${view.confirmReset ? 'Tap again to erase everything' : 'Erase journal'}</button>`)}
+  </div>`;
+}
+
+/* ================= install ================= */
+let installPrompt = null;
+const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; if (view.tab === 'keep') render(); });
+window.addEventListener('appinstalled', () => { installPrompt = null; if (view.tab === 'keep') render(); });
+function installHTML() {
+  if (isInstalled()) return '<p style="margin:0">✿ You\'re using the installed Tend app.</p>';
+  if (installPrompt) return '<p style="margin-top:0">Put Tend on your home screen or desktop, with its own icon and window. It opens even without internet.</p><button class="btn" data-act="install">Install Tend</button>';
+  if (location.protocol === 'file:') return '<p style="margin:0">You opened Tend straight from a file. Browsers can only install apps from a web address, so open Tend from its web address (see the README), then come back here.</p>';
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios) return '<p style="margin:0">On iPhone or iPad: tap the <b>Share</b> button <span aria-hidden="true">(□↑)</span> in Safari, then <b>Add to Home Screen</b>.</p>';
+  return `<ul class="plain">
+    <li><b>Chrome / Edge on a computer:</b> click the install icon at the right end of the address bar, or open the <b>⋮</b> menu → <b>Cast, save and share</b> → <b>Install page as app</b> (in Edge: <b>Apps</b> → <b>Install this site as an app</b>).</li>
+    <li><b>Android phone:</b> open the browser's <b>⋮</b> menu → <b>Install app</b> or <b>Add to Home screen</b>.</li>
+    <li><b>Mac Safari:</b> <b>File</b> → <b>Add to Dock</b>.</li></ul>`;
+}
+
+/* ================= render ================= */
+const main = document.getElementById('main');
+const RENDER = { today: renderToday, self: renderSelf, mind: renderMind, body: renderBody, habits: renderHabits, month: renderMonth, pages: renderPages, keep: renderKeep };
+function render() {
+  let n = 0;
+  document.getElementById('tabs').innerHTML = TABS.map(t => t.gap ? '<span class="gap"></span>' :
+    `<button role="tab" style="--t:${t.t}" data-act="tab" data-tab="${t.id}" aria-selected="${t.id === view.tab}"><span class="num">${++n}</span>${t.label}</button>`).join('');
+  const cur = TABS.find(t => t.id === view.tab) || TABS[0];
+  main.style.setProperty('--spine', cur.t);
+  const nav = document.getElementById('tabs'), sel = nav.querySelector('[aria-selected="true"]');
+  if (sel && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = sel.offsetLeft - (nav.clientWidth - sel.offsetWidth) / 2;
+  document.getElementById('tagline').innerHTML = (S.name ? `${esc(S.name)}'s journal · ` : '') + 'self care · mental care · physical care <span class="heart">♡</span>';
+  stopBreath();
+  main.innerHTML = (RENDER[view.tab] || renderToday)();
+}
+
+/* ================= breathing ================= */
+function stopBreath() { clearTimeout(breathTimer); breathTimer = null; view.breath = null; }
+function runBreath() {
+  const p = PATTERNS[view.pattern];
+  let si = 0, left = p.steps[0][1];
+  const tick = () => {
+    const orb = document.getElementById('orb'); if (!orb || !view.breath) return stopBreath();
+    const [label, secs, big] = p.steps[si];
+    if (left === secs) { orb.style.transitionDuration = secs + 's'; orb.classList.toggle('big', big); document.getElementById('orb-label').textContent = label.toLowerCase(); }
+    document.getElementById('orb-count').textContent = `${label} · ${left}`;
+    left--;
+    if (left === 0) { si = (si + 1) % p.steps.length; left = p.steps[si][1]; }
+    breathTimer = setTimeout(tick, 1000);
+  };
+  tick();
+}
+
+/* ================= events ================= */
+function addFromInput(id, fn) {
+  const el = document.getElementById(id); if (!el) return;
+  const v = el.value.trim(); if (!v) { el.focus(); return; }
+  fn(v); save(); render();
+  const again = document.getElementById(id); if (again) again.focus();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, v = b.dataset.v, i = Number(b.dataset.i);
+  const d = () => getDay(view.day, true);
+  if (act !== 'reset') view.confirmReset = false;
+  switch (act) {
+    case 'tab': view.tab = b.dataset.tab; try { localStorage.setItem('tend.tab', view.tab); } catch (err) {} window.scrollTo({ top: 0 }); break;
+    case 'day': view.day = addDays(view.day, Number(v)); view.month = view.day.slice(0, 7); break;
+    case 'gotoday': view.day = todayKey(); view.month = view.day.slice(0, 7); break;
+    case 'open': view.day = b.dataset.k; view.tab = 'today'; window.scrollTo({ top: 0 }); break;
+    case 'month': { const [y, m] = view.month.split('-').map(Number); const dt = new Date(y, m - 1 + Number(v), 1); view.month = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}`; break; }
+    case 'todo': { const t = d().todos[i]; t.done = !t.done; save(); break; }
+    case 'todo-del': d().todos.splice(i, 1); save(); break;
+    case 'todo-add': return addFromInput('todo-new', t => d().todos.push({ t, done: false }));
+    case 'carry': { const prev = (S.days[addDays(view.day, -1)] || {}).todos || [], cur = d(); prev.filter(t => !t.done && !cur.todos.some(x => x.t === t.t)).forEach(t => cur.todos.push({ t: t.t, done: false })); save(); break; }
+    case 'habit': { const day = getDay(b.dataset.k, true); day.habits[b.dataset.id] = !day.habits[b.dataset.id]; save(); break; }
+    case 'water': { const dd = d(); dd.water = dd.water === Number(v) ? Number(v) - 1 : Number(v); save(); break; }
+    case 'mood': { const dd = d(); dd.mood = dd.mood === v ? '' : v; save(); break; }
+    case 'cycle': { const dd = d(); dd.cycle = dd.cycle === v ? '' : v; save(); break; }
+    case 'scale': { const dd = d(), f = b.dataset.f; dd[f] = dd[f] === Number(v) ? 0 : Number(v); save(); break; }
+    case 'chip': { const dd = d(), f = b.dataset.f; dd[f] = dd[f].includes(v) ? dd[f].filter(x => x !== v) : dd[f].concat(v); save(); break; }
+    case 'tick': { const dd = d(), l = b.dataset.list; dd[l][v] = !dd[l][v]; save(); break; }
+    case 'goal': { const g = getMonth(view.month).goals[i]; g.done = !g.done; save(); break; }
+    case 'goal-del': getMonth(view.month).goals.splice(i, 1); save(); break;
+    case 'goal-add': return addFromInput('goal-new', t => getMonth(view.month).goals.push({ t, done: false }));
+    case 'pattern': view.pattern = v; break;
+    case 'breathe':
+      if (view.breath) { stopBreath(); render(); return; }
+      view.breath = { on: true }; b.textContent = 'Stop'; runBreath(); return;
+    case 'hcolor': S.habits[i].c = v; save(); break;
+    case 'hdel': S.habits.splice(i, 1); save(); break;
+    case 'hadd': return addFromInput('new-habit', t => S.habits.push({ id: uid(), name: t, c: COLORS[S.habits.length % COLORS.length] }));
+    case 'ldel': S[b.dataset.kind].splice(i, 1); save(); break;
+    case 'ladd': return addFromInput('new-' + b.dataset.kind, t => S[b.dataset.kind].push(t));
+    case 'install': if (installPrompt) { installPrompt.prompt(); installPrompt.userChoice.finally(() => { installPrompt = null; render(); }); } return;
+    case 'export': exportBackup(); return;
+    case 'import': document.getElementById('restore-file').click(); return;
+    case 'reset':
+      if (!view.confirmReset) { view.confirmReset = true; break; }
+      view.confirmReset = false; S = defaults(); try { localStorage.removeItem(KEY); } catch (err) {} flashSaved('Journal erased'); break;
+    default: return;
+  }
+  render();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing) return;
+  const id = e.target.id || '';
+  const sel = { 'todo-new': '[data-act="todo-add"]', 'goal-new': '[data-act="goal-add"]', 'new-habit': '[data-act="hadd"]' }[id]
+    || (id.startsWith('new-') ? `[data-act="ladd"][data-kind="${id.slice(4)}"]` : null);
+  if (sel && document.querySelector(sel)) { e.preventDefault(); document.querySelector(sel).click(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.bind) {
+    setPath(getDay(view.day, true), t.dataset.bind, t.value); save();
+    if (t.dataset.bind === 'steps') { const bar = document.getElementById('steps-bar'); if (bar) bar.style.width = Math.min(100, (parseInt(t.value.replace(/\D/g, ''), 10) || 0) / 100) + '%'; }
+  }
+  else if (t.dataset.mbind) { getMonth(view.month)[t.dataset.mbind] = t.value; save(); }
+  else if (t.dataset.sbind) { S[t.dataset.sbind] = t.value; save(); }
+  else if (t.dataset.hbind) { S.habits[Number(t.dataset.hbind)].name = t.value; save(); }
+  else if (t.dataset.lbind) { S[t.dataset.lbind][Number(t.dataset.i)] = t.value; save(); }
+  else if (t.id === 'search') { view.q = t.value; document.getElementById('entries').innerHTML = entriesHTML(); }
+});
+
+/* ================= backup ================= */
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `tend-journal-${todayKey()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  flashSaved('Backup downloaded');
+}
+document.getElementById('restore-file').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!data || typeof data !== 'object' || !data.days) throw new Error('not a Tend backup');
+      S = Object.assign(defaults(), data); save(); render(); flashSaved('Backup restored');
+    } catch (err) { flashSaved('That file is not a Tend backup'); }
+    e.target.value = '';
+  };
+  r.readAsText(f);
+});
+
+/* keep "today" correct if the app stays open past midnight */
+let lastToday = todayKey();
+setInterval(() => { const t = todayKey(); if (t !== lastToday) { if (view.day === lastToday) view.day = t; lastToday = t; if (!document.activeElement || !document.activeElement.matches('input,textarea')) render(); } }, 60000);
+
+render();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>

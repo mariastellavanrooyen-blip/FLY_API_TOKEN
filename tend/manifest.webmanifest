@@ -1,0 +1,17 @@
+{
+  "name": "Tend Journal",
+  "short_name": "Tend",
+  "description": "A bullet-journal style self-care and mental care journal: intentions, habits, mood, gratitude, reflection and calm tools.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5eee3",
+  "theme_color": "#f5eee3",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
