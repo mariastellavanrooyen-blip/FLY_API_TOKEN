@@ -27,7 +27,10 @@ Your books are kept separately for each browser and device, so use **Download ba
 
 ## What's inside (the tabs)
 1. **Reading Now**: books you're reading, each with a page-progress bar and a **▶ Start reading** timer
-2. **Books Read**: finished books, with star ratings and the date you finished
+2. **Books Read**: your finished books standing on bookshelves by their spines (or switch to *Covers*).
+   Arrange the shelves by genre, stars, author, year finished or length, and pick a book size (S, M or L).
+   Tap a spine to take the book off the shelf: it slides out and turns to show its cover, stars, thoughts and a favourite quote.
+   The stats bar across the top shows totals, average stars and your top genre.
 3. **Wish List**: books you want to read. Mark one as *Must read!* or move it to Reading Now
 4. **Progress Sheet**: your yearly book goal, daily and weekly reading-time goals, your goals-checklist progress, your streak, pages read, and charts
 5. **Goals Checklist**: your reading goals as a checklist you tick off (see below)
