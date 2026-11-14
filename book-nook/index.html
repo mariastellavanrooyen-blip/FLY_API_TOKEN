@@ -203,6 +203,88 @@
   }
   .empty .big { font-family: var(--serif); font-size: 1.6rem; color: var(--sage-dark); margin-bottom: 6px; }
 
+  /* ---------- Spine view (Books Read) ---------- */
+  .seg { display: inline-flex; background: var(--paper-2); border-radius: 999px; padding: 3px; gap: 2px; }
+  .seg button { border: 0; background: transparent; border-radius: 999px; padding: 6px 12px; cursor: pointer; font-family: var(--type); font-size: .78rem; color: var(--ink-soft); }
+  .seg button[aria-pressed="true"] { background: #fffdf8; color: var(--sage-dark); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .seg button:focus-visible { outline: 2px dashed var(--sage-dark); outline-offset: 1px; }
+  .shelf-stats {
+    display: grid; grid-template-columns: repeat(6, 1fr); background: var(--case-1); border-radius: 12px; margin-bottom: 16px;
+    color: #f3ecd9; text-align: center; overflow: hidden; box-shadow: inset 0 2px 8px rgba(0,0,0,.25);
+  }
+  .shelf-stats > div { padding: 12px 6px 10px; border-right: 1px solid rgba(255,255,255,.08); min-width: 0; }
+  .shelf-stats > div:last-child { border-right: 0; }
+  .shelf-stats b { display: block; font-family: var(--serif); font-size: 1.6rem; line-height: 1; color: var(--butter); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .shelf-stats span { font-family: var(--type); font-size: .62rem; letter-spacing: .6px; text-transform: uppercase; opacity: .8; }
+  @media (max-width: 640px) { .shelf-stats { grid-template-columns: repeat(3, 1fr); } .shelf-stats > div:nth-child(3) { border-right: 0; } .shelf-stats > div:nth-child(-n+3) { border-bottom: 1px solid rgba(255,255,255,.08); } }
+  :root { --case-1: #2f3d2c; --case-2: #3d4d38; --wood: #a7814f; --wood-dark: #7b5c36; }
+  .shelves { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+  .shelf-row {
+    background: linear-gradient(180deg, var(--case-1), var(--case-2)); border-radius: 12px; padding: 10px 10px 0;
+    box-shadow: inset 0 3px 12px rgba(0,0,0,.35), 0 4px 12px rgba(47,61,44,.18); min-width: 0;
+  }
+  .shelf-label {
+    display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 999px; padding: 5px 12px; color: #f3ecd9; font-family: var(--type); font-size: .7rem; letter-spacing: .6px;
+  }
+  .shelf-label .k { text-transform: uppercase; opacity: .65; }
+  .shelf-label .v { flex: 1; text-align: center; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .shelf-label .n { background: rgba(255,255,255,.12); border-radius: 999px; padding: 1px 8px; }
+  .shelf-books {
+    display: flex; align-items: flex-end; gap: 2px; overflow-x: auto; overflow-y: hidden; padding: 14px 6px 0; margin: 0 -2px;
+    min-height: calc(var(--spine-max) + 16px); position: relative; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent;
+  }
+  .plank { height: 12px; margin: 0 -10px; background: linear-gradient(180deg, var(--wood), var(--wood-dark)); border-radius: 0 0 12px 12px; box-shadow: 0 -3px 6px rgba(0,0,0,.35); }
+  .spine {
+    --h: 150px; --w: 30px;
+    flex: none; height: var(--h); width: var(--w); border: 0; padding: 8px 0 6px; cursor: pointer; position: relative;
+    border-radius: 3px 3px 1px 1px; background-color: var(--c); background-size: cover; background-position: center;
+    color: #fffdf6; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 4px;
+    box-shadow: inset 3px 0 4px -2px rgba(255,255,255,.35), inset -4px 0 6px -2px rgba(0,0,0,.45), 1px 0 2px rgba(0,0,0,.3);
+    transition: transform .22s ease, filter .22s ease; overflow: hidden;
+  }
+  .spine::before, .spine::after { content: ""; position: absolute; left: 3px; right: 3px; height: 2px; background: rgba(241,220,138,.75); }
+  .spine::before { top: 6px; } .spine::after { bottom: 5px; }
+  .spine:hover, .spine:focus-visible { transform: translateY(-8px); filter: brightness(1.08); }
+  .spine:focus-visible { outline: 2px solid var(--butter); outline-offset: 2px; }
+  .spine.pulled { transform: translateY(-60%); opacity: 0; transition: transform .3s ease-in, opacity .25s ease-in .1s; }
+  .spine .sp-title {
+    writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--serif); font-weight: 700; font-size: calc(var(--fs) * 1px);
+    line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: calc(var(--h) - 40px);
+    text-shadow: 0 1px 2px rgba(0,0,0,.6); padding-top: 4px;
+  }
+  .spine .sp-auth { font-family: var(--type); font-size: 7px; letter-spacing: .3px; text-transform: uppercase; opacity: .9; writing-mode: vertical-rl; transform: rotate(180deg); max-height: 34px; overflow: hidden; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .spine.leaning { transform: rotate(-7deg); transform-origin: bottom left; margin-left: 10px; }
+  .spine.leaning:hover { transform: rotate(-7deg) translateY(-8px); }
+  .prop { flex: none; font-size: calc(var(--spine-max) * .22); line-height: 1; margin: 0 8px 0 10px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.35)); user-select: none; }
+
+  /* Taking a book off the shelf */
+  .bookout-back {
+    position: fixed; inset: 0; z-index: 55; background: rgba(35,44,33,.55); backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center; padding: 20px 14px; overflow-y: auto;
+  }
+  .bookout {
+    background: var(--paper); border-radius: var(--radius); max-width: 760px; width: 100%; padding: 24px; position: relative;
+    display: grid; grid-template-columns: 230px 1fr; gap: 24px; perspective: 1400px; box-shadow: 0 30px 70px rgba(0,0,0,.35);
+    border-top: 10px solid var(--sage-2); margin: auto;
+  }
+  .bo-cover { transform-origin: left center; transform-style: preserve-3d; }
+  .bo-cover .cover { box-shadow: inset 8px 0 10px -6px rgba(0,0,0,.35), 6px 10px 22px rgba(0,0,0,.28); }
+  .bo-info h3 { font-family: var(--serif); font-size: 2rem; line-height: 1.05; margin: 0; color: var(--sage-dark); padding-right: 28px; }
+  .bo-info .by { font-style: italic; color: var(--ink-soft); margin: 4px 0 10px; }
+  .bo-info .stars { font-size: 1.3rem; }
+  .bo-facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
+  .bo-facts span { background: var(--paper-2); border-radius: 999px; padding: 4px 10px; font-family: var(--type); font-size: .72rem; color: var(--ink-soft); }
+  .bo-note { font-family: var(--serif); font-style: italic; font-size: 1.15rem; line-height: 1.35; border-left: 3px solid var(--pink); padding: 2px 0 2px 14px; margin: 0 0 12px; color: var(--ink); }
+  .bo-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  @media (max-width: 600px) {
+    .bookout { grid-template-columns: 1fr; padding: 18px; gap: 14px; }
+    .bo-cover { width: 150px; margin: 0 auto; }
+    .bo-info h3 { font-size: 1.6rem; text-align: center; padding: 0; }
+    .bo-info .by, .bo-info .stars { text-align: center; }
+    .bo-facts { justify-content: center; }
+  }
+
   /* ---------- Progress sheet ---------- */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
   .stat {
@@ -356,6 +438,7 @@
 
 <div id="timer-slot"></div>
 <div id="modal-slot"></div>
+<div id="bookout-slot"></div>
 
 <script>
 /* =========================================================
@@ -414,6 +497,7 @@ const state = {
   settings: { yearGoal: 24, weekMinutesGoal: 210, dailyMinutesGoal: 30, name: '' },
   goals: [],       // reading-goal checklist: {id, text, done, doneAt, addedAt}
   filter: { q: '', sort: 'recent' },
+  shelf: { view: 'spines', group: 'genre', size: 'M' },   // Books Read layout
 };
 
 /* ---------- helpers ---------- */
@@ -477,6 +561,7 @@ async function load() {
   if (meta) Object.assign(state.settings, meta.value);
   state.goals = (goals && goals.value) || [];
   try { const t = localStorage.getItem('booknook.tab'); if (t && TABS.some(x => x.id === t)) state.tab = t; } catch (e) {}
+  try { Object.assign(state.shelf, JSON.parse(localStorage.getItem('booknook.shelf') || '{}')); } catch (e) {}
 }
 const saveBook = b => DB.put('books', b);
 const saveSettings = () => DB.put('meta', { id: 'settings', value: state.settings });
@@ -562,22 +647,186 @@ function renderShelf(status) {
     body = `<div class="empty"><div class="big">${msg}</div><p>Add a book — search it online, snap a photo of the cover, or type it in.</p><button class="btn" data-action="add" data-status="${status}">＋ Add a book</button></div>`;
   } else if (!list.length) {
     body = `<div class="empty"><div class="big">No matches</div><p>Try a different search.</p></div>`;
+  } else if (status === 'read' && state.shelf.view === 'spines') {
+    body = spineShelves(list);
   } else {
     body = `<div class="shelf">${list.map(b => bookCard(b)).join('')}</div>`;
   }
+  const spinesOn = status === 'read' && state.shelf.view === 'spines';
   return `
     <div class="page-head">
-      <div><h2>${title}</h2><p class="sub">${sub}</p></div>
+      <div><h2>${title}</h2><p class="sub">${spinesOn ? 'Your whole library, spine by spine. Tap a book to take it off the shelf.' : sub}</p></div>
       <button class="btn" data-action="add" data-status="${status}">＋ Add a book</button>
     </div>
+    ${status === 'read' && total ? readStatsStrip() + `<div class="toolbar" style="align-items:center">
+      <div class="seg" role="group" aria-label="View">
+        <button data-action="shelf-view" data-v="covers" aria-pressed="${!spinesOn}">▦ Covers</button>
+        <button data-action="shelf-view" data-v="spines" aria-pressed="${spinesOn}">≣ Spines</button>
+      </div>
+      ${spinesOn ? `<div class="seg" role="group" aria-label="Book size">${['S', 'M', 'L'].map(z => `<button data-action="shelf-size" data-v="${z}" aria-pressed="${state.shelf.size === z}">${z}</button>`).join('')}</div>
+      <select id="shelf-group" aria-label="Arrange shelves by" style="width:auto;border-radius:999px;flex:1 1 180px">
+        ${SHELF_GROUPS.map(([v, l]) => `<option value="${v}" ${state.shelf.group === v ? 'selected' : ''}>Shelves by ${l.toLowerCase()}</option>`).join('')}
+      </select>` : ''}
+    </div>` : ''}
     ${total ? `<div class="toolbar">
       <input type="search" id="q" placeholder="Search title, author or genre…" value="${esc(state.filter.q)}" aria-label="Search books">
-      <select id="sort" aria-label="Sort">
+      ${spinesOn ? '' : `<select id="sort" aria-label="Sort">
         ${[['recent', 'Recently updated'], ['title', 'Title A–Z'], ['author', 'Author A–Z'], ['rating', 'Highest rated'], ['finished', 'Date finished']]
           .map(([v, l]) => `<option value="${v}" ${state.filter.sort === v ? 'selected' : ''}>${l}</option>`).join('')}
-      </select>
+      </select>`}
     </div>` : ''}
     ${body}`;
+}
+
+/* ---------- Spine view ---------- */
+const SHELF_GROUPS = [['genre', 'Genre'], ['stars', 'Stars'], ['author', 'Author'], ['year', 'Year finished'], ['length', 'Length']];
+const SPINE_COLORS = ['#7a2e3a', '#2f4f6f', '#4f6b48', '#b8902e', '#8c5a3c', '#2b2b35', '#c9706a', '#4d7682', '#a07b5b', '#5e4a72', '#c7a46f', '#3f5a4c', '#9b3d3d', '#d99a93', '#6f8a68', '#1f3a4d'];
+const spineColor = b => { let h = 0; for (const c of String(b.title) + (b.author || '')) h = (h * 31 + c.charCodeAt(0)) >>> 0; return SPINE_COLORS[h % SPINE_COLORS.length]; };
+const PROPS = ['🪴', '🕯️', '☕', '🌿', '🌸', '🫖', '🐚', '⏳'];
+const SPINE_SIZES = { S: { max: 120, fs: 10, w: .8 }, M: { max: 160, fs: 12, w: 1 }, L: { max: 205, fs: 14, w: 1.25 } };
+
+function readStatsStrip() {
+  const read = state.books.filter(b => b.status === 'read');
+  const rated = read.filter(b => b.rating);
+  const avg = rated.length ? (rated.reduce((a, b) => a + b.rating, 0) / rated.length).toFixed(1) : '–';
+  const g = {}; read.forEach(b => { if (b.genre) g[b.genre] = (g[b.genre] || 0) + 1; });
+  const top = Object.entries(g).sort((a, b) => b[1] - a[1])[0];
+  const pages = read.reduce((a, b) => a + (Number(b.pages) || 0), 0);
+  return `<div class="shelf-stats">
+    <div><b>${state.books.length}</b><span>Books total</span></div>
+    <div><b>${read.length}</b><span>Read</span></div>
+    <div><b>${state.books.filter(b => b.status === 'reading').length}</b><span>Reading now</span></div>
+    <div><b>${state.books.filter(b => b.status === 'wishlist').length}</b><span>Want to read</span></div>
+    <div><b>${avg}${avg !== '–' ? '★' : ''}</b><span>Avg stars</span></div>
+    <div><b title="${esc(top ? top[0] : '')}">${top ? esc(top[0]) : pages.toLocaleString()}</b><span>${top ? 'Top genre' : 'Pages read'}</span></div>
+  </div>`;
+}
+
+function shelfKey(b, group) {
+  switch (group) {
+    case 'stars': return b.rating ? ['★'.repeat(b.rating) + '☆'.repeat(5 - b.rating), 10 - b.rating] : ['Not rated', 99];
+    case 'author': return [b.author || 'Unknown author', b.author ? 0 : 1];
+    case 'year': return b.finishDate ? [String(parseDate(b.finishDate).getFullYear()), -parseDate(b.finishDate).getFullYear()] : ['Undated', 1e9];
+    case 'length': {
+      const n = Number(b.pages) || 0;
+      if (!n) return ['Unknown length', 9];
+      if (n < 200) return ['Under 200 pages', 1];
+      if (n < 350) return ['200 – 349 pages', 2];
+      if (n < 500) return ['350 – 499 pages', 3];
+      return ['500+ pages', 4];
+    }
+    default: return [b.genre || 'Uncategorised', b.genre ? 0 : 1];
+  }
+}
+
+function spineShelves(list) {
+  const group = state.shelf.group;
+  const size = SPINE_SIZES[state.shelf.size] || SPINE_SIZES.M;
+  const map = new Map();
+  list.forEach(b => {
+    const [label, order] = shelfKey(b, group);
+    if (!map.has(label)) map.set(label, { label, order, books: [] });
+    map.get(label).books.push(b);
+  });
+  const shelves = [...map.values()].sort((a, b) => a.order - b.order || b.books.length - a.books.length || a.label.localeCompare(b.label));
+  const groupName = (SHELF_GROUPS.find(g => g[0] === group) || SHELF_GROUPS[0])[1];
+  return `<div class="shelves" style="--spine-max:${size.max}px">${shelves.map(sh => {
+    sh.books.sort((a, b) => (a.author || '').localeCompare(b.author || '') || a.title.localeCompare(b.title));
+    const h = [...sh.label].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+    const prop = PROPS[h % PROPS.length];
+    const propAt = sh.books.length > 3 ? (h % 3 === 0 ? 'start' : 'end') : 'end';
+    const spines = sh.books.map((b, i) => spineHTML(b, size, i === sh.books.length - 1 && sh.books.length > 2 && h % 4 === 1)).join('');
+    return `<section class="shelf-row" aria-label="${esc(groupName)}: ${esc(sh.label)}">
+      <div class="shelf-label"><span class="k">${esc(groupName)}</span><span class="v">${esc(sh.label)}</span><span class="n">${sh.books.length}</span></div>
+      <div class="shelf-books">${propAt === 'start' ? `<span class="prop" aria-hidden="true">${prop}</span>` : ''}${spines}${propAt === 'end' ? `<span class="prop" aria-hidden="true">${prop}</span>` : ''}</div>
+      <div class="plank"></div>
+    </section>`;
+  }).join('')}</div>`;
+}
+
+function spineHTML(b, size, leaning) {
+  const pages = Number(b.pages) || 280;
+  const t = Math.min(1, Math.max(0, (pages - 100) / 600));            // 0 (slim) … 1 (chunky)
+  const seed = [...b.id].reduce((a, c) => (a * 33 + c.charCodeAt(0)) >>> 0, 5);
+  const hgt = Math.round(size.max * (0.74 + 0.2 * t + (seed % 7) / 100));
+  const wid = Math.round((20 + 26 * t) * size.w);
+  const bg = b.cover ? `background-image:linear-gradient(90deg,rgba(0,0,0,.45),rgba(0,0,0,.2) 40%,rgba(0,0,0,.45)),url(&quot;${esc(b.cover)}&quot;);` : '';
+  const last = (b.author || '').split(',')[0].trim().split(' ').pop();
+  return `<button class="spine${leaning ? ' leaning' : ''}" data-action="pull" data-id="${b.id}"
+    style="--h:${hgt}px;--w:${wid}px;--c:${spineColor(b)};--fs:${Math.min(size.fs, Math.max(8, wid - 10))};${bg}"
+    aria-label="${esc(b.title)}${b.author ? ' by ' + esc(b.author) : ''}${b.rating ? ', ' + b.rating + ' stars' : ''}" title="${esc(b.title)}">
+    <span class="sp-title">${esc(b.title)}</span>${last && wid >= 24 ? `<span class="sp-auth">${esc(last)}</span>` : '<span></span>'}
+  </button>`;
+}
+
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let bookOut = null; // { id, spine }
+
+function pullBook(spine) {
+  const b = bookById(spine.dataset.id); if (!b) return;
+  const mins = state.sessions.filter(s => s.bookId === b.id).reduce((a, s) => a + (s.minutes || 0), 0);
+  const quote = (b.quotes || [])[0];
+  const facts = [
+    b.finishDate && `Finished ${fmtDate(b.finishDate)}`,
+    b.pages && `${b.pages} pages`,
+    mins && `${fmtMins(mins)} reading`,
+    b.genre && esc(b.genre),
+    (b.quotes || []).length && `${b.quotes.length} quote${b.quotes.length > 1 ? 's' : ''}`,
+  ].filter(Boolean);
+  $('#bookout-slot').innerHTML = `<div class="bookout-back" data-bookout-back>
+    <div class="bookout" role="dialog" aria-modal="true" aria-label="${esc(b.title)}">
+      <button class="icon-btn close" data-action="putback" aria-label="Put back on the shelf" style="position:absolute;top:12px;right:12px;font-size:1.4rem">✕</button>
+      <div class="bo-cover">${b.cover ? coverHTML(b) : `<div class="cover placeholder" style="background-color:${spineColor(b)}"><div class="pt">${esc(b.title)}</div><div class="pa">${esc(b.author || '')}</div></div>`}</div>
+      <div class="bo-info">
+        <h3>${esc(b.title)}</h3>
+        ${b.author ? `<div class="by">by ${esc(b.author)}</div>` : ''}
+        <div class="stars" aria-label="${b.rating || 0} out of 5 stars">${stars(b.rating)}</div>
+        <div class="bo-facts">${facts.map(f => `<span>${f}</span>`).join('')}</div>
+        ${b.notes ? `<p class="bo-note">${esc(b.notes.length > 320 ? b.notes.slice(0, 320) + '…' : b.notes)}</p>` : ''}
+        ${quote ? `<p class="bo-note" style="border-left-color:var(--butter-dark)">“${esc(quote.text)}”${quote.page ? ` <span class="muted">p. ${esc(quote.page)}</span>` : ''}</p>` : ''}
+        ${!b.notes && !quote ? '<p class="muted">No thoughts written yet — open the book to add your notes and favourite lines.</p>' : ''}
+        <div class="bo-actions">
+          <button class="btn" data-action="open" data-id="${b.id}">📖 Open &amp; edit</button>
+          <button class="btn ghost" data-action="putback">↩ Put it back</button>
+        </div>
+      </div>
+    </div></div>`;
+  bookOut = { id: b.id, spine };
+  const back = $('.bookout-back'), card = $('.bookout'), cov = $('.bo-cover'), info = $('.bo-info');
+  setTimeout(() => $('.bookout [data-action=open]')?.focus({ preventScroll: true }), 50);
+  if (reduceMotion() || !cov.animate) { spine.style.visibility = 'hidden'; return; }
+  // 1) the spine slides up out of its slot, 2) the book flies out and turns to show its cover.
+  spine.classList.add('pulled');
+  const from = spine.getBoundingClientRect(), to = cov.getBoundingClientRect();
+  const sc = from.height / to.height;
+  const start = `translate(${from.left - to.left}px, ${from.top - to.top - from.height * 0.6}px) scale(${sc}) rotateY(-88deg)`;
+  back.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: 'ease-out' });
+  card.animate([{ backgroundColor: 'rgba(251,247,238,0)', boxShadow: 'none', borderTopColor: 'transparent' }, { backgroundColor: 'rgba(251,247,238,0)', boxShadow: 'none', borderTopColor: 'transparent', offset: .45 }, {}], { duration: 700, easing: 'ease-out' });
+  cov.animate([{ transform: start }, { transform: start, offset: .2 }, { transform: 'none' }], { duration: 750, easing: 'cubic-bezier(.2,.7,.2,1)' });
+  info.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 0, transform: 'translateY(10px)', offset: .5 }, { opacity: 1, transform: 'none' }], { duration: 750, easing: 'ease-out' });
+}
+
+function putBack(instant) {
+  if (!bookOut) return Promise.resolve();
+  const { spine } = bookOut; bookOut = null;
+  const done = () => {
+    $('#bookout-slot').innerHTML = '';
+    if (spine && spine.isConnected) {
+      spine.style.visibility = '';
+      requestAnimationFrame(() => spine.classList.remove('pulled'));
+      spine.focus({ preventScroll: true });
+    }
+  };
+  const cov = $('.bo-cover');
+  if (instant || reduceMotion() || !cov || !cov.animate || !spine || !spine.isConnected) { done(); return Promise.resolve(); }
+  const back = $('.bookout-back'), card = $('.bookout'), info = $('.bo-info');
+  spine.classList.remove('pulled'); const from = spine.getBoundingClientRect(); spine.classList.add('pulled');
+  const to = cov.getBoundingClientRect();
+  const end = `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.height / to.height}) rotateY(-88deg)`;
+  info.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' });
+  card.animate([{}, { backgroundColor: 'rgba(251,247,238,0)', boxShadow: 'none', borderTopColor: 'transparent' }], { duration: 250, fill: 'forwards' });
+  back.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 550, easing: 'ease-in', fill: 'forwards' });
+  return cov.animate([{ transform: 'none' }, { transform: end }], { duration: 520, easing: 'cubic-bezier(.5,0,.75,.3)', fill: 'forwards' }).finished.then(done, done);
 }
 
 function bookCard(b) {
@@ -1264,6 +1513,7 @@ async function importData(file) {
 /* ---------- events ---------- */
 document.addEventListener('click', async e => {
   if (e.target.matches('[data-backdrop]')) { closeModal(); return; }
+  if (e.target.matches('[data-bookout-back]')) { putBack(); return; }
   const el = e.target.closest('[data-action], [data-tab]');
   if (!el) return;
   if (el.dataset.tab) {
@@ -1275,7 +1525,14 @@ document.addEventListener('click', async e => {
   switch (a) {
     case 'close': closeModal(); break;
     case 'add': bookModal(null, el.dataset.status); break;
-    case 'open': bookModal(bookById(id)); break;
+    case 'open': if (bookOut) await putBack(true); bookModal(bookById(id)); break;
+    case 'pull': if (!bookOut) pullBook(el); break;
+    case 'putback': putBack(); break;
+    case 'shelf-view': case 'shelf-size': {
+      state.shelf[a === 'shelf-view' ? 'view' : 'size'] = el.dataset.v;
+      try { localStorage.setItem('booknook.shelf', JSON.stringify(state.shelf)); } catch (err) {}
+      render(); break;
+    }
     case 'save-book': await saveDraft(); break;
     case 'ol-search': await olSearch(); break;
     case 'ol-pick': olPick(Number(el.dataset.i)); break;
@@ -1414,6 +1671,7 @@ document.addEventListener('submit', async e => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && $('#modal-slot').innerHTML) closeModal();
+  else if (e.key === 'Escape' && bookOut) putBack();
   if (e.key === 'Enter' && e.target.id === 'ol-q') { e.preventDefault(); olSearch(); }
   if (e.key === 'Enter' && e.target.id === 'new-quote') { e.preventDefault(); $('[data-action=add-quote]').click(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.card[data-action=open]')) { e.preventDefault(); bookModal(bookById(e.target.dataset.id)); }
@@ -1431,6 +1689,7 @@ document.addEventListener('input', e => {
 document.addEventListener('change', async e => {
   const t = e.target;
   if (t.id === 'sort') { state.filter.sort = t.value; render(); }
+  if (t.id === 'shelf-group') { state.shelf.group = t.value; try { localStorage.setItem('booknook.shelf', JSON.stringify(state.shelf)); } catch (err) {} render(); }
   if (t.matches('[data-cover-input]') && t.files[0]) {
     try { syncDraft(); draft.cover = await resizeImage(t.files[0]); renderBookModal(); }
     catch (err) { toast('Couldn’t read that photo'); }
