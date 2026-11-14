@@ -1,4 +1,4 @@
-name: Deploy frontend + Book Nook + Tend to GitHub Pages
+name: Deploy frontend + Book Nook + Tend + Abide to GitHub Pages
 
 on:
   # Manual only — Maria chose to run the app locally instead of via GitHub
@@ -49,6 +49,11 @@ jobs:
         run: |
           mkdir -p frontend/dist/tend
           cp tend/index.html tend/sw.js tend/manifest.webmanifest tend/*.png frontend/dist/tend/
+
+      - name: Add Abide Bible companion (served at /abide/)
+        run: |
+          mkdir -p frontend/dist/abide
+          cp abide/index.html abide/sw.js abide/manifest.webmanifest abide/*.png frontend/dist/abide/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -41,6 +41,12 @@ install it from there the same way.
 A care journal set up like Book Nook, with index tabs for self care, mental care and physical care.
 It lives in [`tend/`](tend/README.md). Open `tend/index.html` directly, or use it at `/FLY_API_TOKEN/tend/` once GitHub Pages is deployed.
 
+## 🌼 Abide: Bible companion
+
+A cottage-style Bible app with a Proverbs 31 progress sheet, a fasting and prayer section, a 6-week Bible study,
+scripture to save and memorise, and lessons on walking with God. It lives in [`abide/`](abide/README.md).
+Open `abide/index.html` directly, or use it at `/FLY_API_TOKEN/abide/` once GitHub Pages is deployed.
+
 ## Features
 
 - **Dashboard** — upcoming assignments, today's habits, goals in progress, your burrow at a glance, tip of the day
