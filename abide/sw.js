@@ -1,6 +1,6 @@
 // Abide service worker: lets the installed app open offline.
 // Your progress is NOT stored here — it lives in the browser's localStorage.
-const CACHE = 'abide-v1';
+const CACHE = 'abide-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

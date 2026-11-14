@@ -31,10 +31,11 @@ You can also just double-click `index.html` to use it without installing.
    (including when to check with a doctor first).
 4. **Bible Study**: a 6-week plan (Knowing God, Identity, Trusting God, Hearing His voice, Purpose & calling,
    Becoming like Jesus) with notes for every day and a question each week.
-5. **Scripture**: a library of verses by topic (KJV), saved verses, a memorise helper that hides words step by step,
+5. **Scripture**: 146 verses (KJV) in 18 topics with search, saved verses, a memorise helper that hides words step by step,
    your own verses as sticky notes, and **Renew my mind** (write the lie, then the truth God says).
-6. **Walk With God**: 12 short lessons (grace, prayer, Bible study, renewing your mind, fasting, the fruit of the Spirit,
-   words, forgiveness, stewardship, rest, serving, the armour of God), each with steps to live it and a reflection.
+6. **Walk With God**: 22 short lessons (grace, prayer, Bible study, renewing your mind, fasting, the fruit of the Spirit,
+   words, forgiveness, stewardship, rest, serving, the armour of God, gratitude, contentment, worry, humility, worship,
+   building your home, hearing and obeying God, sharing your faith, honouring God with your body, hope in hard seasons), each with steps to live it and a reflection.
 7. **Prayer Journal**: prayer list, answered prayers, and "God moments".
 8. **Settings & Backup**: your name, download/restore a backup, erase, and install help.
 
