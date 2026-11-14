@@ -1,0 +1,1425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abide</title>
+<meta name="description" content="A cottage-style Bible companion: Proverbs 31 progress sheet, fasting with prayer, a 6-week Bible study, scripture to memorise and lessons on walking with God.">
+<meta name="theme-color" content="#f5efe3">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Abide">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=Nunito:wght@400;600;700&family=Caveat:wght@500;700&display=swap">
+<style>
+/* Layout: an iPad-style home screen in a cottage kitchen. A moss-green side panel (like a lock-screen widget column)
+   holds the sections; on phones it slides out as a drawer and a rounded dock sits at the bottom.
+   Pages are linen with pinned paper cards, washi-tape labels and sticky notes. */
+:root {
+  --linen: #f5efe3;
+  --paper: #fffaf2;
+  --paper-2: #f9f1e3;
+  --ink: #4f3a2c;
+  --ink-soft: #85705d;
+  --line: #e6d8c3;
+  --moss: #5a6a42;
+  --moss-deep: #4a5836;
+  --moss-ink: #f5efdc;
+  --moss-soft: rgba(245,239,220,.16);
+  --sage: #8c9d6f;
+  --sage-soft: #e1e7d0;
+  --rose: #c97d74;
+  --rose-ink: #a85c53;
+  --blush: #f6dcd5;
+  --butter: #edd27e;
+  --butter-soft: #f8ecc6;
+  --peach: #f6dcc4;
+  --lavender: #e4daf0;
+  --sky: #d7e3ea;
+  --gold: #b88a35;
+  --on-accent: #fffaf2;
+  --shadow: 0 1px 0 rgba(79,58,44,.05), 0 10px 26px -16px rgba(79,58,44,.4);
+  --shadow-lift: 0 18px 36px -18px rgba(79,58,44,.5);
+  --display: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --body: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --r: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --linen: #1e1b15; --paper: #29251d; --paper-2: #312b22; --ink: #f1e7d5; --ink-soft: #bfac94; --line: #463c30;
+    --moss: #39462a; --moss-deep: #2e3922; --moss-ink: #eee6d0; --moss-soft: rgba(238,230,208,.12);
+    --sage: #a7b88a; --sage-soft: #36402b; --rose: #e0a097; --rose-ink: #eab1a8; --blush: #4a322e;
+    --butter: #d8bd66; --butter-soft: #463c24; --peach: #4b3828; --lavender: #3d3550; --sky: #2f3c45; --gold: #ddb565;
+    --on-accent: #1e1b15;
+    --shadow: 0 10px 26px -16px rgba(0,0,0,.75); --shadow-lift: 0 18px 36px -16px rgba(0,0,0,.85);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --linen: #1e1b15; --paper: #29251d; --paper-2: #312b22; --ink: #f1e7d5; --ink-soft: #bfac94; --line: #463c30;
+  --moss: #39462a; --moss-deep: #2e3922; --moss-ink: #eee6d0; --moss-soft: rgba(238,230,208,.12);
+  --sage: #a7b88a; --sage-soft: #36402b; --rose: #e0a097; --rose-ink: #eab1a8; --blush: #4a322e;
+  --butter: #d8bd66; --butter-soft: #463c24; --peach: #4b3828; --lavender: #3d3550; --sky: #2f3c45; --gold: #ddb565;
+  --on-accent: #1e1b15;
+  --shadow: 0 10px 26px -16px rgba(0,0,0,.75); --shadow-lift: 0 18px 36px -16px rgba(0,0,0,.85);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; background: var(--linen); color: var(--ink);
+  font: 16px/1.55 var(--body);
+  background-image:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--linen); }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.15; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--rose-ink); }
+:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; border-radius: 6px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- frame ---------- */
+.app { display: grid; grid-template-columns: 272px minmax(0, 1fr); min-height: 100vh; }
+.side {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: var(--moss); color: var(--moss-ink);
+  padding: calc(22px + env(safe-area-inset-top, 0px)) 18px 22px max(18px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 18px;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { width: 40px; height: 40px; flex: none; }
+.brand h1 { font-size: 1.7rem; font-style: italic; font-weight: 400; letter-spacing: .01em; }
+.brand small { display: block; font: 600 .72rem/1.2 var(--body); letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+.mini { background: var(--moss-soft); border-radius: 14px; padding: 12px 14px; display: grid; gap: 8px; font-size: .85rem; }
+.mini-date { font-family: var(--display); font-size: 1.05rem; }
+.mini-dots { display: flex; gap: 6px; align-items: center; }
+.mini-dots i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--moss-ink); opacity: .9; }
+.mini-dots i.on { background: var(--moss-ink); }
+.mini-fast { font-variant-numeric: tabular-nums; }
+.nav { display: grid; gap: 2px; }
+.nav button {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  background: none; border: 0; border-radius: 12px; padding: 9px 12px; cursor: pointer; color: var(--moss-ink);
+  font-weight: 600; font-size: .96rem;
+}
+.nav button svg { width: 22px; height: 22px; flex: none; }
+.nav button:hover { background: var(--moss-soft); }
+.nav button[aria-current="page"] { background: var(--moss-ink); color: var(--moss-deep); }
+.side-foot { margin-top: auto; font-family: var(--hand); font-size: 1.2rem; line-height: 1.2; opacity: .85; }
+
+.main { min-width: 0; padding-block: 28px 120px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); position: relative; }
+.page { max-width: 1040px; margin: 0 auto; display: grid; gap: 22px; position: relative; z-index: 1; }
+
+.topbar { display: none; }
+.dock { display: none; }
+.scrim { display: none; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side {
+    position: fixed; z-index: 60; left: 0; top: 0; bottom: 0; width: min(300px, 84vw); height: auto;
+    transform: translateX(-104%); transition: transform .28s ease; box-shadow: var(--shadow-lift);
+  }
+  .app.drawer .side { transform: none; }
+  .app.drawer .scrim { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(30,24,18,.35); }
+  .topbar {
+    display: flex; align-items: center; gap: 10px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+    background: color-mix(in srgb, var(--linen) 92%, transparent); backdrop-filter: blur(8px);
+    padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar h2 { font-size: 1.25rem; font-style: italic; font-weight: 400; }
+  .main { padding-top: 18px; }
+  .dock {
+    display: flex; position: fixed; z-index: 30; left: 50%; transform: translateX(-50%);
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)); gap: 6px; padding: 8px;
+    background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px);
+    border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow-lift);
+  }
+  .dock button { width: 52px; height: 52px; border-radius: 15px; border: 0; display: grid; place-items: center; cursor: pointer; }
+  .dock button svg { width: 24px; height: 24px; }
+  .dock button[aria-current="page"] { outline: 2px solid var(--ink); outline-offset: 1px; }
+}
+.icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); display: grid; place-items: center; cursor: pointer; }
+.icon-btn svg { width: 22px; height: 22px; }
+
+/* decorative corner flowers */
+.deco { position: fixed; pointer-events: none; z-index: 0; opacity: .55; }
+.deco.tr { top: calc(-20px + env(safe-area-inset-top, 0px)); right: -30px; width: 230px; }
+.deco.bl { bottom: -26px; left: 250px; width: 200px; }
+@media (max-width: 900px) { .deco.bl { left: -40px; } .deco { opacity: .3; } .deco.tr { width: 140px; right: -40px; } }
+@media (max-width: 640px) { .banner svg.sprig { width: 80px; opacity: .2; } }
+
+/* ---------- shared pieces ---------- */
+.head { display: grid; gap: 6px; }
+.eyebrow { font-weight: 700; font-size: .74rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+.head h2 { font-size: clamp(1.9rem, 4.4vw, 2.7rem); }
+.head h2 em { font-weight: 400; color: var(--rose-ink); }
+.lede { color: var(--ink-soft); max-width: 62ch; }
+
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; box-shadow: var(--shadow); min-width: 0; }
+.card h3 { font-size: 1.3rem; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 980px) { .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
+.stack { display: grid; gap: 12px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.muted { color: var(--ink-soft); }
+.small { font-size: .88rem; }
+
+.tape {
+  display: inline-block; padding: 4px 14px; font: 700 .76rem/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase;
+  background: var(--sage-soft); color: var(--ink); transform: rotate(-1.5deg);
+  clip-path: polygon(2% 0, 98% 4%, 100% 50%, 97% 100%, 3% 96%, 0 50%);
+}
+.tape.rose { background: var(--blush); } .tape.butter { background: var(--butter-soft); } .tape.lav { background: var(--lavender); } .tape.sky { background: var(--sky); } .tape.peach { background: var(--peach); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 9px 18px; cursor: pointer;
+  border: 1.5px solid var(--ink); background: var(--paper); font-weight: 700; font-size: .92rem;
+}
+.btn svg { width: 18px; height: 18px; }
+.btn:hover { background: var(--paper-2); }
+.btn.primary { background: var(--moss); border-color: var(--moss); color: var(--moss-ink); }
+.btn.primary:hover { background: var(--moss-deep); }
+.btn.rose { background: var(--rose); border-color: var(--rose); color: var(--on-accent); }
+.btn.ghost { border-color: var(--line); }
+.btn.small { padding: 5px 12px; font-size: .82rem; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: .88rem; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+label.field { display: grid; gap: 5px; font-weight: 700; font-size: .86rem; }
+.field input, .field select, .field textarea, textarea.note, input.text {
+  width: 100%; border: 1px solid var(--line); background: var(--paper-2); border-radius: 12px; padding: 10px 12px; font-weight: 400; font-size: 1rem;
+}
+textarea { resize: vertical; min-height: 84px; }
+textarea.lined {
+  font-family: var(--hand); font-size: 1.35rem; line-height: 32px; padding: 4px 12px; min-height: 100px;
+  background: repeating-linear-gradient(var(--paper-2), var(--paper-2) 31px, var(--line) 31px, var(--line) 32px);
+  border: 1px solid var(--line); border-radius: 12px; width: 100%;
+}
+
+.check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 6px 0; }
+.check input { appearance: none; flex: none; width: 22px; height: 22px; margin: 1px 0 0; border: 1.5px solid var(--ink-soft); border-radius: 7px; background: var(--paper); cursor: pointer; display: grid; place-items: center; }
+.check input:checked { background: var(--sage); border-color: var(--sage); }
+.check input:checked::after { content: ""; width: 10px; height: 6px; border: 2.5px solid var(--on-accent); border-top: 0; border-right: 0; transform: translateY(-1px) rotate(-45deg); }
+.check input:checked + span { color: var(--ink-soft); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ink-soft) 50%, transparent); }
+
+.sticky {
+  font-family: var(--hand); font-size: 1.4rem; line-height: 1.2; padding: 18px 18px 20px; border-radius: 3px;
+  background: var(--blush); box-shadow: var(--shadow); transform: rotate(-1deg); position: relative;
+}
+.sticky::before { content: ""; position: absolute; top: -9px; left: 50%; width: 70px; height: 20px; transform: translateX(-50%) rotate(2deg); background: color-mix(in srgb, var(--butter) 60%, transparent); }
+.sticky.butter { background: var(--butter-soft); transform: rotate(1deg); }
+.sticky.sage { background: var(--sage-soft); }
+.sticky.lav { background: var(--lavender); transform: rotate(.6deg); }
+.sticky.sky { background: var(--sky); }
+.sticky.peach { background: var(--peach); transform: rotate(-.4deg); }
+.sticky small { display: block; font-family: var(--body); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; margin-top: 8px; color: var(--ink-soft); }
+
+.verse { font-family: var(--display); font-style: italic; font-size: 1.12rem; line-height: 1.55; }
+.ref { font-weight: 700; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--rose-ink); }
+.bar { height: 10px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--sage); border-radius: 99px; }
+.subtabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px dashed var(--line); padding-bottom: 12px; }
+.subtabs button { border: 0; background: none; padding: 7px 14px; border-radius: 999px; cursor: pointer; font-weight: 700; color: var(--ink-soft); }
+.subtabs button[aria-pressed="true"] { background: var(--blush); color: var(--ink); }
+.datenav { display: flex; align-items: center; gap: 8px; }
+.datenav button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); cursor: pointer; display: grid; place-items: center; }
+.datenav button svg { width: 18px; height: 18px; }
+.datenav span { font-family: var(--display); font-size: 1.1rem; min-width: 0; }
+.empty { border: 1.5px dashed var(--line); border-radius: var(--r); padding: 18px; color: var(--ink-soft); text-align: center; }
+.ring { width: 92px; height: 92px; flex: none; }
+.ring text { font-family: var(--display); fill: var(--ink); }
+
+/* ---------- home ---------- */
+.hello { display: flex; justify-content: space-between; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+.hello h2 { font-size: clamp(2rem, 5vw, 3rem); }
+.hello h2 em { font-weight: 400; color: var(--rose-ink); }
+.votd { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 22px; align-items: center; padding: 24px; background: var(--paper); }
+.votd .art { background: var(--sage-soft); border-radius: 14px; aspect-ratio: 1; max-width: 100%; display: grid; place-items: center; transform: rotate(-2deg); box-shadow: var(--shadow); border: 6px solid var(--paper); outline: 1px solid var(--line); }
+.votd .art svg { width: 82%; }
+.votd .verse { font-size: clamp(1.2rem, 2.4vw, 1.5rem); }
+@media (max-width: 560px) { .votd { grid-template-columns: minmax(0, 1fr); } .votd .art { width: 120px; } }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 18px 12px; }
+.tile { display: grid; justify-items: center; gap: 7px; background: none; border: 0; cursor: pointer; font-weight: 600; font-size: .86rem; text-align: center; }
+.tile i { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; box-shadow: var(--shadow); border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent); transition: transform .15s; }
+.tile i svg { width: 30px; height: 30px; }
+.tile:hover i { transform: translateY(-2px) rotate(-2deg); }
+.bg-rose { background: var(--blush); } .bg-sage { background: var(--sage-soft); } .bg-butter { background: var(--butter-soft); }
+.bg-lav { background: var(--lavender); } .bg-sky { background: var(--sky); } .bg-peach { background: var(--peach); } .bg-paper { background: var(--paper-2); }
+.rhythm { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .rhythm { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.step { border: 1.5px solid var(--line); border-radius: 14px; padding: 12px; background: var(--paper-2); text-align: left; cursor: pointer; display: grid; gap: 4px; align-content: start; }
+.step b { font-family: var(--display); font-size: 1.15rem; display: flex; justify-content: space-between; align-items: center; }
+.step span { font-size: .84rem; color: var(--ink-soft); }
+.step.on { background: var(--sage-soft); border-color: var(--sage); }
+.step .dot { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--ink-soft); display: grid; place-items: center; }
+.step.on .dot { background: var(--sage); border-color: var(--sage); color: var(--on-accent); }
+.step .dot svg { width: 13px; height: 13px; }
+.widget h4 { font-size: 1.05rem; margin-bottom: 6px; }
+.big-num { font-family: var(--display); font-size: 2.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+
+/* ---------- proverbs 31 ---------- */
+.banner { background: var(--moss); color: var(--moss-ink); border-radius: var(--r); padding: 22px 24px; display: grid; gap: 6px; position: relative; overflow: hidden; }
+.banner .verse { font-size: clamp(1.15rem, 2.4vw, 1.45rem); }
+.banner .ref { color: var(--butter); }
+.banner svg.sprig { position: absolute; right: 10px; bottom: -8px; width: 120px; opacity: .35; }
+.traits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 700px) { .traits { grid-template-columns: minmax(0, 1fr); } }
+.trait { padding: 16px 18px; display: grid; gap: 6px; }
+.trait-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.trait h3 { font-size: 1.12rem; }
+.num { font-family: var(--hand); font-size: 1.6rem; line-height: 1; color: var(--rose-ink); margin-right: 4px; }
+.count { font-weight: 700; font-size: .8rem; padding: 3px 10px; border-radius: 99px; background: var(--paper-2); border: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.count.full { background: var(--sage); color: var(--on-accent); border-color: var(--sage); }
+.sheet-wrap { overflow-x: auto; }
+table.sheet { border-collapse: separate; border-spacing: 4px; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums; }
+.sheet th { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; padding: 4px; }
+.sheet th.t { text-align: left; text-transform: none; letter-spacing: 0; font-size: .92rem; color: var(--ink); font-weight: 600; }
+.sheet td { text-align: center; }
+.cell { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: .75rem; font-weight: 700; }
+.lv1 { background: color-mix(in srgb, var(--sage) 25%, var(--paper)); }
+.lv2 { background: color-mix(in srgb, var(--sage) 50%, var(--paper)); }
+.lv3 { background: color-mix(in srgb, var(--sage) 75%, var(--paper)); }
+.lv4 { background: var(--sage); color: var(--on-accent); border-color: var(--sage); }
+.today-col .cell { outline: 2px solid var(--rose); outline-offset: 1px; }
+.legend { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: .82rem; color: var(--ink-soft); }
+.legend .cell { width: 18px; height: 18px; margin: 0; }
+.trend { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; align-items: end; height: 150px; padding-top: 18px; }
+.trend div { display: grid; gap: 4px; justify-items: center; height: 100%; align-content: end; font-size: .74rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.trend b { width: 100%; max-width: 36px; background: var(--rose); border-radius: 8px 8px 3px 3px; min-height: 3px; }
+.trend .cur b { background: var(--moss); }
+.rate { display: flex; gap: 4px; }
+.rate button { width: 32px; height: 32px; border: 0; background: none; cursor: pointer; padding: 2px; color: var(--line); }
+.rate button.on { color: var(--rose); }
+.rate svg { width: 100%; height: 100%; }
+.delta { font-size: .8rem; font-weight: 700; }
+.delta.up { color: var(--moss); } .delta.down { color: var(--rose-ink); }
+:root[data-theme="dark"] .delta.up { color: var(--sage); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .delta.up { color: var(--sage); } }
+.today-list { columns: 2; column-gap: 24px; }
+.today-list li { break-inside: avoid; margin-bottom: 6px; }
+@media (max-width: 640px) { .today-list { columns: 1; } }
+ul.hearts { list-style: none; padding: 0; margin: 0; }
+ul.hearts li { padding-left: 22px; position: relative; }
+ul.hearts li::before { content: ""; position: absolute; left: 2px; top: .5em; width: 10px; height: 10px; background: var(--rose); clip-path: path("M5 9.5 C2 7 0 5.2 0 3.1 0 1.3 1.3 0 2.9 0 3.8 0 4.6.5 5 1.2 5.4.5 6.2 0 7.1 0 8.7 0 10 1.3 10 3.1 10 5.2 8 7 5 9.5z"); }
+
+/* ---------- fasting ---------- */
+.fast-live { background: var(--paper); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 760px) { .fast-live { grid-template-columns: minmax(0, 1fr); } }
+.clock { font-family: var(--display); font-size: clamp(2.6rem, 8vw, 4rem); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.prompt-card { background: var(--butter-soft); border-radius: 14px; padding: 16px; display: grid; gap: 8px; }
+.types { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.type { text-align: left; border: 1.5px solid var(--line); background: var(--paper-2); border-radius: 14px; padding: 12px 14px; cursor: pointer; display: grid; gap: 4px; }
+.type b { font-family: var(--display); font-size: 1.05rem; }
+.type span { font-size: .84rem; color: var(--ink-soft); }
+.type[aria-pressed="true"] { border-color: var(--moss); background: var(--sage-soft); box-shadow: inset 0 0 0 1px var(--moss); }
+details.teach { border-top: 1px dashed var(--line); padding: 12px 0; }
+details.teach:first-of-type { border-top: 0; }
+details.teach summary { cursor: pointer; font-family: var(--display); font-size: 1.12rem; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+details.teach summary::-webkit-details-marker { display: none; }
+details.teach summary::after { content: "+"; font-family: var(--body); color: var(--rose-ink); font-weight: 700; }
+details.teach[open] summary::after { content: "–"; }
+details.teach .body { padding-top: 10px; display: grid; gap: 10px; max-width: 68ch; }
+.log { display: grid; gap: 10px; }
+.log-item { border-left: 3px solid var(--sage); padding: 4px 0 4px 14px; display: grid; gap: 2px; }
+.log-item.rose { border-color: var(--rose); }
+.note-text { font-family: var(--hand); font-size: 1.3rem; line-height: 1.25; white-space: pre-wrap; }
+.confirm { background: var(--blush); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+
+/* ---------- study ---------- */
+.weeks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+@media (max-width: 980px) { .weeks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .weeks { grid-template-columns: minmax(0, 1fr); } }
+.week { padding: 0; overflow: hidden; }
+.week-head { padding: 14px 16px 12px; display: grid; gap: 2px; }
+.week-head b { font: 700 .74rem/1 var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); }
+.week-head h3 { font-size: 1.2rem; }
+.week-body { padding: 6px 16px 14px; }
+.day { border-bottom: 1px dashed var(--line); }
+.day:last-child { border-bottom: 0; }
+.day-row { display: flex; align-items: center; gap: 10px; }
+.day-row .check { flex: 1; padding: 8px 0; }
+.day-row .check span { display: flex; gap: 8px; }
+.day-row .check em { font-style: normal; color: var(--ink-soft); font-size: .85rem; min-width: 44px; }
+.open-day { border: 0; background: none; cursor: pointer; color: var(--ink-soft); padding: 4px; border-radius: 8px; }
+.open-day svg { width: 18px; height: 18px; transition: transform .2s; }
+.open-day[aria-expanded="true"] svg { transform: rotate(90deg); }
+.day-detail { padding: 4px 0 14px; display: grid; gap: 10px; }
+.week-q { background: var(--paper-2); padding: 12px 16px 16px; display: grid; gap: 8px; border-top: 1px solid var(--line); }
+.week-q p { font-family: var(--hand); font-size: 1.3rem; line-height: 1.2; }
+.routine { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .routine { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.routine div { display: grid; gap: 4px; align-content: start; }
+.routine b { font-family: var(--display); font-size: 1.15rem; color: var(--rose-ink); }
+.routine p { font-size: .9rem; color: var(--ink-soft); }
+
+/* ---------- scripture ---------- */
+.verses { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.vcard { display: grid; gap: 10px; align-content: start; padding: 18px; }
+.vcard .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.heart-btn { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 5px 12px; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; font-weight: 700; font-size: .82rem; }
+.heart-btn svg { width: 16px; height: 16px; }
+.heart-btn.on { background: var(--blush); border-color: var(--rose); color: var(--rose-ink); }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--moss); background: var(--sage-soft); border-radius: 99px; padding: 3px 9px; }
+:root[data-theme="dark"] .badge { color: var(--sage); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .badge { color: var(--sage); } }
+.notes-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 22px 18px; padding-top: 8px; }
+.truth { display: grid; gap: 10px; padding: 18px; }
+.truth .lie { text-decoration: line-through; text-decoration-color: var(--rose); color: var(--ink-soft); font-family: var(--hand); font-size: 1.3rem; }
+.truth .tru { font-family: var(--hand); font-size: 1.45rem; line-height: 1.2; }
+.x { border: 0; background: none; cursor: pointer; color: var(--ink-soft); padding: 4px; border-radius: 8px; }
+.x svg { width: 16px; height: 16px; }
+
+.modal { position: fixed; inset: 0; z-index: 80; background: rgba(30,24,18,.45); display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.modal .card { width: min(640px, 100%); max-height: 100%; overflow-y: auto; display: grid; gap: 16px; padding: 24px; }
+.practice { font-family: var(--display); font-size: clamp(1.25rem, 3vw, 1.6rem); line-height: 1.9; }
+.practice .w { cursor: pointer; border-radius: 4px; }
+.practice .w.hid { color: transparent; border-bottom: 2px solid var(--ink-soft); background: var(--paper-2); }
+.practice .w.first { color: transparent; border-bottom: 2px solid var(--ink-soft); }
+.practice .w.first::first-letter { color: var(--ink); }
+.practice .w.shown { color: var(--rose-ink); background: none; }
+
+/* ---------- learn ---------- */
+.lessons { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.lesson-card { text-align: left; cursor: pointer; display: grid; gap: 8px; align-content: start; font: inherit; color: inherit; }
+.lesson-card:hover { box-shadow: var(--shadow-lift); }
+.lesson-card .n { font-family: var(--hand); font-size: 1.5rem; color: var(--rose-ink); line-height: 1; }
+.lesson { display: grid; gap: 18px; }
+.lesson .body { display: grid; gap: 12px; max-width: 68ch; font-size: 1.04rem; }
+ol.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; counter-reset: s; }
+ol.steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; }
+ol.steps li::before { counter-increment: s; content: counter(s); width: 30px; height: 30px; border-radius: 50%; background: var(--butter-soft); display: grid; place-items: center; font-family: var(--display); font-weight: 600; }
+ol.steps .check { padding: 2px 0; }
+ol.steps .check b { display: block; }
+
+/* ---------- prayer ---------- */
+.prayer-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+.prayer-item:last-child { border-bottom: 0; }
+.prayer-item.answered .ptext { color: var(--ink-soft); }
+.ptext { font-family: var(--hand); font-size: 1.35rem; line-height: 1.2; }
+.answer { font-size: .9rem; color: var(--moss); margin-top: 4px; }
+:root[data-theme="dark"] .answer { color: var(--sage); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .answer { color: var(--sage); } }
+
+.toast { position: fixed; z-index: 90; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); background: var(--ink); color: var(--paper); border-radius: 999px; padding: 7px 16px; font-weight: 700; font-size: .85rem; opacity: 0; transform: translateY(-6px); transition: .2s; pointer-events: none; }
+.toast.on { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side" id="side" aria-label="Sections"></aside>
+  <div class="scrim" data-act="drawer"></div>
+  <div class="main-col" style="min-width:0">
+    <header class="topbar">
+      <button class="icon-btn" data-act="drawer" aria-label="Open sections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+      <h2 id="top-title">Abide</h2>
+    </header>
+    <main class="main" id="main"></main>
+  </div>
+  <nav class="dock" id="dock" aria-label="Quick sections"></nav>
+</div>
+<div id="modal-root"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="restore-file" accept="application/json,.json" hidden>
+
+<script>
+/* ================= icons & art ================= */
+const I = (p, w = 1.7) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICON = {
+  home: I('<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/>'),
+  crown: I('<path d="M4.5 18.5h15"/><path d="M4.5 18.5 3.5 8l4.5 3.5L12 5l4 6.5L20.5 8l-1 10.5"/><circle cx="12" cy="14.5" r="1"/>'),
+  wheat: I('<path d="M12 21.5V7"/><path d="M12 7c-1.8-.8-2.7-2.6-2.5-4.6 1.8.6 2.7 2.3 2.5 4.6zM12 7c1.8-.8 2.7-2.6 2.5-4.6-1.8.6-2.7 2.3-2.5 4.6z"/><path d="M12 12c-2-.6-3.5-2.2-3.6-4.3 2 .2 3.5 1.9 3.6 4.3zM12 12c2-.6 3.5-2.2 3.6-4.3-2 .2-3.5 1.9-3.6 4.3z"/><path d="M12 17c-2-.6-3.5-2.2-3.6-4.3 2 .2 3.5 1.9 3.6 4.3zM12 17c2-.6 3.5-2.2 3.6-4.3-2 .2-3.5 1.9-3.6 4.3z"/>'),
+  book: I('<path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5v13"/>'),
+  ribbon: I('<path d="M6 3.5h12v17l-6-4-6 4z"/><path d="M12 12.4s-3-1.8-3-3.7a1.6 1.6 0 0 1 3-.8 1.6 1.6 0 0 1 3 .8c0 1.9-3 3.7-3 3.7z"/>'),
+  lamp: I('<path d="M3.5 14.5c0 2.2 3.8 4 8.5 4s8.5-1.8 8.5-4"/><path d="M3.5 14.5h17c0-2.3-3.8-3.8-8.5-3.8s-8.5 1.5-8.5 3.8z"/><path d="M20.5 13.5 22 12"/><path d="M12 10.7V9"/><path d="M12 9c-1.3-1.3-1.2-3 0-5.2 1.2 2.2 1.3 3.9 0 5.2z"/>'),
+  hands: I('<path d="M11.4 20.5 7 16.2V9.8l3.2-5.5c.5-.8 1.6-.4 1.4.5L11 9.5"/><path d="M12.6 20.5 17 16.2V9.8l-3.2-5.5c-.5-.8-1.6-.4-1.4.5L13 9.5"/><path d="M11.4 20.5V10M12.6 20.5V10"/>'),
+  sliders: I('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>'),
+  heart: I('<path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.4 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/>'),
+  heartFill: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.4 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>`,
+  check: I('<path d="m5 12.5 4.5 4.5L19 7.5"/>', 2.4),
+  left: I('<path d="m14.5 6-6 6 6 6"/>', 2),
+  right: I('<path d="m9.5 6 6 6-6 6"/>', 2),
+  plus: I('<path d="M12 5v14M5 12h14"/>', 2),
+  x: I('<path d="M6 6l12 12M18 6 6 18"/>', 2),
+  sun: I('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'),
+  eye: I('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/>'),
+  link: I('<path d="M14 4h6v6M20 4l-8.5 8.5"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
+};
+function daisy(cx, cy, r, petal, center) {
+  let s = '';
+  for (let i = 0; i < 10; i++) s += `<ellipse cx="${cx}" cy="${cy - r * .55}" rx="${r * .2}" ry="${r * .45}" fill="${petal}" transform="rotate(${i * 36} ${cx} ${cy})"/>`;
+  return s + `<circle cx="${cx}" cy="${cy}" r="${r * .22}" fill="${center}"/>`;
+}
+const ART = {
+  corner: `<svg viewBox="0 0 240 240" aria-hidden="true">
+    <path d="M240 30C190 40 150 70 120 120" stroke="var(--sage)" stroke-width="3" fill="none"/>
+    <path d="M200 40c-10-14-30-16-40-8 12 8 26 12 40 8zM170 62c-14-6-30 0-36 10 14 4 28 0 36-10zM150 90c-14-2-26 8-28 20 12-2 24-8 28-20z" fill="var(--sage)"/>
+    ${daisy(205, 95, 34, 'var(--paper)', 'var(--butter)')}${daisy(160, 150, 26, 'var(--blush)', 'var(--gold)')}${daisy(220, 175, 20, 'var(--butter-soft)', 'var(--rose)')}
+    <circle cx="125" cy="118" r="5" fill="var(--rose)"/><circle cx="112" cy="132" r="4" fill="var(--rose)"/></svg>`,
+  sprig: `<svg viewBox="0 0 200 200" aria-hidden="true"><path d="M20 190C60 150 90 110 110 40" stroke="var(--sage)" stroke-width="3" fill="none"/>
+    <path d="M100 70c-20-6-36 2-42 14 18 4 34-2 42-14zM108 52c16-12 34-12 44-4-14 10-30 12-44 4zM88 110c-20-2-34 10-36 22 18 0 32-8 36-22zM96 92c18-8 36-4 44 4-16 8-32 6-44-4zM70 140c-18 2-30 14-30 26 16-2 28-12 30-26z" fill="var(--sage)"/>
+    ${daisy(112, 36, 22, 'var(--blush)', 'var(--butter)')}${daisy(150, 120, 16, 'var(--paper)', 'var(--butter)')}</svg>`,
+  bible: `<svg viewBox="0 0 120 120" aria-hidden="true">
+    <path d="M60 40c-12-8-28-10-44-7v52c16-3 32-1 44 7 12-8 28-10 44-7V33c-16-3-32-1-44 7z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M60 40v52" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M24 46h26M24 54h26M24 62h22M70 46h26M70 54h26M70 62h20M24 70h24M70 70h24" stroke="var(--line)" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M64 92v18l5-4 5 4V90" fill="var(--rose)"/>
+    <path d="M86 30c4-10 14-14 22-12-2 10-12 16-22 12z" fill="var(--sage)"/><path d="M84 34c2-14 8-20 18-26" stroke="var(--sage)" stroke-width="2" fill="none"/>
+    ${daisy(100, 20, 14, 'var(--blush)', 'var(--butter)')}</svg>`,
+  jar: `<svg viewBox="0 0 120 120" aria-hidden="true">
+    <path d="M60 70V40M52 72 40 46M68 72l14-24" stroke="var(--sage)" stroke-width="2.5"/>
+    ${daisy(60, 34, 20, 'var(--paper)', 'var(--butter)')}${daisy(38, 44, 16, 'var(--blush)', 'var(--gold)')}${daisy(84, 44, 16, 'var(--butter-soft)', 'var(--rose)')}
+    <path d="M40 68h40l-2 8c4 6 6 14 6 22 0 8-6 12-24 12s-24-4-24-12c0-8 2-16 6-22z" fill="var(--sky)" stroke="var(--ink)" stroke-width="2" opacity=".9"/>
+    <path d="M42 84h36" stroke="var(--paper)" stroke-width="3" stroke-dasharray="4 4"/></svg>`,
+  lamp: `<svg viewBox="0 0 120 120" aria-hidden="true">
+    <ellipse cx="60" cy="96" rx="40" ry="6" fill="var(--line)"/>
+    <path d="M22 72c0 12 17 20 38 20s38-8 38-20z" fill="var(--butter)" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M22 72c4-8 20-12 38-12s34 4 38 12" fill="var(--butter-soft)" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M98 70c6-2 10-6 12-10" stroke="var(--ink)" stroke-width="2" fill="none"/>
+    <path d="M60 60V50" stroke="var(--ink)" stroke-width="2"/>
+    <path d="M60 50c-8-7-8-17 0-30 8 13 8 23 0 30z" fill="var(--rose)" opacity=".9"/><path d="M60 46c-3-3-3-8 0-13 3 5 3 10 0 13z" fill="var(--butter)"/></svg>`,
+};
+const BRAND = `<svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="23" fill="var(--moss-ink)"/>
+  <path d="M24 38V18" stroke="var(--moss)" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M24 24c-6-1-9-5-9-10 6 1 9 5 9 10zM24 30c6-1 9-5 9-10-6 1-9 5-9 10z" fill="var(--moss)"/>
+  <circle cx="24" cy="14" r="3.2" fill="var(--rose)"/></svg>`;
+
+/* ================= scripture (King James Version, public domain) ================= */
+const VERSES = [
+  { ref: 'Proverbs 31:10', topic: 'Womanhood', text: 'Who can find a virtuous woman? for her price is far above rubies.' },
+  { ref: 'Proverbs 31:25', topic: 'Womanhood', text: 'Strength and honour are her clothing; and she shall rejoice in time to come.' },
+  { ref: 'Proverbs 31:26', topic: 'Womanhood', text: 'She openeth her mouth with wisdom; and in her tongue is the law of kindness.' },
+  { ref: 'Proverbs 31:30', topic: 'Womanhood', text: 'Favour is deceitful, and beauty is vain: but a woman that feareth the LORD, she shall be praised.' },
+  { ref: 'Proverbs 31:27', topic: 'Womanhood', text: 'She looketh well to the ways of her household, and eateth not the bread of idleness.' },
+  { ref: 'Proverbs 31:20', topic: 'Womanhood', text: 'She stretcheth out her hand to the poor; yea, she reacheth forth her hands to the needy.' },
+  { ref: 'Proverbs 31:17', topic: 'Womanhood', text: 'She girdeth her loins with strength, and strengtheneth her arms.' },
+  { ref: 'Proverbs 31:11', topic: 'Womanhood', text: 'The heart of her husband doth safely trust in her, so that he shall have no need of spoil.' },
+  { ref: 'Proverbs 31:13', topic: 'Womanhood', text: 'She seeketh wool, and flax, and worketh willingly with her hands.' },
+  { ref: 'Proverbs 31:16', topic: 'Womanhood', text: 'She considereth a field, and buyeth it: with the fruit of her hands she planteth a vineyard.' },
+  { ref: '1 Peter 3:4', topic: 'Womanhood', text: 'But let it be the hidden man of the heart, in that which is not corruptible, even the ornament of a meek and quiet spirit, which is in the sight of God of great price.' },
+  { ref: 'Romans 12:2', topic: 'Renewing my mind', text: 'And be not conformed to this world: but be ye transformed by the renewing of your mind, that ye may prove what is that good, and acceptable, and perfect, will of God.' },
+  { ref: 'Philippians 4:8', topic: 'Renewing my mind', text: 'Finally, brethren, whatsoever things are true, whatsoever things are honest, whatsoever things are just, whatsoever things are pure, whatsoever things are lovely, whatsoever things are of good report; if there be any virtue, and if there be any praise, think on these things.' },
+  { ref: 'Psalm 51:10', topic: 'Renewing my mind', text: 'Create in me a clean heart, O God; and renew a right spirit within me.' },
+  { ref: 'Proverbs 4:23', topic: 'Renewing my mind', text: 'Keep thy heart with all diligence; for out of it are the issues of life.' },
+  { ref: '2 Timothy 1:7', topic: 'Renewing my mind', text: 'For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind.' },
+  { ref: 'Philippians 4:6-7', topic: 'Peace', text: 'Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.' },
+  { ref: 'Isaiah 41:10', topic: 'Peace', text: 'Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.' },
+  { ref: 'Matthew 11:28', topic: 'Peace', text: 'Come unto me, all ye that labour and are heavy laden, and I will give you rest.' },
+  { ref: 'Psalm 46:10', topic: 'Peace', text: 'Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.' },
+  { ref: 'Psalm 23:1', topic: 'Peace', text: 'The LORD is my shepherd; I shall not want.' },
+  { ref: 'Zephaniah 3:17', topic: 'Peace', text: 'The LORD thy God in the midst of thee is mighty; he will save, he will rejoice over thee with joy; he will rest in his love, he will joy over thee with singing.' },
+  { ref: 'Psalm 139:14', topic: 'Identity', text: 'I will praise thee; for I am fearfully and wonderfully made: marvellous are thy works; and that my soul knoweth right well.' },
+  { ref: '2 Corinthians 5:17', topic: 'Identity', text: 'Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new.' },
+  { ref: 'Ephesians 2:10', topic: 'Identity', text: 'For we are his workmanship, created in Christ Jesus unto good works, which God hath before ordained that we should walk in them.' },
+  { ref: '1 Peter 2:9', topic: 'Identity', text: 'But ye are a chosen generation, a royal priesthood, an holy nation, a peculiar people; that ye should shew forth the praises of him who hath called you out of darkness into his marvellous light.' },
+  { ref: 'Ephesians 2:8-9', topic: 'Grace', text: 'For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast.' },
+  { ref: 'John 3:16', topic: 'Grace', text: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.' },
+  { ref: '1 John 1:9', topic: 'Grace', text: 'If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness.' },
+  { ref: 'Lamentations 3:22-23', topic: 'Grace', text: "It is of the LORD'S mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness." },
+  { ref: 'Ephesians 4:32', topic: 'Grace', text: "And be ye kind one to another, tenderhearted, forgiving one another, even as God for Christ's sake hath forgiven you." },
+  { ref: 'Proverbs 3:5-6', topic: 'Trust', text: 'Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.' },
+  { ref: 'Jeremiah 29:11', topic: 'Trust', text: 'For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.' },
+  { ref: 'Romans 8:28', topic: 'Trust', text: 'And we know that all things work together for good to them that love God, to them who are the called according to his purpose.' },
+  { ref: 'Psalm 37:4', topic: 'Trust', text: 'Delight thyself also in the LORD; and he shall give thee the desires of thine heart.' },
+  { ref: 'Matthew 6:33', topic: 'Trust', text: 'But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.' },
+  { ref: 'Isaiah 40:31', topic: 'Strength', text: 'But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint.' },
+  { ref: 'Philippians 4:13', topic: 'Strength', text: 'I can do all things through Christ which strengtheneth me.' },
+  { ref: 'Galatians 6:9', topic: 'Strength', text: 'And let us not be weary in well doing: for in due season we shall reap, if we faint not.' },
+  { ref: 'Ephesians 6:11', topic: 'Strength', text: 'Put on the whole armour of God, that ye may be able to stand against the wiles of the devil.' },
+  { ref: 'Matthew 6:16-18', topic: 'Fasting', text: 'Moreover when ye fast, be not, as the hypocrites, of a sad countenance: for they disfigure their faces, that they may appear unto men to fast. Verily I say unto you, They have their reward. But thou, when thou fastest, anoint thine head, and wash thy face; That thou appear not unto men to fast, but unto thy Father which is in secret: and thy Father, which seeth in secret, shall reward thee openly.' },
+  { ref: 'Isaiah 58:6', topic: 'Fasting', text: 'Is not this the fast that I have chosen? to loose the bands of wickedness, to undo the heavy burdens, and to let the oppressed go free, and that ye break every yoke?' },
+  { ref: 'Joel 2:12', topic: 'Fasting', text: 'Therefore also now, saith the LORD, turn ye even to me with all your heart, and with fasting, and with weeping, and with mourning.' },
+  { ref: 'Matthew 4:4', topic: 'Fasting', text: 'But he answered and said, It is written, Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God.' },
+  { ref: 'Ezra 8:23', topic: 'Fasting', text: 'So we fasted and besought our God for this: and he was intreated of us.' },
+  { ref: 'Acts 13:2', topic: 'Fasting', text: 'As they ministered to the Lord, and fasted, the Holy Ghost said, Separate me Barnabas and Saul for the work whereunto I have called them.' },
+  { ref: 'Daniel 10:3', topic: 'Fasting', text: 'I ate no pleasant bread, neither came flesh nor wine in my mouth, neither did I anoint myself at all, till three whole weeks were fulfilled.' },
+  { ref: 'Psalm 119:105', topic: 'The Word & prayer', text: 'Thy word is a lamp unto my feet, and a light unto my path.' },
+  { ref: 'Hebrews 4:12', topic: 'The Word & prayer', text: 'For the word of God is quick, and powerful, and sharper than any twoedged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart.' },
+  { ref: 'John 15:5', topic: 'The Word & prayer', text: 'I am the vine, ye are the branches: He that abideth in me, and I in him, the same bringeth forth much fruit: for without me ye can do nothing.' },
+  { ref: 'Colossians 2:7', topic: 'The Word & prayer', text: 'Rooted and built up in him, and stablished in the faith, as ye have been taught, abounding therein with thanksgiving.' },
+  { ref: 'Mark 1:35', topic: 'The Word & prayer', text: 'And in the morning, rising up a great while before day, he went out, and departed into a solitary place, and there prayed.' },
+  { ref: '1 Thessalonians 5:16-18', topic: 'The Word & prayer', text: 'Rejoice evermore. Pray without ceasing. In every thing give thanks: for this is the will of God in Christ Jesus concerning you.' },
+  { ref: 'John 10:27', topic: 'The Word & prayer', text: 'My sheep hear my voice, and I know them, and they follow me.' },
+  { ref: 'James 1:5', topic: 'Wisdom & words', text: 'If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him.' },
+  { ref: 'Psalm 19:14', topic: 'Wisdom & words', text: 'Let the words of my mouth, and the meditation of my heart, be acceptable in thy sight, O LORD, my strength, and my redeemer.' },
+  { ref: 'Proverbs 15:1', topic: 'Wisdom & words', text: 'A soft answer turneth away wrath: but grievous words stir up anger.' },
+  { ref: 'Galatians 5:22-23', topic: 'Wisdom & words', text: 'But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, Meekness, temperance: against such there is no law.' },
+  { ref: 'Micah 6:8', topic: 'Purpose', text: 'He hath shewed thee, O man, what is good; and what doth the LORD require of thee, but to do justly, and to love mercy, and to walk humbly with thy God?' },
+  { ref: 'Colossians 3:23', topic: 'Purpose', text: 'And whatsoever ye do, do it heartily, as to the Lord, and not unto men;' },
+  { ref: 'Proverbs 16:3', topic: 'Purpose', text: 'Commit thy works unto the LORD, and thy thoughts shall be established.' },
+  { ref: 'Exodus 20:8', topic: 'Purpose', text: 'Remember the sabbath day, to keep it holy.' },
+];
+const TOPICS = [...new Set(VERSES.map(v => v.topic))];
+const verseOf = ref => VERSES.find(v => v.ref === ref) || (S.verses.mine || []).find(v => v.ref === ref);
+
+/* ================= Proverbs 31 ================= */
+const TRAITS = [
+  { id: 'fears', title: 'She fears the Lord', ref: 'Proverbs 31:30', color: 'rose',
+    habits: ['Gave God the first part of my day', 'Spent time in His Word', 'Trusted His plan in something hard', 'Lived with integrity when no one was watching'] },
+  { id: 'faithful', title: 'She is faithful in her role', ref: 'Proverbs 31:11', color: 'sky',
+    habits: ['Encouraged my husband or family', 'Prayed for the people closest to me', 'Did them good, not harm, in my words and actions', 'Gave someone my full attention'] },
+  { id: 'home', title: 'She manages her home well', ref: 'Proverbs 31:27', color: 'sage',
+    habits: ['Made my home a little more peaceful', 'Planned meals or the day ahead', 'Used my time wisely', 'Made space for rest at home'] },
+  { id: 'steward', title: 'She is a wise steward', ref: 'Proverbs 31:16', color: 'butter',
+    habits: ['Was careful with money today', 'Planned ahead instead of rushing', 'Saved or avoided a want I did not need', 'Gave generously (time, money or care)'] },
+  { id: 'works', title: 'She works willingly', ref: 'Proverbs 31:13', color: 'peach',
+    habits: ['Worked with excellence, as unto the Lord', 'Did the task without excuses', 'Used a gift or talent God gave me', 'Finished something I started'] },
+  { id: 'kind', title: 'She is kind and compassionate', ref: 'Proverbs 31:20', color: 'lav',
+    habits: ['Served someone without being asked', 'Reached out to someone in need', 'Answered with gentleness', 'Was quick to help'] },
+  { id: 'cares', title: 'She takes care of herself', ref: 'Proverbs 31:17', color: 'sage',
+    habits: ['Rested and slept enough', 'Ate well and drank water', 'Moved my body', 'Took time for what matters'] },
+  { id: 'wisdom', title: 'She speaks with wisdom', ref: 'Proverbs 31:26', color: 'rose',
+    habits: ['Spoke life and encouragement', 'Kept away from gossip', 'Spoke truth in love', 'Held my tongue when I was upset'] },
+  { id: 'confident', title: 'She is confident in who God made her', ref: 'Proverbs 31:25', color: 'butter',
+    habits: ['Did not compare myself to others', 'Spoke God\'s truth over myself', 'Walked in humble confidence', 'Thanked God for how He made me'] },
+  { id: 'trusts', title: 'She trusts God always', ref: 'Psalm 37:4', color: 'sky',
+    habits: ['Gave a worry to God in prayer', 'Chose peace over panic', 'Surrendered my plans to Him', 'Thanked Him in the good and the hard'] },
+];
+const TODAYS_WORLD = ['loves Jesus with her whole heart', 'makes her relationship with God the priority', 'takes care of her body', 'sets goals and dreams big', 'keeps learning and growing', 'manages her time wisely', 'works with excellence', 'loves and invests in her family', 'serves others with a joyful heart', 'speaks life and encouragement', 'keeps her peace and guards her heart', 'is kind, patient and humble', 'trusts God in every season', 'lives with grace and gratitude'];
+
+/* ================= 6-week study ================= */
+const PLAN = [
+  { title: 'Knowing God', sub: 'His heart and character', color: 'bg-rose', days: ['Psalm 139', 'Psalm 23', 'Isaiah 40:21-31', 'Exodus 34:1-9', 'Psalm 103', 'John 1:1-18', 'Rest & journal'],
+    q: 'If I really believed God was with me, what would I stop being afraid of?' },
+  { title: 'Identity', sub: 'Who am I in Christ?', color: 'bg-peach', days: ['Ephesians 1', 'Ephesians 2:1-10', 'Romans 8:1-17', '1 Peter 2:1-10', 'Genesis 1:26-31', '2 Corinthians 5:14-21', 'Rest & journal'],
+    q: 'What labels have I placed on myself that God never placed on me?' },
+  { title: 'Trusting God', sub: 'Letting go of control', color: 'bg-butter', days: ['Proverbs 3:1-12', 'Psalm 37:1-11', 'Matthew 6:25-34', 'Philippians 4:4-9', 'Isaiah 43:1-7', 'Romans 8:18-39', 'Rest & journal'],
+    q: 'What am I holding tightly that I need to place in His hands?' },
+  { title: 'Hearing His voice', sub: 'Learning to listen', color: 'bg-sage', days: ['John 10:1-18', '1 Kings 19:9-13', 'Psalm 119:97-112', 'James 1:19-27', 'Galatians 5:16-26', 'Luke 10:38-42', 'Rest & journal'],
+    q: 'Am I asking God to bless my plans, or asking Him what His plans are?' },
+  { title: 'Purpose & calling', sub: 'Using what God gave me', color: 'bg-sky', days: ['Esther 4:10-17', 'Jeremiah 1:4-10', '1 Corinthians 12:4-27', 'Matthew 5:13-16', 'Colossians 3:12-17', 'Proverbs 31:10-31', 'Rest & journal'],
+    q: 'What has God already placed in my hands that I could use for Him?' },
+  { title: 'Becoming like Jesus', sub: 'Living differently because of Him', color: 'bg-lav', days: ['Matthew 5:1-16', 'Matthew 5:38-48', 'Matthew 6:1-18', 'John 13:1-17', 'Philippians 2:1-11', '1 Corinthians 13', 'Rest & reflect'],
+    q: 'How has God changed me over these six weeks?' },
+];
+const STUDY_FIELDS = [['saw', 'What stood out to me'], ['god', 'What this shows me about God'], ['apply', 'How I will live it today'], ['prayer', 'My prayer']];
+
+/* ================= fasting ================= */
+const FAST_TYPES = [
+  { id: 'meal', name: 'Give up a meal', hours: 6, desc: 'Skip one meal and spend that time in prayer and the Word. A gentle place to begin.' },
+  { id: 'sunset', name: 'Sunrise to sunset', hours: 12, desc: 'No food from waking until the evening meal. Israel "fasted that day until even" (Judges 20:26).' },
+  { id: 'water', name: 'Water fast', hours: 24, desc: 'Water only, usually for 24 hours or less. Speak with your doctor before going longer.' },
+  { id: 'daniel', name: 'Daniel fast', hours: 504, desc: 'Vegetables, fruit, grains and water. No sweets, meat or wine (Daniel 1:12, 10:3). Often 10 or 21 days.' },
+  { id: 'media', name: 'Media fast', hours: 24, desc: 'Lay down social media, TV or your phone and give that time to God. Good for anyone who should not fast from food.' },
+  { id: 'custom', name: 'My own fast', hours: 24, desc: 'Something you lay down for a season so you can seek God with your whole heart.' },
+];
+const FAST_LENGTHS = [[6, '6 hours'], [12, '12 hours'], [16, '16 hours'], [24, '24 hours'], [36, '36 hours'], [48, '2 days'], [72, '3 days'], [168, '7 days'], [240, '10 days'], [504, '21 days'], [960, '40 days']];
+const HUNGER_PROMPTS = [
+  { t: 'When the hunger comes, let it turn you to Him. Tell Him: "Lord, I want You more than this meal."', ref: 'Matthew 4:4' },
+  { t: 'Read your reason for fasting out loud and bring it before God again, simply and honestly.', ref: 'Joel 2:12' },
+  { t: 'Ask the Holy Spirit to show you anything you need to confess. Receive His forgiveness, then thank Him.', ref: '1 John 1:9' },
+  { t: 'Pray for someone else for five minutes. Fasting is not only about my needs; it is the fast that lifts burdens.', ref: 'Isaiah 58:6' },
+  { t: 'Be still for two minutes. No words, no list. Just "Here I am, Lord."', ref: 'Psalm 46:10' },
+  { t: 'Wash your face, smile, and keep this between you and your Father. He sees in secret.', ref: 'Matthew 6:16-18' },
+  { t: 'Thank Him for three things He has already done. Fasting with thanksgiving keeps the heart soft.', ref: '1 Thessalonians 5:16-18' },
+  { t: 'Feeling weak? That is all right. Ask Him for strength for the next hour, not the whole fast.', ref: 'Isaiah 40:31' },
+];
+const FAST_PRAYERS = [
+  { when: 'Before you begin', color: 'butter', text: 'Father, I set this time apart for You. Search my heart and show me why I am really here. I lay down this food (or this habit) so I can pick up more of You. Let this fast honour You and not me.' },
+  { when: 'During the fast', color: 'sage', text: 'Lord, when I feel empty, fill me with Your Word. Keep my eyes on You, not on the clock. Speak, Lord, for Your servant is listening. Show me what You want me to see.' },
+  { when: 'When you break the fast', color: 'rose', text: 'Thank You, Father, for meeting me here. I receive this food with gratitude. Help me carry what You showed me into ordinary days. Every good gift comes from You.' },
+];
+
+/* ================= lessons ================= */
+const LESSONS = [
+  { id: 'grace', title: 'Grace: where it all begins', key: 'Ephesians 2:8-9', also: ['John 3:16', '1 John 1:9'],
+    body: ['A godly life does not start with trying harder. It starts with receiving. God loved you before you did a single thing right, and Jesus paid in full for every wrong. You cannot earn His love, and you cannot lose it by having a bad week.',
+      'Everything else in this app (the Proverbs 31 sheet, the fasting, the study plan) is a response to grace, never a way to earn it. When you miss a day, you are still His. Come back, and start again.'],
+    steps: [['Know you are loved', 'Read John 3:16 slowly and put your own name in it.'], ['Be honest about your need', 'Tell God plainly where you have fallen short.'], ['Receive, don\'t perform', 'Thank Him that Jesus already did what you could not.'], ['Rest in it', 'When guilt whispers "try harder", answer "It is finished".'], ['Tell someone', 'Share with one person what God\'s grace means to you.']],
+    challenge: 'Each time you open this app this week, pause and say: "I am loved, I am forgiven, I am His."', q: 'Where am I still trying to earn what God has already given?' },
+  { id: 'prayer', title: 'How to pray', key: 'Philippians 4:6-7', also: ['Mark 1:35', '1 Thessalonians 5:16-18'],
+    body: ['Prayer is simply talking with your Father, and listening. Jesus Himself got up early and found a quiet place to pray. You don\'t need fancy words; you need an honest heart and a few minutes.',
+      'A simple shape that helps is ACTS: Adoration, Confession, Thanksgiving and Supplication (asking). It keeps prayer from becoming only a wish list.'],
+    steps: [['Adoration', 'Praise God for who He is: faithful, kind, holy, near.'], ['Confession', 'Name what you did wrong and receive His forgiveness.'], ['Thanksgiving', 'Thank Him for three specific things from yesterday.'], ['Supplication', 'Ask for what you and others need. Write it in your prayer list.'], ['Listen', 'Sit quietly for a minute before you say "amen".']],
+    challenge: 'Pick a set time and place to pray every day this week, even if it is five minutes in the car.', q: 'What keeps me from praying, and what would make it easier?' },
+  { id: 'soap', title: 'How to study the Bible', key: 'Psalm 119:105', also: ['Hebrews 4:12', 'Colossians 2:7'],
+    body: ['God\'s Word is a lamp. It doesn\'t always show you the whole road, but it shows you the next step. Reading a little, slowly, every day will change you more than reading a lot once in a while.',
+      'The SOAP method is an easy way to go deeper. It is exactly what the notes in your 6-week Bible Study are built on.'],
+    steps: [['S: Scripture', 'Read the passage. Write out the verse that stands out.'], ['O: Observation', 'What does it say? Who is speaking, to whom, and why? What does it show about God?'], ['A: Application', 'How does this change how I think, speak or act today?'], ['P: Prayer', 'Turn what you read into a short prayer back to God.'], ['Read in context', 'Read the verses before and after so you understand the whole thought.']],
+    challenge: 'Do one SOAP entry each day in the Bible Study section this week.', q: 'Which book of the Bible do I want to understand better?' },
+  { id: 'renew', title: 'Renewing your mind', key: 'Romans 12:2', also: ['Philippians 4:8', '2 Timothy 1:7'],
+    body: ['We are changed by what we think about. Many of us carry quiet lies: "I\'m not enough", "God is disappointed in me", "It will never change". Paul says we are transformed by the renewing of the mind, which means replacing those thoughts with what God says is true.',
+      'This is daily, gentle work. You will find a "Renew my mind" page in the Scripture section to write the lie down and the truth beside it.'],
+    steps: [['Notice', 'Catch the thought that pulls you down.'], ['Name the lie', 'Write it down exactly as it sounds in your head.'], ['Find the truth', 'Search for a verse that speaks to it.'], ['Speak it', 'Read the truth out loud, every time the lie returns.'], ['Repeat', 'Renewal is a habit, not a moment. Keep coming back.']],
+    challenge: 'Write one lie and one truth in "Renew my mind" today.', q: 'What lie have I believed the longest?' },
+  { id: 'fasting', title: 'Biblical fasting', key: 'Matthew 6:16-18', also: ['Isaiah 58:6', 'Joel 2:12'],
+    body: ['Jesus said "when you fast", not "if you fast". Fasting is setting aside food (or something else) for a time to seek God more fully. It is not a diet, a way to twist God\'s arm, or something to show off. It is hunger turned into prayer.',
+      'In the Bible, people fasted to repent, to ask for help, to seek direction, to grieve, and to prepare for something God was calling them to.'],
+    steps: [['Settle your purpose', 'Write down why you are fasting before you start.'], ['Choose your fast', 'Start small: a meal or sunrise to sunset is a wonderful beginning.'], ['Plan your prayer', 'Use mealtimes as prayer times.'], ['Keep it secret', 'Look after yourself and don\'t make a show of it.'], ['Break it gently', 'End with thanks and with light, simple food.']],
+    challenge: 'Plan one fast in the Fasting section, even a single meal.', q: 'What do I want to seek God for with my whole heart?' },
+  { id: 'spirit', title: 'Walking by the Spirit', key: 'Galatians 5:22-23', also: ['John 15:5'],
+    body: ['Fruit doesn\'t grow by straining; it grows by staying connected to the vine. Love, joy, peace, patience, kindness, goodness, faithfulness, gentleness and self-control are what the Holy Spirit grows in you as you abide in Jesus.',
+      'When you notice impatience or harsh words, it isn\'t proof you have failed. It is an invitation to come back to the vine.'],
+    steps: [['Abide first', 'Begin the day with Him before your phone.'], ['Ask for help', 'Pray "Holy Spirit, help me" before hard conversations.'], ['Notice the flesh', 'Pay attention to what triggers you.'], ['Choose the opposite', 'Answer anger with gentleness, worry with prayer.'], ['Confess quickly', 'Don\'t let a bad moment become a bad week.']],
+    challenge: 'Pick one fruit of the Spirit to pray for every morning this week.', q: 'Which fruit is God growing in me right now?' },
+  { id: 'words', title: 'Guarding your words', key: 'Proverbs 31:26', also: ['Psalm 19:14', 'Proverbs 15:1'],
+    body: ['The Proverbs 31 woman opens her mouth with wisdom, and kindness is the law of her tongue. Words can build a home or tear it down. Godly speech is honest, gentle and life-giving.',
+      'Before you speak, ask: Is it True? Is it Helpful? Is it Inspiring? Is it Necessary? Is it Kind? (THINK).'],
+    steps: [['Pause', 'Take a breath before you answer when you are upset.'], ['THINK', 'True, helpful, inspiring, necessary, kind.'], ['No gossip', 'If she\'s not in the room, speak as if she were.'], ['Bless', 'Say one encouraging thing to someone every day.'], ['Repair fast', 'Apologise quickly and simply when you get it wrong.']],
+    challenge: 'Go one full day without complaining or gossip. Notice how it feels.', q: 'Whose day could my words lift this week?' },
+  { id: 'forgive', title: 'Forgiveness', key: 'Ephesians 4:32', also: ['1 John 1:9'],
+    body: ['We forgive because we have been forgiven. Forgiveness is not saying what happened was fine, and it does not mean you must trust someone who is still hurting you. It means you release the debt to God and stop carrying it.',
+      'It is often a decision before it is a feeling. You may need to choose it more than once.'],
+    steps: [['Receive', 'Start with how much God has forgiven you.'], ['Be honest', 'Tell God exactly what happened and how it hurt.'], ['Release', 'Say "I choose to forgive ___ for ___." Hand it to God.'], ['Pray for them', 'Ask God to bless them. It softens the heart.'], ['Keep wise boundaries', 'Forgiving is not the same as going back to harm.']],
+    challenge: 'Write the name of someone you need to forgive in your prayer list.', q: 'What am I still carrying that God is asking me to put down?' },
+  { id: 'steward', title: 'Faithful stewardship', key: 'Colossians 3:23', also: ['Matthew 6:33', 'Proverbs 16:3'],
+    body: ['Everything we have (money, time, gifts, home, body) belongs to God, and we look after it for Him. The Proverbs 31 woman considers a field before she buys it. She plans, she works, and she gives.',
+      'Stewardship is not about having a lot. It is about being faithful with what is already in your hands.'],
+    steps: [['Give first', 'Decide what you will give before you spend.'], ['Know your numbers', 'Write down what comes in and what goes out.'], ['Plan your week', 'Give your time a plan before others give it one.'], ['Work heartily', 'Do ordinary tasks as if for the Lord.'], ['Save', 'Put a little aside, even a small amount.']],
+    challenge: 'Look at last week\'s spending and time and ask God what He thinks.', q: 'What has God put in my hands that I have not been faithful with?' },
+  { id: 'rest', title: 'Rest and Sabbath', key: 'Matthew 11:28', also: ['Exodus 20:8', 'Psalm 23:1'],
+    body: ['God rested on the seventh day, and He invites us to rest too. Rest is an act of trust: the world keeps turning while I stop, because God holds it, not me.',
+      'A Sabbath can be simple: a slower morning, a walk, worship, a meal with people you love, and no work emails.'],
+    steps: [['Pick a day', 'Choose a regular day or half-day to rest.'], ['Stop', 'Put away work and the to-do list.'], ['Delight', 'Do something life-giving: nature, worship, a good book.'], ['Connect', 'Spend time with God and people you love.'], ['Trust', 'Remind yourself: He is God, and I am not.']],
+    challenge: 'Plan your next Sabbath in your calendar today.', q: 'What makes it hard for me to rest?' },
+  { id: 'serve', title: 'Serving others', key: 'Micah 6:8', also: ['Proverbs 31:20', 'Ephesians 4:32'],
+    body: ['Jesus washed His disciples\' feet. Greatness in His kingdom looks like serving. The Proverbs 31 woman reaches out her hands to the poor and needy.',
+      'Serving starts small: noticing the person others overlook, bringing a meal, sending a message, giving an hour.'],
+    steps: [['Notice', 'Ask God to show you one need today.'], ['Act small', 'Do one kind thing without being asked.'], ['Give quietly', 'Don\'t post about it. Let it stay between you and God.'], ['Use your gifts', 'Serve in the way God made you: cooking, listening, organising.'], ['Stay humble', 'Do justly, love mercy, walk humbly.']],
+    challenge: 'Do one hidden act of kindness this week.', q: 'Who in my life needs someone to notice them?' },
+  { id: 'armour', title: 'Standing firm: the armour of God', key: 'Ephesians 6:11', also: ['Isaiah 41:10', '2 Timothy 1:7'],
+    body: ['The Christian life includes real battles: temptation, fear, discouragement and lies. God doesn\'t send us out unprotected. Ephesians 6:14-17 describes armour we put on by faith every day.',
+      'You can pray through each piece in the morning as you get dressed.'],
+    steps: [['Belt of truth', 'Ask God to keep you honest and anchored in His Word.'], ['Breastplate of righteousness', 'Stand in Christ\'s righteousness, not your own.'], ['Shoes of peace', 'Carry the gospel of peace into your day.'], ['Shield of faith', 'Answer fiery doubts with "God is faithful".'], ['Helmet and sword', 'Guard your mind with salvation, and fight with Scripture.']],
+    challenge: 'Memorise one verse this week to use as your "sword".', q: 'Where am I fighting a battle in my own strength?' },
+];
+
+const MOMENT_TYPES = [
+  ['teaching', 'Something God is teaching me', 'bg-sage'], ['waiting', 'A prayer I\'m waiting on', 'bg-sky'], ['answered', 'A prayer God answered', 'bg-butter'],
+  ['verse', 'A verse I want to remember', 'bg-rose'], ['surrender', 'Something I need to surrender', 'bg-lav'], ['working', 'A way I\'ve seen God working', 'bg-peach'], ['grateful', 'Something I\'m grateful for', 'bg-rose'],
+];
+const RHYTHM = [
+  { id: 'pray1', title: 'Pray', text: '"Lord, show me what You want me to see today."' },
+  { id: 'read', title: 'Read', text: 'Take your time. Underline what speaks to you.' },
+  { id: 'reflect', title: 'Reflect', text: 'What does this show me about God, and about me?' },
+  { id: 'pray2', title: 'Pray', text: 'Give your thoughts back to Him.' },
+];
+
+/* ================= state ================= */
+const KEY = 'abide.v1';
+const pad = n => String(n).padStart(2, '0');
+const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); };
+const todayKey = () => keyOf(new Date());
+const mondayOf = k => { const d = parseKey(k); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return keyOf(d); };
+const monthOf = k => k.slice(0, 7);
+const addMonths = (m, n) => { const [y, mo] = m.split('-').map(Number); const d = new Date(y, mo - 1 + n, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
+const fmt = (k, o = { weekday: 'long', day: 'numeric', month: 'long' }) => parseKey(k).toLocaleDateString(undefined, o);
+const fmtTime = iso => new Date(iso).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+function defaults() {
+  return {
+    v: 1, name: '', started: todayKey(),
+    rhythm: {},                 // date -> { pray1, read, reflect, pray2 }
+    p31: {},                    // date -> { traitId: { 0: true, ... } }
+    p31Notes: {}, p31Focus: {}, // week -> traitId
+    p31Ratings: {},             // month -> { traitId: 1..5 }
+    study: { done: {}, notes: {}, answers: {} },
+    fast: { active: null, history: [], planned: [], journal: [] },
+    verses: { fav: [], memorized: [], mine: [] },
+    truths: [], lessons: { done: {}, steps: {}, notes: {} },
+    prayers: [], moments: [],
+  };
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { const d = JSON.parse(raw); const base = defaults(); for (const k in base) if (d[k] === undefined) d[k] = base[k]; return d; }
+  } catch (e) {}
+  return defaults();
+}
+let S = load();
+let saveTimer = null;
+function save(quiet) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); if (!quiet) toast('Saved'); }
+    catch (e) { toast('Not saved: this browser is blocking storage'); }
+  }, 300);
+}
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 1500);
+}
+function setPath(path, val) {
+  const parts = path.split('.'); let o = S;
+  for (let i = 0; i < parts.length - 1; i++) { if (o[parts[i]] == null || typeof o[parts[i]] !== 'object') o[parts[i]] = {}; o = o[parts[i]]; }
+  o[parts[parts.length - 1]] = val;
+}
+function getPath(path) { return path.split('.').reduce((o, p) => (o == null ? undefined : o[p]), S); }
+
+/* ================= view state ================= */
+const TABS = [
+  { id: 'home', label: 'Home', icon: 'home', bg: 'bg-paper' },
+  { id: 'proverbs31', label: 'Proverbs 31 Woman', short: 'Proverbs 31', icon: 'crown', bg: 'bg-rose' },
+  { id: 'fasting', label: 'Fasting & Prayer', short: 'Fasting', icon: 'wheat', bg: 'bg-butter' },
+  { id: 'study', label: 'Bible Study', icon: 'book', bg: 'bg-sage' },
+  { id: 'scripture', label: 'Scripture', icon: 'ribbon', bg: 'bg-lav' },
+  { id: 'learn', label: 'Walk With God', short: 'Learn', icon: 'lamp', bg: 'bg-peach' },
+  { id: 'prayer', label: 'Prayer Journal', short: 'Prayer', icon: 'hands', bg: 'bg-sky' },
+  { id: 'settings', label: 'Settings & Backup', short: 'Settings', icon: 'sliders', bg: 'bg-paper' },
+];
+const view = {
+  tab: 'home', p31tab: 'today', p31day: todayKey(), p31week: mondayOf(todayKey()), p31month: monthOf(todayKey()),
+  scriptTab: 'library', topic: 'All', practise: null, level: 1, lesson: null, openDay: null,
+  fastType: 'sunset', fastHours: 12, promptI: new Date().getHours() % HUNGER_PROMPTS.length, endingFast: false,
+  answering: null, confirmReset: false, momentType: 'teaching',
+};
+function readHash() { const h = location.hash.replace('#', ''); if (TABS.some(t => t.id === h)) view.tab = h; }
+readHash();
+
+/* ================= helpers ================= */
+function ring(frac, label, sub) {
+  const r = 38, c = 2 * Math.PI * r, f = Math.max(0, Math.min(1, frac));
+  return `<svg class="ring" viewBox="0 0 92 92" role="img" aria-label="${esc(label)} ${esc(sub || '')}">
+    <circle cx="46" cy="46" r="${r}" fill="none" stroke="var(--line)" stroke-width="8"/>
+    <circle cx="46" cy="46" r="${r}" fill="none" stroke="var(--sage)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - f)}" transform="rotate(-90 46 46)"/>
+    <text x="46" y="${sub ? 46 : 52}" text-anchor="middle" font-size="20">${esc(label)}</text>
+    ${sub ? `<text x="46" y="62" text-anchor="middle" font-size="10" style="font-family:var(--body);fill:var(--ink-soft)">${esc(sub)}</text>` : ''}</svg>`;
+}
+const p31Count = (date, tid) => Object.values(((S.p31[date] || {})[tid]) || {}).filter(Boolean).length;
+const p31DayTotal = date => TRAITS.reduce((n, t) => n + p31Count(date, t.id), 0);
+const HABITS_TOTAL = TRAITS.length * 4;
+function rhythmStreak() {
+  let k = todayKey(), n = 0;
+  const any = d => Object.values(S.rhythm[d] || {}).some(Boolean);
+  if (!any(k)) k = addDays(k, -1);
+  while (any(k)) { n++; k = addDays(k, -1); }
+  return n;
+}
+function studyFlat() { const out = []; PLAN.forEach((w, wi) => w.days.forEach((d, di) => out.push({ wi, di, ref: d, key: `${wi}-${di}` }))); return out; }
+function nextReading() { return studyFlat().find(x => !S.study.done[x.key]); }
+function verseOfDay() {
+  const d = parseKey(todayKey()); const start = new Date(d.getFullYear(), 0, 0);
+  return VERSES[Math.floor((d - start) / 864e5) % VERSES.length];
+}
+function elapsed(iso) {
+  const ms = Math.max(0, Date.now() - new Date(iso).getTime());
+  const h = Math.floor(ms / 36e5), m = Math.floor(ms / 6e4) % 60, s = Math.floor(ms / 1e3) % 60;
+  return { ms, text: `${h}:${pad(m)}:${pad(s)}`, hours: ms / 36e5 };
+}
+const durText = h => h >= 48 ? `${Math.round(h / 24 * 10) / 10} days` : `${Math.round(h * 10) / 10} hours`;
+const gateway = ref => `https://www.biblegateway.com/passage/?search=${encodeURIComponent(ref)}&version=KJV`;
+const fastTypeOf = id => FAST_TYPES.find(t => t.id === id) || FAST_TYPES[5];
+
+function verseCard(v, extra = '') {
+  const fav = S.verses.fav.includes(v.ref), mem = S.verses.memorized.includes(v.ref);
+  return `<article class="card vcard">
+    <div class="row" style="justify-content:space-between"><span class="ref">${esc(v.ref)}</span>${mem ? `<span class="badge">${ICON.check.replace('<svg', '<svg width="12" height="12"')} Memorised</span>` : ''}</div>
+    <p class="verse">${esc(v.text)}</p>${extra}
+    <div class="actions">
+      <button class="heart-btn ${fav ? 'on' : ''}" data-act="fav" data-ref="${esc(v.ref)}" aria-pressed="${fav}">${fav ? ICON.heartFill : ICON.heart} ${fav ? 'Saved' : 'Save'}</button>
+      <button class="heart-btn" data-act="practise" data-ref="${esc(v.ref)}">${ICON.eye} Memorise</button>
+    </div></article>`;
+}
+
+/* ================= views ================= */
+function viewHome() {
+  const t = todayKey(), v = verseOfDay(), hr = new Date().getHours();
+  const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  const rh = S.rhythm[t] || {}, streak = rhythmStreak();
+  const p31 = p31DayTotal(t), next = nextReading(), doneStudy = Object.values(S.study.done).filter(Boolean).length;
+  const fa = S.fast.active;
+  const lessonsDone = Object.values(S.lessons.done).filter(Boolean).length;
+  const nextLesson = LESSONS.find(l => !S.lessons.done[l.id]) || LESSONS[0];
+  const upcoming = S.fast.planned.filter(p => p.date >= t).sort((a, b) => a.date.localeCompare(b.date))[0];
+  return `
+  <div class="hello">
+    <div class="head"><span class="eyebrow">${esc(fmt(t))}</span><h2>${greet}${S.name ? `, <em>${esc(S.name)}</em>` : ''}</h2>
+    <p class="lede">Grow deep, not fast. Here is today, one small step at a time.</p></div>
+  </div>
+
+  <section class="card votd" aria-label="Verse of the day">
+    <div class="art">${ART.jar}</div>
+    <div class="stack">
+      <span class="tape butter">Verse for today</span>
+      <p class="verse">${esc(v.text)}</p>
+      <span class="ref">${esc(v.ref)} · KJV</span>
+      <div class="row">
+        <button class="heart-btn ${S.verses.fav.includes(v.ref) ? 'on' : ''}" data-act="fav" data-ref="${esc(v.ref)}">${S.verses.fav.includes(v.ref) ? ICON.heartFill + ' Saved' : ICON.heart + ' Save verse'}</button>
+        <button class="heart-btn" data-act="practise" data-ref="${esc(v.ref)}">${ICON.eye} Memorise it</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><div><span class="eyebrow">My time with God · 20–30 minutes</span><h3>Today's rhythm</h3></div>
+      <span class="count ${streak ? 'full' : ''}">${streak} day${streak === 1 ? '' : 's'} showing up</span></div>
+    <div class="rhythm">${RHYTHM.map(s => `<button class="step ${rh[s.id] ? 'on' : ''}" data-act="rhythm" data-id="${s.id}" aria-pressed="${!!rh[s.id]}">
+      <b>${s.title}<i class="dot">${rh[s.id] ? ICON.check : ''}</i></b><span>${esc(s.text)}</span></button>`).join('')}</div>
+  </section>
+
+  <div class="grid2">
+    <section class="card widget">
+      <div class="row" style="gap:16px;flex-wrap:nowrap">${ring(p31 / HABITS_TOTAL, `${p31}`, `of ${HABITS_TOTAL}`)}
+      <div class="stack" style="gap:6px"><span class="eyebrow">Proverbs 31 today</span><h4>She is clothed in strength</h4>
+      <p class="small muted">Tick the little ways you lived it today. Grace, not perfection.</p>
+      <div><button class="btn small" data-act="go" data-tab="proverbs31">Open my sheet</button></div></div></div>
+    </section>
+    <section class="card widget">
+      <span class="eyebrow">Fasting</span>
+      ${fa ? `<h4>${esc(fastTypeOf(fa.type).name)} in progress</h4><div class="big-num" data-fast-clock>${elapsed(fa.start).text}</div>
+        <p class="small muted">${esc(fa.purpose || 'Seeking God')}</p><div style="margin-top:8px"><button class="btn small primary" data-act="go" data-tab="fasting">Pray &amp; journal</button></div>`
+        : `<h4>${upcoming ? `Next fast: ${esc(fmt(upcoming.date, { weekday: 'short', day: 'numeric', month: 'short' }))}` : 'Set apart time for God'}</h4>
+        <p class="small muted">${upcoming ? esc(upcoming.purpose || fastTypeOf(upcoming.type).name) : 'Plan a fast with a purpose, a prayer focus and scripture to carry you.'}</p>
+        <div style="margin-top:8px"><button class="btn small" data-act="go" data-tab="fasting">${upcoming ? 'See my plan' : 'Plan a fast'}</button></div>`}
+    </section>
+    <section class="card widget">
+      <span class="eyebrow">Bible study · ${doneStudy} of 42 days</span>
+      <h4>${next ? `Week ${next.wi + 1}: ${esc(PLAN[next.wi].title)}` : 'You finished all six weeks!'}</h4>
+      ${next ? `<p class="verse" style="font-size:1.05rem">${esc(next.ref)}</p>` : '<p class="small muted">Start again whenever you like. He is always worth knowing better.</p>'}
+      <div class="bar" style="margin:10px 0"><i style="width:${doneStudy / 42 * 100}%"></i></div>
+      <button class="btn small" data-act="go" data-tab="study">Today's reading</button>
+    </section>
+    <section class="card widget">
+      <span class="eyebrow">Walk with God · ${lessonsDone} of ${LESSONS.length} lessons</span>
+      <h4>${esc(nextLesson.title)}</h4>
+      <p class="small muted">${esc(nextLesson.body[0].split('. ').slice(0, 2).join('. '))}.</p>
+      <div style="margin-top:8px"><button class="btn small" data-act="lesson" data-id="${nextLesson.id}">Learn this</button></div>
+    </section>
+  </div>
+
+  <section aria-label="All sections" class="card" style="background:var(--paper-2)">
+    <div class="tiles">${TABS.filter(x => x.id !== 'home').map(x => `<button class="tile" data-act="go" data-tab="${x.id}"><i class="${x.bg}">${ICON[x.icon]}</i>${esc(x.short || x.label)}</button>`).join('')}</div>
+  </section>
+
+  <div class="grid2">
+    <div class="sticky butter">Missing a day isn't failing. Starting again is faithfulness.<small>A little reminder</small></div>
+    <div class="sticky sage">You don't have to do this perfectly. Just show up, open your Bible, and talk to God.<small>Grace for today</small></div>
+  </div>`;
+}
+
+function viewP31() {
+  const tabs = [['today', 'Daily check-in'], ['sheet', 'Progress sheet'], ['growth', 'Monthly growth'], ['notes', 'My notes'], ['world', 'In today\'s world']];
+  let body = '';
+  if (view.p31tab === 'today') body = p31Today();
+  else if (view.p31tab === 'sheet') body = p31Sheet();
+  else if (view.p31tab === 'growth') body = p31Growth();
+  else if (view.p31tab === 'notes') body = p31Notes();
+  else body = p31World();
+  return `
+  <div class="head"><span class="eyebrow">Proverbs 31 · progress sheet</span><h2>Becoming a <em>Proverbs 31</em> woman</h2>
+  <p class="lede">Ten marks of a woman who fears the Lord, with small daily ways to live each one. Everything you tick is saved, so you can watch God grow you week by week.</p></div>
+  <section class="banner"><p class="verse">"Strength and honour are her clothing; and she shall rejoice in time to come."</p><span class="ref">Proverbs 31:25</span>${ART.sprig.replace('<svg', '<svg class="sprig"')}</section>
+  <nav class="subtabs" aria-label="Proverbs 31 pages">${tabs.map(([id, l]) => `<button data-act="p31tab" data-id="${id}" aria-pressed="${view.p31tab === id}">${l}</button>`).join('')}</nav>
+  ${body}`;
+}
+function p31Today() {
+  const d = view.p31day, total = p31DayTotal(d), isToday = d === todayKey();
+  const focus = S.p31Focus[mondayOf(d)];
+  const order = focus ? [TRAITS.find(t => t.id === focus), ...TRAITS.filter(t => t.id !== focus)] : TRAITS;
+  return `
+  <div class="card" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+    <div class="datenav"><button data-act="p31day" data-n="-1" aria-label="Previous day">${ICON.left}</button><span>${isToday ? 'Today, ' : ''}${esc(fmt(d, { weekday: 'short', day: 'numeric', month: 'long' }))}</span><button data-act="p31day" data-n="1" aria-label="Next day" ${isToday ? 'disabled style="opacity:.35"' : ''}>${ICON.right}</button></div>
+    <div class="row" style="flex-wrap:nowrap">${ring(total / HABITS_TOTAL, `${Math.round(total / HABITS_TOTAL * 100)}%`, `${total} of ${HABITS_TOTAL}`)}</div>
+  </div>
+  <div class="traits">${order.map(t => {
+    const n = p31Count(d, t.id), i = TRAITS.indexOf(t) + 1;
+    return `<article class="card trait">
+      <div class="trait-top"><div><h3><span class="num">${i}.</span>${esc(t.title)}</h3><span class="ref">${esc(t.ref)}</span>${focus === t.id ? ' <span class="badge">Focus this week</span>' : ''}</div><span class="count ${n === 4 ? 'full' : ''}">${n}/4</span></div>
+      <div>${t.habits.map((h, hi) => { const id = `p31-${t.id}-${hi}`; const on = !!(((S.p31[d] || {})[t.id] || {})[hi]);
+        return `<label class="check" for="${id}"><input type="checkbox" id="${id}" data-check="p31.${d}.${t.id}.${hi}" ${on ? 'checked' : ''}><span>${esc(h)}</span></label>`; }).join('')}</div>
+    </article>`; }).join('')}</div>`;
+}
+function p31Sheet() {
+  const wk = view.p31week, days = [...Array(7)].map((_, i) => addDays(wk, i)), t = todayKey();
+  const rows = TRAITS.map((tr, i) => {
+    const counts = days.map(d => p31Count(d, tr.id)), sum = counts.reduce((a, b) => a + b, 0);
+    return `<tr><th class="t" scope="row"><span class="num" style="font-size:1.2rem">${i + 1}.</span>${esc(tr.title.replace(/^She (is )?/, '').replace(/^./, c => c.toUpperCase()))}</th>
+      ${counts.map((c, ci) => `<td class="${days[ci] === t ? 'today-col' : ''}"><div class="cell ${c ? 'lv' + c : ''}" title="${c} of 4">${c || ''}</div></td>`).join('')}
+      <td><b>${sum}</b><span class="muted small">/28</span></td></tr>`;
+  }).join('');
+  const weekTotal = days.reduce((a, d) => a + p31DayTotal(d), 0);
+  const per = TRAITS.map(tr => ({ tr, s: days.reduce((a, d) => a + p31Count(d, tr.id), 0) })).sort((a, b) => b.s - a.s);
+  const trend = [...Array(8)].map((_, i) => { const w = addDays(wk, -7 * (7 - i)); const tot = [...Array(7)].reduce((a, _, j) => a + p31DayTotal(addDays(w, j)), 0); return { w, pct: Math.round(tot / (HABITS_TOTAL * 7) * 100) }; });
+  const focus = S.p31Focus[wk] || '';
+  return `
+  <section class="card">
+    <div class="card-head"><div class="datenav"><button data-act="p31week" data-n="-1" aria-label="Previous week">${ICON.left}</button><span>Week of ${esc(fmt(wk, { day: 'numeric', month: 'long' }))}</span><button data-act="p31week" data-n="1" aria-label="Next week">${ICON.right}</button></div>
+      <span class="count">${weekTotal} of ${HABITS_TOTAL * 7} · ${Math.round(weekTotal / (HABITS_TOTAL * 7) * 100)}%</span></div>
+    <div class="sheet-wrap"><table class="sheet"><thead><tr><th></th>${days.map(d => `<th scope="col">${esc(fmt(d, { weekday: 'short' }))}<br><span style="font-weight:400">${parseKey(d).getDate()}</span></th>`).join('')}<th>Week</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="legend" style="margin-top:10px">Habits ticked that day: <span class="cell"></span>0 <span class="cell lv1"></span>1 <span class="cell lv2"></span>2 <span class="cell lv3"></span>3 <span class="cell lv4"></span>all 4</div>
+  </section>
+  <div class="grid2">
+    <section class="card">
+      <h3>Last 8 weeks</h3><p class="small muted">Percentage of all 40 daily habits ticked each week.</p>
+      <div class="trend">${trend.map(x => `<div class="${x.w === wk ? 'cur' : ''}"><span>${x.pct}%</span><b style="height:${Math.max(2, x.pct)}%"></b><span>${esc(fmt(x.w, { day: 'numeric', month: 'short' }))}</span></div>`).join('')}</div>
+    </section>
+    <section class="card stack">
+      <h3>This week</h3>
+      ${weekTotal ? `<p><b>Growing strong:</b> ${esc(per[0].tr.title)}</p><p><b>Needs a little love:</b> ${esc(per[per.length - 1].tr.title)}</p>` : '<p class="muted">Tick a few habits in the daily check-in and your week will show here.</p>'}
+      <label class="field">My focus for this week<select data-bind="p31Focus.${wk}" data-rerender="1"><option value="">Choose one area to pray over…</option>${TRAITS.map(t => `<option value="${t.id}" ${focus === t.id ? 'selected' : ''}>${esc(t.title)}</option>`).join('')}</select></label>
+      <p class="small muted">Your focus area moves to the top of the daily check-in all week.</p>
+    </section>
+  </div>`;
+}
+function p31Growth() {
+  const m = view.p31month, prev = addMonths(m, -1), cur = S.p31Ratings[m] || {}, last = S.p31Ratings[prev] || {};
+  const label = mm => new Date(mm + '-01T12:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  return `
+  <section class="card">
+    <div class="card-head"><div class="datenav"><button data-act="p31month" data-n="-1" aria-label="Previous month">${ICON.left}</button><span>${esc(label(m))}</span><button data-act="p31month" data-n="1" aria-label="Next month">${ICON.right}</button></div></div>
+    <p class="muted small" style="margin-bottom:12px">Once a month, prayerfully rate where you are in each area (1 = just beginning, 5 = God has really grown me here). Compare with last month to see your growth.</p>
+    <div class="stack">${TRAITS.map((t, i) => {
+      const r = cur[t.id] || 0, l = last[t.id] || 0, diff = r && l ? r - l : 0;
+      return `<div class="row" style="justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:10px">
+        <div style="min-width:0;flex:1 1 220px"><b><span class="num" style="font-size:1.2rem">${i + 1}.</span>${esc(t.title)}</b><div class="small muted">Last month: ${l || '–'} ${diff ? `<span class="delta ${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲ +' : '▼ '}${diff}</span>` : ''}</div></div>
+        <div class="rate" role="group" aria-label="Rate ${esc(t.title)}">${[1, 2, 3, 4, 5].map(n => `<button data-act="rate" data-id="${t.id}" data-n="${n}" class="${n <= r ? 'on' : ''}" aria-label="${n} of 5">${ICON.heartFill}</button>`).join('')}</div>
+      </div>`; }).join('')}</div>
+  </section>`;
+}
+function p31Notes() {
+  return `<div class="traits">${TRAITS.map((t, i) => `<section class="card trait">
+    <h3><span class="num">${i + 1}.</span>${esc(t.title)}</h3><p class="verse small">${esc((verseOf(t.ref) || {}).text || '')}</p>
+    <label class="sr" for="n-${t.id}">How God is growing me: ${esc(t.title)}</label>
+    <textarea class="lined" id="n-${t.id}" data-bind="p31Notes.${t.id}" placeholder="How is God growing me here?">${esc(S.p31Notes[t.id] || '')}</textarea></section>`).join('')}</div>`;
+}
+function p31World() {
+  return `<div class="grid2">
+    <section class="card"><span class="tape rose">In today's world, she…</span><ul class="hearts stack" style="gap:8px;margin-top:14px">${TODAYS_WORLD.map(x => `<li>${esc(x)}</li>`).join('')}</ul></section>
+    <div class="stack" style="gap:22px">
+      <div class="sticky">"She openeth her mouth with wisdom; and in her tongue is the law of kindness."<small>Proverbs 31:26</small></div>
+      <div class="sticky lav">She is strong, but she knows her strength comes from the Lord.<small>Remember</small></div>
+      <section class="card"><h3>A prayer for today</h3><p class="verse" style="margin-top:8px">Lord, make me a woman who fears You. Let my home be peaceful, my hands willing, my words kind and my heart trusting. I don't want to look like her for people to see; I want to look like You. Amen.</p></section>
+    </div></div>`;
+}
+
+function viewFasting() {
+  const fa = S.fast.active, t = todayKey();
+  const planned = S.fast.planned.filter(p => p.date >= t).sort((a, b) => a.date.localeCompare(b.date));
+  const hist = [...S.fast.history].reverse();
+  let live;
+  if (fa) {
+    const e = elapsed(fa.start), ty = fastTypeOf(fa.type), pct = Math.min(100, e.hours / fa.hours * 100);
+    const endAt = new Date(new Date(fa.start).getTime() + fa.hours * 36e5).toISOString();
+    const pr = HUNGER_PROMPTS[view.promptI % HUNGER_PROMPTS.length];
+    const entries = S.fast.journal.filter(j => j.fastId === fa.id).reverse();
+    live = `<section class="card fast-live">
+      <div class="stack">
+        <span class="tape butter">${esc(ty.name)} · in progress</span>
+        <div class="clock" data-fast-clock>${e.text}</div>
+        <div class="bar"><i data-fast-bar style="width:${pct}%"></i></div>
+        <p class="small muted">Started ${esc(fmtTime(fa.start))} · planned ${esc(durText(fa.hours))} · ends about ${esc(fmtTime(endAt))}</p>
+        ${fa.purpose ? `<p><b>Why I'm fasting:</b> ${esc(fa.purpose)}</p>` : ''}
+        ${fa.focus ? `<p><b>Praying for:</b> ${esc(fa.focus)}</p>` : ''}
+        ${fa.verse && verseOf(fa.verse) ? `<div><span class="ref">${esc(fa.verse)}</span><p class="verse">${esc(verseOf(fa.verse).text)}</p></div>` : ''}
+        ${view.endingFast ? `<div class="confirm"><b>Ready to break your fast?</b>
+          <label class="field">What did God show you? (optional)<textarea id="end-notes" placeholder="Something He taught me, an answer, a change in me…"></textarea></label>
+          <div class="row"><button class="btn primary" data-act="endfast">Break my fast with thanks</button><button class="btn ghost" data-act="cancelend">Keep fasting</button></div></div>`
+          : `<div class="row"><button class="btn" data-act="askend">End fast</button></div>`}
+      </div>
+      <div class="stack">
+        <div class="prompt-card"><span class="eyebrow">When hunger comes</span><p class="verse" style="font-size:1.08rem">${esc(pr.t)}</p><span class="ref">${esc(pr.ref)}</span>
+          <div><button class="btn small ghost" data-act="nextprompt">Another prompt</button></div></div>
+        <label class="field" for="fast-entry">Fasting journal<textarea id="fast-entry" class="lined" placeholder="Lord, today I…"></textarea></label>
+        <div><button class="btn small primary" data-act="fastjournal">${ICON.plus} Add to journal</button></div>
+        <div class="log">${entries.map(j => `<div class="log-item"><span class="small muted">${esc(fmtTime(j.at))}</span><p class="note-text">${esc(j.text)}</p></div>`).join('')}</div>
+      </div>
+    </section>`;
+  } else {
+    const ty = fastTypeOf(view.fastType);
+    live = `<section class="card stack">
+      <div class="card-head"><div><span class="eyebrow">Begin a fast</span><h3>Set this time apart for God</h3></div></div>
+      <div class="types" role="group" aria-label="Kind of fast">${FAST_TYPES.map(x => `<button class="type" data-act="fasttype" data-id="${x.id}" aria-pressed="${view.fastType === x.id}"><b>${esc(x.name)}</b><span>${esc(x.desc)}</span></button>`).join('')}</div>
+      <div class="grid2">
+        <label class="field">How long?<select id="fast-hours">${FAST_LENGTHS.map(([h, l]) => `<option value="${h}" ${view.fastHours === h ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <label class="field">A verse to carry with me<select id="fast-verse">${VERSES.filter(v => ['Fasting', 'Strength', 'Peace', 'Trust'].includes(v.topic)).map(v => `<option ${v.ref === 'Matthew 4:4' ? 'selected' : ''}>${esc(v.ref)}</option>`).join('')}</select></label>
+      </div>
+      <label class="field">Why am I fasting?<input class="text" id="fast-purpose" placeholder="e.g. seeking direction about my job, praying for my family"></label>
+      <label class="field">Who or what will I pray for?<input class="text" id="fast-focus" placeholder="e.g. my husband's health, my sister's salvation"></label>
+      <div class="row"><button class="btn primary" data-act="startfast">${ICON.wheat} Begin fast with prayer</button><span class="small muted">${esc(ty.name)} · the timer keeps running even if you close the app.</span></div>
+    </section>`;
+  }
+  return `
+  <div class="head"><span class="eyebrow">Fasting &amp; prayer</span><h2>"When you <em>fast</em>…"</h2>
+  <p class="lede">Hunger turned into prayer. Plan a fast, keep your heart on Jesus while you fast, and remember what He showed you.</p></div>
+  ${live}
+  <div class="grid3">${FAST_PRAYERS.map(p => `<div class="sticky ${p.color}" style="font-size:1.25rem">${esc(p.text)}<small>${esc(p.when)}</small></div>`).join('')}</div>
+  <div class="grid2">
+    <section class="card stack">
+      <h3>When I will fast</h3>
+      <div class="grid2"><label class="field">Date<input type="date" class="text" id="plan-date" value="${addDays(t, 1)}" min="${t}"></label>
+      <label class="field">Kind of fast<select id="plan-type">${FAST_TYPES.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></label></div>
+      <label class="field">Purpose<input class="text" id="plan-purpose" placeholder="What I'll seek God for"></label>
+      <div><button class="btn small" data-act="planfast">${ICON.plus} Add to my plan</button></div>
+      <div class="log">${planned.length ? planned.map(p => `<div class="log-item rose"><div class="row" style="justify-content:space-between"><b>${esc(fmt(p.date, { weekday: 'long', day: 'numeric', month: 'short' }))}</b>
+        <span class="row" style="gap:4px">${p.date === t && !fa ? `<button class="btn small primary" data-act="startplanned" data-id="${p.id}">Start now</button>` : ''}<button class="x" data-act="delplan" data-id="${p.id}" aria-label="Remove">${ICON.x}</button></span></div>
+        <span class="small muted">${esc(fastTypeOf(p.type).name)}${p.purpose ? ' · ' + esc(p.purpose) : ''}</span></div>`).join('') : '<p class="empty">No fasts planned yet. Many people fast on a set day each week or before a big decision.</p>'}</div>
+    </section>
+    <section class="card stack">
+      <h3>My fasts</h3>
+      <div class="log">${hist.length ? hist.map(h => `<div class="log-item"><div class="row" style="justify-content:space-between"><b>${esc(fastTypeOf(h.type).name)} · ${esc(durText(h.actualHours))}</b><button class="x" data-act="delhist" data-id="${h.id}" aria-label="Delete">${ICON.x}</button></div>
+        <span class="small muted">${esc(fmtTime(h.start))}${h.purpose ? ' · ' + esc(h.purpose) : ''}</span>${h.notes ? `<p class="note-text">${esc(h.notes)}</p>` : ''}</div>`).join('') : '<p class="empty">Your finished fasts and what God showed you will be kept here.</p>'}</div>
+    </section>
+  </div>
+  <section class="card">
+    <h3 style="margin-bottom:6px">Learn about fasting</h3>
+    <details class="teach" open><summary>What is biblical fasting?</summary><div class="body">
+      <p>Fasting is choosing to go without food (or something else you lean on) for a set time so you can give that hunger and time to God. Jesus expected His followers to fast: He said <i>"when ye fast"</i>, not "if" (Matthew 6:16).</p>
+      <p>It isn't a diet, a punishment or a way to earn God's favour. It is a way of saying with your whole body: <i>"Lord, I need You more than I need bread"</i> (Matthew 4:4).</p></div></details>
+    <details class="teach"><summary>Why people fasted in the Bible</summary><div class="body">
+      <ul class="hearts stack" style="gap:6px"><li><b>To return to God</b> with the whole heart (Joel 2:12)</li><li><b>To ask for protection and help</b>, like Ezra before the journey (Ezra 8:21-23) and Esther before going to the king (Esther 4:16)</li><li><b>To seek direction</b>, as the church did before sending Paul and Barnabas (Acts 13:2-3)</li><li><b>To grieve and repent</b>, like Nehemiah (Nehemiah 1:4)</li><li><b>To set others free</b>: the fast God chooses loosens chains and feeds the hungry (Isaiah 58:6-7)</li><li><b>To prepare for what God calls you to</b>, as Jesus did in the wilderness (Matthew 4:1-2)</li></ul></div></details>
+    <details class="teach"><summary>How to fast in a way that honours God</summary><div class="body">
+      <ol class="steps"><li><span><b>Start with your why.</b> Write your purpose down before you begin.</span></li><li><span><b>Replace, don't just remove.</b> Use mealtimes for prayer and Scripture.</span></li><li><span><b>Keep it between you and God.</b> Look after yourself and don't announce it (Matthew 6:17-18).</span></li><li><span><b>Watch your heart.</b> Fasting with a harsh spirit misses the point (Isaiah 58:3-5).</span></li><li><span><b>Write down what He shows you.</b> Use the fasting journal above.</span></li><li><span><b>Break it gently</b> with thanks and light food: fruit, broth, small portions.</span></li></ol></div></details>
+    <details class="teach"><summary>Please look after your body</summary><div class="body">
+      <p>Your body is a gift from God. If you are pregnant or breastfeeding, have diabetes or another medical condition, take medication, or have struggled with eating, please talk to your doctor before fasting from food. A <b>media fast</b> or giving up one specific thing honours God just as much.</p>
+      <p>Drink plenty of water during food fasts. If you feel faint, unwell or confused, stop and eat. Ending a fast early for your health is wisdom, not failure.</p></div></details>
+  </section>`;
+}
+
+function viewStudy() {
+  const done = Object.values(S.study.done).filter(Boolean).length;
+  return `
+  <div class="head"><span class="eyebrow">Rooted in Him · a 6-week personal Bible study</span><h2>Grow deep. <em>Stay close.</em> Trust God.</h2>
+  <p class="lede">One passage a day for six weeks. Tick it off, write a few honest notes, and answer each week's question. The goal isn't to finish; it's to know Jesus better than you did six weeks ago.</p></div>
+  <section class="card">
+    <div class="card-head"><h3>My Bible study routine</h3><span class="count ${done === 42 ? 'full' : ''}">${done} of 42 days</span></div>
+    <div class="bar" style="margin-bottom:16px"><i style="width:${done / 42 * 100}%"></i></div>
+    <div class="routine">${RHYTHM.map((s, i) => `<div><b>${i + 1}. ${s.title}</b><p>${esc(s.text)}</p></div>`).join('')}</div>
+  </section>
+  <div class="weeks">${PLAN.map((w, wi) => {
+    const wd = w.days.filter((_, di) => S.study.done[`${wi}-${di}`]).length;
+    return `<section class="card week">
+      <div class="week-head ${w.color}"><b>Week ${wi + 1} · ${wd}/7</b><h3>${esc(w.title)}</h3><span class="small">${esc(w.sub)}</span></div>
+      <div class="week-body">${w.days.map((d, di) => {
+        const k = `${wi}-${di}`, open = view.openDay === k, rest = /^Rest/.test(d), n = S.study.notes[k] || {};
+        return `<div class="day"><div class="day-row">
+          <label class="check" for="sd-${k}"><input type="checkbox" id="sd-${k}" data-check="study.done.${k}" ${S.study.done[k] ? 'checked' : ''}><span><em>Day ${di + 1}</em>${esc(d)}</span></label>
+          <button class="open-day" data-act="openday" data-k="${k}" aria-expanded="${open}" aria-label="Notes for day ${di + 1}">${ICON.right}</button></div>
+          ${open ? `<div class="day-detail">${rest ? '' : `<a href="${gateway(d)}" target="_blank" rel="noopener" class="small">${ICON.link.replace('<svg', '<svg width="14" height="14" style="vertical-align:-2px"')} Read ${esc(d)} (KJV) on Bible Gateway</a>`}
+            ${STUDY_FIELDS.map(([f, l]) => `<label class="field">${l}<textarea data-bind="study.notes.${k}.${f}" rows="2">${esc(n[f] || '')}</textarea></label>`).join('')}</div>` : ''}
+        </div>`; }).join('')}</div>
+      <div class="week-q"><span class="eyebrow">This week's question</span><p>${esc(w.q)}</p>
+        <label class="sr" for="wq-${wi}">My answer</label><textarea id="wq-${wi}" data-bind="study.answers.${wi}" rows="3" placeholder="My answer…">${esc(S.study.answers[wi] || '')}</textarea></div>
+    </section>`; }).join('')}</div>
+  <div class="grid2"><div class="sticky peach">One rule: don't let a missed day turn into quitting. If you miss three days, you haven't failed. Just pick it back up.<small>Grace</small></div>
+  <div class="sticky sky">"Rooted and built up in him, and stablished in the faith, as ye have been taught, abounding therein with thanksgiving."<small>Colossians 2:7</small></div></div>`;
+}
+
+function viewScripture() {
+  const tabs = [['library', 'Verse library'], ['saved', `Saved (${S.verses.fav.length})`], ['mine', 'My verses'], ['renew', 'Renew my mind']];
+  let body = '';
+  if (view.scriptTab === 'library') {
+    const list = view.topic === 'All' ? VERSES : VERSES.filter(v => v.topic === view.topic);
+    body = `<div class="chips" role="group" aria-label="Topics">${['All', ...TOPICS].map(tp => `<button class="chip" data-act="topic" data-id="${esc(tp)}" aria-pressed="${view.topic === tp}">${esc(tp)}</button>`).join('')}</div>
+      <div class="verses">${list.map(v => verseCard(v)).join('')}</div>`;
+  } else if (view.scriptTab === 'saved') {
+    const list = S.verses.fav.map(verseOf).filter(Boolean);
+    body = list.length ? `<p class="muted">${S.verses.memorized.length} memorised so far. Tap <b>Memorise</b> to practise a verse with words hidden.</p><div class="verses">${list.map(v => verseCard(v)).join('')}</div>` : '<p class="empty">Tap the heart on any verse to keep it here.</p>';
+  } else if (view.scriptTab === 'mine') {
+    const colors = ['', 'butter', 'sage', 'lav', 'sky', 'peach'];
+    body = `<section class="card stack"><h3>Write a verse on a note</h3>
+      <div class="grid2"><label class="field">Reference<input class="text" id="mv-ref" placeholder="e.g. Psalm 34:8"></label><label class="field">Why it matters to me<input class="text" id="mv-note" placeholder="optional"></label></div>
+      <label class="field">The verse<textarea id="mv-text" rows="3" placeholder="Type it out. Writing it helps you remember it."></textarea></label>
+      <div><button class="btn small primary" data-act="addmine">${ICON.plus} Pin it to my wall</button></div></section>
+      ${S.verses.mine.length ? `<div class="notes-wall">${S.verses.mine.map((v, i) => `<div class="sticky ${colors[i % colors.length]}" style="font-size:1.3rem">
+        <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span class="ref">${esc(v.ref)}</span><button class="x" data-act="delmine" data-id="${v.id}" aria-label="Remove">${ICON.x}</button></div>
+        <p style="margin-top:6px">${esc(v.text)}</p>${v.note ? `<small>${esc(v.note)}</small>` : ''}
+        <div style="margin-top:10px"><button class="heart-btn" data-act="practise" data-ref="${esc(v.ref)}">${ICON.eye} Memorise</button></div></div>`).join('')}</div>` : '<p class="empty">Your own verses will be pinned here like sticky notes in a journaling Bible.</p>'}`;
+  } else {
+    body = `<section class="card stack"><div><h3>Trade a lie for the truth</h3><p class="small muted">"Be ye transformed by the renewing of your mind" (Romans 12:2). Write the thought that pulls you down, then what God says instead.</p></div>
+      <label class="field">The lie I've been believing<input class="text" id="tr-lie" placeholder="e.g. I'm too far behind to ever change"></label>
+      <label class="field">What God says is true<textarea id="tr-truth" rows="2" placeholder="e.g. His mercies are new every morning"></textarea></label>
+      <label class="field">The verse<select id="tr-ref"><option value="">Choose a verse (optional)</option>${VERSES.map(v => `<option>${esc(v.ref)}</option>`).join('')}</select></label>
+      <div><button class="btn small primary" data-act="addtruth">${ICON.plus} Renew my mind</button></div></section>
+      ${S.truths.length ? `<div class="verses">${[...S.truths].reverse().map(x => `<article class="card truth"><div class="row" style="justify-content:space-between"><span class="eyebrow">I used to believe</span><button class="x" data-act="deltruth" data-id="${x.id}" aria-label="Remove">${ICON.x}</button></div>
+        <p class="lie">${esc(x.lie)}</p><span class="eyebrow" style="color:var(--rose-ink)">But God says</span><p class="tru">${esc(x.truth)}</p>
+        ${x.ref && verseOf(x.ref) ? `<p class="verse small">"${esc(verseOf(x.ref).text)}" <span class="ref">${esc(x.ref)}</span></p>` : ''}</article>`).join('')}</div>` : '<p class="empty">Nothing here yet. Start with the thought that is loudest today.</p>'}`;
+  }
+  return `
+  <div class="head"><span class="eyebrow">Scripture</span><h2>Hide His Word <em>in your heart</em></h2>
+  <p class="lede">Verses for every season (King James Version), a place to keep your own, a memorisation helper and a page for renewing your mind.</p></div>
+  <nav class="subtabs" aria-label="Scripture pages">${tabs.map(([id, l]) => `<button data-act="scripttab" data-id="${id}" aria-pressed="${view.scriptTab === id}">${l}</button>`).join('')}</nav>
+  ${body}`;
+}
+
+function viewLearn() {
+  if (view.lesson) {
+    const L = LESSONS.find(l => l.id === view.lesson), i = LESSONS.indexOf(L), kv = verseOf(L.key), st = S.lessons.steps[L.id] || {};
+    const prev = LESSONS[i - 1], next = LESSONS[i + 1];
+    return `<div class="lesson">
+      <div><button class="btn small ghost" data-act="lesson" data-id="">${ICON.left} All lessons</button></div>
+      <div class="head"><span class="eyebrow">Lesson ${i + 1} of ${LESSONS.length} · walk with God</span><h2>${esc(L.title)}</h2></div>
+      <section class="banner"><p class="verse">"${esc(kv.text)}"</p><span class="ref">${esc(L.key)}</span>${ART.sprig.replace('<svg', '<svg class="sprig"')}</section>
+      <section class="card"><div class="body">${L.body.map(p => `<p>${esc(p)}</p>`).join('')}</div></section>
+      <section class="card stack"><h3>Steps to live it</h3>
+        <ol class="steps">${L.steps.map(([h, d], si) => `<li><label class="check" for="ls-${L.id}-${si}"><input type="checkbox" id="ls-${L.id}-${si}" data-check="lessons.steps.${L.id}.${si}" ${st[si] ? 'checked' : ''}><span><b>${esc(h)}</b>${esc(d)}</span></label></li>`).join('')}</ol></section>
+      <div class="grid2">
+        <div class="sticky butter">${esc(L.challenge)}<small>Live it this week</small></div>
+        <section class="card stack"><span class="eyebrow">Reflect</span><p class="verse">${esc(L.q)}</p>
+          <label class="sr" for="ln-${L.id}">My reflection</label><textarea class="lined" id="ln-${L.id}" data-bind="lessons.notes.${L.id}" placeholder="Write honestly…">${esc(S.lessons.notes[L.id] || '')}</textarea></section>
+      </div>
+      ${L.also.length ? `<div class="verses">${L.also.map(r => verseOf(r)).filter(Boolean).map(v => verseCard(v)).join('')}</div>` : ''}
+      <div class="row" style="justify-content:space-between">
+        ${prev ? `<button class="btn ghost" data-act="lesson" data-id="${prev.id}">${ICON.left} ${esc(prev.title)}</button>` : '<span></span>'}
+        <button class="btn ${S.lessons.done[L.id] ? '' : 'primary'}" data-act="lessondone" data-id="${L.id}">${S.lessons.done[L.id] ? ICON.check + ' Completed' : 'Mark lesson complete'}</button>
+        ${next ? `<button class="btn ghost" data-act="lesson" data-id="${next.id}">${esc(next.title)} ${ICON.right}</button>` : '<span></span>'}
+      </div></div>`;
+  }
+  const done = Object.values(S.lessons.done).filter(Boolean).length;
+  return `
+  <div class="head"><span class="eyebrow">Walk with God · teaching</span><h2>Learning the <em>ways of a godly life</em></h2>
+  <p class="lede">Short lessons with Scripture, simple steps and a question to sit with. Take one a week, or go slower. Each one ends with a way to live it.</p></div>
+  <section class="card" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <div style="width:110px">${ART.lamp}</div>
+    <div class="stack" style="flex:1 1 240px;gap:8px"><p class="verse">"Thy word is a lamp unto my feet, and a light unto my path."</p><span class="ref">Psalm 119:105</span>
+    <div class="bar"><i style="width:${done / LESSONS.length * 100}%"></i></div><span class="small muted">${done} of ${LESSONS.length} lessons completed</span></div>
+  </section>
+  <div class="lessons">${LESSONS.map((l, i) => `<button class="card lesson-card" data-act="lesson" data-id="${l.id}">
+    <div class="row" style="justify-content:space-between"><span class="n">${i + 1}.</span>${S.lessons.done[l.id] ? `<span class="badge">${ICON.check.replace('<svg', '<svg width="12" height="12"')} Done</span>` : ''}</div>
+    <h3>${esc(l.title)}</h3><span class="ref">${esc(l.key)}</span><p class="small muted">${esc(l.body[0].split('. ')[0])}.</p></button>`).join('')}</div>`;
+}
+
+function viewPrayer() {
+  const open = S.prayers.filter(p => !p.answered).reverse(), ans = S.prayers.filter(p => p.answered).reverse();
+  const item = p => `<div class="prayer-item ${p.answered ? 'answered' : ''}"><div style="min-width:0"><p class="ptext">${esc(p.text)}</p>
+      <span class="small muted">Prayed since ${esc(fmt(p.date, { day: 'numeric', month: 'short', year: 'numeric' }))}</span>
+      ${p.answered ? `<p class="answer">${ICON.check.replace('<svg', '<svg width="14" height="14" style="vertical-align:-2px"')} Answered ${esc(fmt(p.answeredOn, { day: 'numeric', month: 'short' }))}${p.answer ? ': ' + esc(p.answer) : ''}</p>` : ''}
+      ${view.answering === p.id ? `<div class="confirm" style="margin-top:8px"><label class="field">How did God answer?<input class="text" id="ans-text" placeholder="optional"></label><div class="row"><button class="btn small primary" data-act="answer" data-id="${p.id}">Mark answered</button><button class="btn small ghost" data-act="answering" data-id="">Cancel</button></div></div>` : ''}</div>
+    <div class="row" style="gap:4px;flex-wrap:nowrap">${!p.answered && view.answering !== p.id ? `<button class="btn small" data-act="answering" data-id="${p.id}">Answered</button>` : ''}<button class="x" data-act="delprayer" data-id="${p.id}" aria-label="Delete">${ICON.x}</button></div></div>`;
+  const mt = MOMENT_TYPES.find(m => m[0] === view.momentType);
+  return `
+  <div class="head"><span class="eyebrow">Prayer journal</span><h2>Talk to God. <em>Listen.</em> Remember.</h2>
+  <p class="lede">Keep your requests, mark the ones He answers, and collect the moments you see Him at work.</p></div>
+  <div class="grid2">
+    <section class="card stack"><h3>My prayer list</h3>
+      <div class="row" style="flex-wrap:nowrap"><label class="sr" for="pr-text">New prayer request</label><input class="text" id="pr-text" placeholder="Lord, I'm asking You for…"><button class="btn primary" data-act="addprayer" aria-label="Add prayer">${ICON.plus}</button></div>
+      <div>${open.length ? open.map(item).join('') : '<p class="empty">Write your first request above.</p>'}</div></section>
+    <section class="card stack"><h3>Answered prayers <span class="count">${ans.length}</span></h3>
+      <div>${ans.length ? ans.map(item).join('') : '<p class="empty">When God answers, mark it here so you never forget His faithfulness.</p>'}</div></section>
+  </div>
+  <section class="card stack">
+    <div><span class="eyebrow">Keep this page through your whole walk</span><h3>My God moments</h3></div>
+    <div class="chips" role="group" aria-label="Kind of moment">${MOMENT_TYPES.map(([id, l]) => `<button class="chip" data-act="momenttype" data-id="${id}" aria-pressed="${view.momentType === id}">${esc(l)}</button>`).join('')}</div>
+    <label class="field" for="gm-text">${esc(mt[1])}<textarea id="gm-text" class="lined" placeholder="Write it down…"></textarea></label>
+    <div><button class="btn small primary" data-act="addmoment">${ICON.plus} Keep this moment</button></div>
+    ${S.moments.length ? `<div class="notes-wall">${[...S.moments].reverse().map(m => { const t = MOMENT_TYPES.find(x => x[0] === m.type) || MOMENT_TYPES[0];
+      return `<div class="sticky ${{ 'bg-sage': 'sage', 'bg-sky': 'sky', 'bg-butter': 'butter', 'bg-rose': '', 'bg-lav': 'lav', 'bg-peach': 'peach' }[t[2]]}" style="font-size:1.3rem">
+      <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span class="eyebrow">${esc(t[1])}</span><button class="x" data-act="delmoment" data-id="${m.id}" aria-label="Remove">${ICON.x}</button></div>
+      <p style="margin-top:6px;white-space:pre-wrap">${esc(m.text)}</p><small>${esc(fmt(m.date, { day: 'numeric', month: 'short', year: 'numeric' }))}</small></div>`; }).join('')}</div>` : ''}
+  </section>`;
+}
+
+function viewSettings() {
+  const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1), android = /Android/.test(ua);
+  let size = 0; try { size = (localStorage.getItem(KEY) || '').length; } catch (e) {}
+  return `
+  <div class="head"><span class="eyebrow">Settings &amp; backup</span><h2>Make it <em>yours</em></h2></div>
+  <div class="grid2">
+    <section class="card stack"><h3>About you</h3>
+      <label class="field">What should Abide call you?<input class="text" id="set-name" data-bind="name" data-rerender-side="1" value="${esc(S.name)}" placeholder="Your first name"></label>
+      <p class="small muted">Scripture in Abide is the King James Version (public domain). Study readings link to Bible Gateway, where you can switch to any translation you like.</p></section>
+    <section class="card stack"><h3>Your data</h3>
+      <p class="small">Everything is saved automatically on this device, in this browser (${(size / 1024).toFixed(1)} KB so far). Nothing is uploaded anywhere. To move to a new phone or keep a safe copy, download a backup.</p>
+      <div class="row"><button class="btn" data-act="export">Download backup</button><button class="btn" data-act="import">Restore backup</button></div>
+      ${view.confirmReset ? `<div class="confirm"><b>Erase everything in Abide on this device?</b><span class="small">This deletes your progress sheet, fasts, notes and prayers. Download a backup first if you might want them.</span>
+        <div class="row"><button class="btn rose" data-act="reset">Yes, erase it all</button><button class="btn ghost" data-act="askreset">Keep my data</button></div></div>` : '<div><button class="btn ghost small" data-act="askreset">Erase all data…</button></div>'}</section>
+  </div>
+  <section class="card stack"><h3>Put Abide on your home screen</h3>
+    <p class="small">Abide works like an app once it is opened from its web address: its own icon, its own window, and it keeps working without internet.</p>
+    <ul class="hearts stack" style="gap:6px">
+      <li ${ios ? 'style="font-weight:700"' : ''}><b>iPhone or iPad (Safari):</b> tap Share, then <b>Add to Home Screen</b>.</li>
+      <li ${android ? 'style="font-weight:700"' : ''}><b>Android (Chrome):</b> open the ⋮ menu, then <b>Install app</b> or <b>Add to Home screen</b>.</li>
+      <li><b>Computer (Chrome or Edge):</b> click the install icon at the right end of the address bar.</li></ul></section>`;
+}
+
+/* ================= practise modal ================= */
+function practiseModal() {
+  const v = verseOf(view.practise); if (!v) return '';
+  const lv = view.level, words = v.text.split(/\s+/);
+  const levels = ['Read it through', 'Some words hidden', 'Half hidden', 'First letters only', 'All hidden'];
+  const html = words.map((w, i) => {
+    let cls = '';
+    if (lv === 1 && i % 4 === 2) cls = 'hid'; else if (lv === 2 && i % 2 === 1) cls = 'hid'; else if (lv === 3) cls = 'first'; else if (lv === 4) cls = 'hid';
+    return `<span class="w ${cls}" ${cls ? 'data-act="reveal" tabindex="0" role="button" aria-label="Hidden word, tap to show"' : ''}>${esc(w)}</span>`;
+  }).join(' ');
+  const mem = S.verses.memorized.includes(v.ref);
+  return `<div class="modal" data-act="closemodal-bg"><div class="card" role="dialog" aria-modal="true" aria-label="Memorise ${esc(v.ref)}">
+    <div class="row" style="justify-content:space-between"><div><span class="eyebrow">Memorise · step ${lv + 1} of 5</span><h3>${esc(v.ref)}</h3></div><button class="icon-btn" data-act="closemodal" aria-label="Close">${ICON.x}</button></div>
+    <p class="small muted">${levels[lv]}. Say it out loud, then tap a blank to check yourself.</p>
+    <p class="practice">${html}</p>
+    <div class="row" style="justify-content:space-between">
+      <div class="row"><button class="btn small ghost" data-act="level" data-n="-1" ${lv === 0 ? 'disabled' : ''}>Show more</button><button class="btn small" data-act="level" data-n="1" ${lv === 4 ? 'disabled' : ''}>Hide more</button></div>
+      <button class="btn small ${mem ? '' : 'primary'}" data-act="memorized" data-ref="${esc(v.ref)}">${mem ? ICON.check + ' Memorised' : 'I know it by heart'}</button>
+    </div></div></div>`;
+}
+
+/* ================= render ================= */
+const VIEWS = { home: viewHome, proverbs31: viewP31, fasting: viewFasting, study: viewStudy, scripture: viewScripture, learn: viewLearn, prayer: viewPrayer, settings: viewSettings };
+function renderSide() {
+  const t = todayKey(), rh = S.rhythm[t] || {}, fa = S.fast.active;
+  document.getElementById('side').innerHTML = `
+    <div class="brand">${BRAND}<div><h1>Abide</h1><small>Grow deep, not fast</small></div></div>
+    <div class="mini"><div class="mini-date">${esc(fmt(t, { weekday: 'long', day: 'numeric', month: 'long' }))}</div>
+      <div class="mini-dots" title="Today's rhythm">${RHYTHM.map(s => `<i class="${rh[s.id] ? 'on' : ''}"></i>`).join('')}<span style="margin-left:6px">${RHYTHM.filter(s => rh[s.id]).length}/4 today · ${rhythmStreak()} day streak</span></div>
+      <div>Proverbs 31: ${p31DayTotal(t)} of ${HABITS_TOTAL} today</div>
+      ${fa ? `<div class="mini-fast">Fasting: <b data-fast-clock>${elapsed(fa.start).text}</b></div>` : ''}</div>
+    <nav class="nav">${TABS.map(x => `<button data-act="go" data-tab="${x.id}" ${view.tab === x.id ? 'aria-current="page"' : ''}>${ICON[x.icon]}${esc(x.label)}</button>`).join('')}</nav>
+    <p class="side-foot">"I am the vine, ye are the branches."<br><span style="font-size:.95rem">John 15:5</span></p>`;
+  document.getElementById('dock').innerHTML = ['home', 'proverbs31', 'fasting', 'study', 'scripture'].map(id => { const x = TABS.find(t => t.id === id);
+    return `<button class="${x.bg}" data-act="go" data-tab="${id}" aria-label="${esc(x.label)}" ${view.tab === id ? 'aria-current="page"' : ''}>${ICON[x.icon]}</button>`; }).join('');
+}
+function render() {
+  const y = window.scrollY;
+  renderSide();
+  const tab = TABS.find(x => x.id === view.tab);
+  document.getElementById('top-title').textContent = tab.label;
+  document.getElementById('main').innerHTML = `${ART.corner.replace('<svg', '<svg class="deco tr"')}${ART.sprig.replace('<svg', '<svg class="deco bl"')}<div class="page">${VIEWS[view.tab]()}</div>`;
+  document.getElementById('modal-root').innerHTML = view.practise ? practiseModal() : '';
+  window.scrollTo(0, y);
+}
+function go(tab) {
+  view.tab = tab; view.lesson = tab === 'learn' ? view.lesson : null; view.endingFast = false; view.confirmReset = false;
+  document.getElementById('app').classList.remove('drawer');
+  if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
+  render(); window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', () => { readHash(); render(); });
+
+/* ================= actions ================= */
+const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, id = b.dataset.id, n = Number(b.dataset.n);
+  if (a === 'closemodal-bg' && e.target !== b) return;
+  switch (a) {
+    case 'go': go(b.dataset.tab); return;
+    case 'drawer': document.getElementById('app').classList.toggle('drawer'); return;
+    case 'rhythm': { const t = todayKey(); S.rhythm[t] = S.rhythm[t] || {}; S.rhythm[t][id] = !S.rhythm[t][id]; save(); break; }
+    case 'p31tab': view.p31tab = id; break;
+    case 'p31day': { const d = addDays(view.p31day, n); if (d <= todayKey()) view.p31day = d; break; }
+    case 'p31week': view.p31week = addDays(view.p31week, 7 * n); break;
+    case 'p31month': view.p31month = addMonths(view.p31month, n); break;
+    case 'rate': { const m = view.p31month; S.p31Ratings[m] = S.p31Ratings[m] || {}; S.p31Ratings[m][id] = S.p31Ratings[m][id] === n ? 0 : n; save(); break; }
+    case 'fav': { const r = b.dataset.ref, f = S.verses.fav; const i = f.indexOf(r); i >= 0 ? f.splice(i, 1) : f.push(r); save(true); toast(i >= 0 ? 'Removed from saved' : 'Verse saved'); break; }
+    case 'practise': view.practise = b.dataset.ref; view.level = 0; break;
+    case 'closemodal': case 'closemodal-bg': view.practise = null; break;
+    case 'level': view.level = Math.max(0, Math.min(4, view.level + n)); break;
+    case 'reveal': b.classList.toggle('shown'); return;
+    case 'memorized': { const r = b.dataset.ref, m = S.verses.memorized; const i = m.indexOf(r); i >= 0 ? m.splice(i, 1) : m.push(r); if (i < 0 && !S.verses.fav.includes(r)) S.verses.fav.push(r); save(true); toast(i >= 0 ? 'Unmarked' : 'Hidden in your heart'); break; }
+    case 'scripttab': view.scriptTab = id; break;
+    case 'topic': view.topic = id; break;
+    case 'addmine': { const ref = val('mv-ref'), text = val('mv-text'); if (!ref || !text) { toast('Add a reference and the verse'); return; } S.verses.mine.push({ id: uid(), ref, text, note: val('mv-note') }); save(); break; }
+    case 'delmine': S.verses.mine = S.verses.mine.filter(v => v.id !== id); save(); break;
+    case 'addtruth': { const lie = val('tr-lie'), truth = val('tr-truth'); if (!lie || !truth) { toast('Write the lie and the truth'); return; } S.truths.push({ id: uid(), lie, truth, ref: val('tr-ref'), date: todayKey() }); save(); break; }
+    case 'deltruth': S.truths = S.truths.filter(x => x.id !== id); save(); break;
+    case 'openday': view.openDay = view.openDay === b.dataset.k ? null : b.dataset.k; break;
+    case 'lesson': view.lesson = id || null; if (view.tab !== 'learn') { go('learn'); return; } window.scrollTo(0, 0); break;
+    case 'lessondone': S.lessons.done[id] = !S.lessons.done[id]; save(); toast(S.lessons.done[id] ? 'Lesson complete' : 'Marked not done'); break;
+    case 'fasttype': { view.fastType = id; view.fastHours = fastTypeOf(id).hours; break; }
+    case 'startfast': {
+      const hours = Number(val('fast-hours')) || 24;
+      S.fast.active = { id: uid(), type: view.fastType, hours, start: new Date().toISOString(), purpose: val('fast-purpose'), focus: val('fast-focus'), verse: val('fast-verse') };
+      save(); toast('Your fast has begun. He is with you.'); break;
+    }
+    case 'startplanned': {
+      const p = S.fast.planned.find(x => x.id === id); if (!p) break;
+      S.fast.active = { id: uid(), type: p.type, hours: fastTypeOf(p.type).hours, start: new Date().toISOString(), purpose: p.purpose, focus: '', verse: 'Matthew 4:4' };
+      S.fast.planned = S.fast.planned.filter(x => x.id !== id); save(); break;
+    }
+    case 'nextprompt': view.promptI++; break;
+    case 'fastjournal': { const text = val('fast-entry'); if (!text || !S.fast.active) { toast('Write something first'); return; } S.fast.journal.push({ id: uid(), fastId: S.fast.active.id, at: new Date().toISOString(), text }); save(); break; }
+    case 'askend': view.endingFast = true; break;
+    case 'cancelend': view.endingFast = false; break;
+    case 'endfast': {
+      const fa = S.fast.active; if (!fa) break;
+      const j = S.fast.journal.filter(x => x.fastId === fa.id).map(x => x.text);
+      S.fast.history.push({ ...fa, end: new Date().toISOString(), actualHours: elapsed(fa.start).hours, notes: [val('end-notes'), ...j].filter(Boolean).join('\n\n') });
+      S.fast.active = null; view.endingFast = false; save(); toast('Fast complete. Well done, faithful one.'); break;
+    }
+    case 'planfast': { const date = val('plan-date'); if (!date) { toast('Pick a date'); return; } S.fast.planned.push({ id: uid(), date, type: val('plan-type'), purpose: val('plan-purpose') }); save(); break; }
+    case 'delplan': S.fast.planned = S.fast.planned.filter(x => x.id !== id); save(); break;
+    case 'delhist': S.fast.history = S.fast.history.filter(x => x.id !== id); save(); break;
+    case 'addprayer': { const text = val('pr-text'); if (!text) { toast('Write your request first'); return; } S.prayers.push({ id: uid(), text, date: todayKey(), answered: false }); save(); break; }
+    case 'answering': view.answering = id || null; break;
+    case 'answer': { const p = S.prayers.find(x => x.id === id); if (p) { p.answered = true; p.answeredOn = todayKey(); p.answer = val('ans-text'); } view.answering = null; save(true); toast('Praise God!'); break; }
+    case 'delprayer': S.prayers = S.prayers.filter(x => x.id !== id); save(); break;
+    case 'momenttype': view.momentType = id; break;
+    case 'addmoment': { const text = val('gm-text'); if (!text) { toast('Write it down first'); return; } S.moments.push({ id: uid(), type: view.momentType, text, date: todayKey() }); save(); break; }
+    case 'delmoment': S.moments = S.moments.filter(x => x.id !== id); save(); break;
+    case 'export': exportBackup(); return;
+    case 'import': document.getElementById('restore-file').click(); return;
+    case 'askreset': view.confirmReset = !view.confirmReset; break;
+    case 'reset': S = defaults(); view.confirmReset = false; try { localStorage.removeItem(KEY); } catch (err) {} toast('Abide has been reset'); break;
+    default: return;
+  }
+  render();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && view.practise) { view.practise = null; render(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.w[data-act="reveal"]')) { e.preventDefault(); e.target.classList.toggle('shown'); }
+  if (e.key === 'Enter' && e.target.id === 'pr-text') { e.preventDefault(); document.querySelector('[data-act="addprayer"]').click(); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.check) { setPath(t.dataset.check, t.checked); save(true); render(); return; }
+  if (t.dataset.bind && t.dataset.rerender) { setPath(t.dataset.bind, t.value); save(); render(); return; }
+  if (t.id === 'fast-hours') view.fastHours = Number(t.value);
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.bind && !t.dataset.rerender) { setPath(t.dataset.bind, t.value); save(true); if (t.dataset.rerenderSide) renderSide(); }
+});
+
+/* ================= backup ================= */
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `abide-backup-${todayKey()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast('Backup downloaded');
+}
+document.getElementById('restore-file').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!data || typeof data !== 'object' || !data.p31 || !data.fast) throw new Error('not an Abide backup');
+      const base = defaults(); for (const k in base) if (data[k] === undefined) data[k] = base[k];
+      S = data; save(true); render(); toast('Backup restored');
+    } catch (err) { toast('That file is not an Abide backup'); }
+    e.target.value = '';
+  };
+  r.readAsText(f);
+});
+
+/* live fasting clock */
+setInterval(() => {
+  const fa = S.fast.active; if (!fa) return;
+  const e = elapsed(fa.start);
+  document.querySelectorAll('[data-fast-clock]').forEach(el => { el.textContent = e.text; });
+  const bar = document.querySelector('[data-fast-bar]'); if (bar) bar.style.width = Math.min(100, e.hours / fa.hours * 100) + '%';
+}, 1000);
+/* keep "today" correct past midnight */
+let lastToday = todayKey();
+setInterval(() => { const t = todayKey(); if (t !== lastToday) { if (view.p31day === lastToday) view.p31day = t; lastToday = t; if (!document.activeElement || !document.activeElement.matches('input,textarea,select')) render(); } }, 60000);
+
+render();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
