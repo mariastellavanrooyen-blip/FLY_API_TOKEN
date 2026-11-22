@@ -164,6 +164,37 @@ kbd { font-family: var(--f-num); font-size: 11.5px; border: 1px solid var(--line
 .toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 10px; display: flex; gap: 14px; align-items: center; font-size: 14px; max-width: calc(100vw - 32px); box-shadow: 0 8px 24px rgb(0 0 0 / .18); z-index: 10; }
 .toast button { background: transparent; border: 0; color: var(--paper); font-weight: 700; text-decoration: underline; padding: 0; }
 
+/* Debts checklist */
+.debt-sum { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--muted); margin-bottom: 6px; flex-wrap: wrap; }
+.debt-sum b { color: var(--ink); }
+.debt-done { margin: 10px 0 0; font-weight: 700; color: var(--ok); }
+.debt-list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 2px; }
+.debt label { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 9px 8px; border-radius: 8px; cursor: pointer; position: relative; }
+.debt label:hover { background: var(--paper); }
+.debt input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.debt .box { width: 24px; height: 24px; border: 2px solid var(--muted); border-radius: 6px; display: grid; place-items: center; background: var(--card); transition: background .15s, border-color .15s; }
+.debt input:checked + .box { background: var(--accent); border-color: var(--accent); }
+.debt input:checked + .box::after { content: ""; width: 6px; height: 12px; border: solid var(--accent-ink); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+.debt input:focus-visible + .box { outline: 2px solid var(--accent); outline-offset: 2px; }
+.debt-text { min-width: 0; }
+.debt-line { position: relative; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.debt-name { font-weight: 700; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.debt-amt { white-space: nowrap; }
+.debt-meta { display: block; font-size: 12.5px; color: var(--muted); }
+.debt.paid .debt-name, .debt.paid .debt-amt { color: var(--muted); transition: color .3s; }
+/* The hand-drawn line through a paid debt */
+.scribble { opacity: 0; position: absolute; left: -5px; top: 50%; width: calc(100% + 10px); height: 12px; transform: translateY(-50%); overflow: visible; pointer-events: none; }
+.scribble path { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.debt.paid .scribble { opacity: 1; }
+.debt.paid .scribble path { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) { .debt.just .scribble path { animation: pen .55s cubic-bezier(.4, 0, .2, 1) .08s both; } }
+@keyframes pen { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.debt-edit { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 4.6em auto; gap: 6px 8px; padding: 10px 0; border-bottom: 1px dashed var(--line); align-items: end; }
+.debt-edit label { display: grid; gap: 3px; min-width: 0; }
+.debt-edit .field { padding: 6px 9px; }
+.debt-edit .wide { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 8px; }
+@media (max-width: 420px) { .debt-edit { grid-template-columns: minmax(0, 1fr) 6.5em; } .debt-edit .del { grid-column: 1 / -1; justify-self: start; } .debt-edit .wide { grid-template-columns: minmax(0, 1fr); } }
+
 @media (max-width: 860px) {
   .main { grid-template-columns: minmax(0, 1fr); }
   .col.side { order: -1; }
@@ -384,7 +415,7 @@ function draw() {
   if (!ready) { $("body").innerHTML = `<p class="empty">Loading your budget…</p>`; return; }
   if (!S.config) return renderSetup();
   if (!$("main")) renderShell();
-  renderBanner(); renderSummary(); renderEnvelopes(); renderCatPicker(); renderLedger(); renderTrend();
+  renderBanner(); renderSummary(); renderEnvelopes(); renderCatPicker(); renderDebts(); renderLedger(); renderTrend();
 }
 
 function renderSetup() {
@@ -439,6 +470,7 @@ function renderShell() {
             <div><button class="btn primary" type="submit" id="qaSubmit">Add</button></div>
           </form>
         </section>
+        <section class="card" id="debts" aria-labelledby="debtsTitle"></section>
         <section class="card" id="ledger" aria-label="Transactions"></section>
         <section class="card trend" id="trend" aria-label="Six month trend"></section>
       </div>
@@ -711,6 +743,124 @@ function onQuickAdd(e) {
   addTx({ id: uid("t"), ...(inMode ? { kind: "in" } : {}), date, month: date.slice(0, 7), amount, catId, note: $("qaNote").value.trim().slice(0, 120), created: Date.now() });
   $("qaAmount").value = ""; $("qaNote").value = "";
   $("qaAmount").focus();
+}
+
+/* ---------- debts checklist ---------- */
+// The list of debts lives in config.debts and carries over every month; what's been paid is kept per month in
+// config.debtPaid["YYYY-MM"][debtId] = { on, amount, txId? }. Ticking can also record the payment in an envelope.
+const debtList = () => (S.config?.debts || []).slice().sort((a, b) => (a.day || 99) - (b.day || 99) || a.name.localeCompare(b.name));
+const paidIn = m => (S.config?.debtPaid || {})[m] || {};
+const ordinal = n => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th");
+const shortDay = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
+const debtCat = () => cats().find(c => /debt/i.test(c.name))?.id || "";
+const SCRIBBLE = `<svg class="scribble" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M1 7.5 C 12 5.5, 22 8.5, 34 6.5 S 56 5, 68 7 S 88 7.5, 99 5"/></svg>`;
+let pendingDebtFocus = null;
+
+function debtLeft(d) {
+  if (!(d.owed > 0)) return null;
+  let paid = 0;
+  for (const m of Object.values(S.config.debtPaid || {})) if (m[d.id]) paid += m[d.id].amount ?? d.amount ?? 0;
+  return round2(d.owed - paid);
+}
+
+function toggleDebt(id, on, month = S.month) {
+  const d = (S.config.debts || []).find(x => x.id === id); if (!d) return;
+  if (on) {
+    if (paidIn(month)[id]) return;
+    let txId = null;
+    const env = d.catId && catById(d.catId);
+    if (env && d.amount > 0) {
+      txId = uid("t");
+      const date = month === S.month ? defaultDate() : `${month}-01`;
+      store.setTx({ id: txId, date, month, amount: d.amount, catId: d.catId, note: `${d.name} · debt payment`, debtId: d.id, created: Date.now() });
+    }
+    S.justPaid = id;
+    setTimeout(() => { if (S.justPaid === id) S.justPaid = null; }, 900);
+    saveConfig(c => { c.debtPaid = c.debtPaid || {}; c.debtPaid[month] = { ...(c.debtPaid[month] || {}), [id]: { on: isoDay(new Date()), amount: d.amount || 0, ...(txId ? { txId } : {}) } }; });
+    toast(`Ticked off ${d.name}${txId ? ` · ${money(d.amount, true)} added to ${env.name}` : ""}`, () => toggleDebt(id, false, month));
+  } else {
+    const entry = paidIn(month)[id]; if (!entry) return;
+    if (entry.txId && S.tx.some(t => t.id === entry.txId)) store.delTx(entry.txId);
+    saveConfig(c => { if (c.debtPaid?.[month]) { delete c.debtPaid[month][id]; if (!Object.keys(c.debtPaid[month]).length) delete c.debtPaid[month]; } });
+    toast(`${d.name} is unticked${entry.txId ? " and its payment was taken off" : ""}.`);
+  }
+}
+
+function renderDebts() {
+  const box = $("debts"); if (!box) return;
+  const active = document.activeElement, activeId = active && box.contains(active) ? active.id : null, sel = active && active.selectionStart;
+  const editing = S.editingDebts, list = editing ? (S.config.debts || []) : debtList(), paid = paidIn(S.month);
+  const mName = esc(monthName(S.month, { month: "long" }));
+  let html = `<div class="card-head"><h2 id="debtsTitle">Debts to pay</h2>${list.length || editing ? `<button class="btn ${editing ? "primary" : ""}" id="debtsEdit">${editing ? "Done" : "Edit list"}</button>` : ""}</div>`;
+  if (editing) {
+    html += `<p class="hint" style="margin:-4px 0 4px">Your list carries over to every month. Pick an envelope to record each payment as spending when you tick it off, or choose "Just tick it off".</p>`;
+    html += list.map(d => `<div class="debt-edit">
+      <label><span class="label">Debt</span><input class="field" id="dn-${d.id}" data-dfield="name" data-did="${d.id}" value="${esc(d.name)}"></label>
+      <label><span class="label">Each month</span><input class="field num" id="da-${d.id}" data-dfield="amount" data-did="${d.id}" inputmode="decimal" value="${d.amount || ""}" placeholder="0"></label>
+      <label><span class="label">Due day</span><input class="field num" id="dd-${d.id}" data-dfield="day" data-did="${d.id}" inputmode="numeric" value="${d.day || ""}" placeholder="–" aria-label="Day of the month it's due"></label>
+      <button class="del" id="dx-${d.id}" data-ddel="${d.id}">Remove</button>
+      <div class="wide">
+        <label><span class="label">When ticked, add to</span><select class="field" id="dc-${d.id}" data-dfield="catId" data-did="${d.id}">
+          <option value="">Just tick it off</option>${cats().map(c => `<option value="${c.id}"${c.id === d.catId ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+        <label><span class="label">Total still owed (optional)</span><input class="field num" id="do-${d.id}" data-dfield="owed" data-did="${d.id}" inputmode="decimal" value="${d.owed || ""}" placeholder="e.g. 18 000"></label>
+      </div></div>`).join("");
+    html += `<div style="margin-top:8px"><button class="btn ghost" id="debtAdd">+ Add a debt</button></div>`;
+    // Gentle check: does each envelope plan enough for the debts paid from it?
+    const plan = planFor(S.month).planned, need = {};
+    list.forEach(d => { if (d.catId && catById(d.catId) && d.amount > 0) need[d.catId] = round2((need[d.catId] || 0) + d.amount); });
+    for (const [cid, amt] of Object.entries(need)) if ((plan[cid] || 0) < amt)
+      html += `<p class="hint" style="margin:8px 0 0">Your debts paid from <b>${esc(catById(cid).name)}</b> add up to ${money(amt)} a month, but that envelope plans ${money(plan[cid] || 0)}. You can raise it under Edit plan.</p>`;
+  } else if (!list.length) {
+    html += `<p class="empty" style="padding-top:0">List the debts you pay every month: a car loan, store card, credit card or personal loan. Tick each one off when it's paid and a line is drawn through it.</p>
+      <button class="btn primary" id="debtAddFirst">+ Add your first debt</button>`;
+  } else {
+    const paidList = list.filter(d => paid[d.id]);
+    const total = round2(list.reduce((a, d) => a + (d.amount || 0), 0));
+    const paidAmt = round2(paidList.reduce((a, d) => a + (paid[d.id].amount ?? d.amount ?? 0), 0));
+    html += `<div class="debt-sum"><span><b>${paidList.length} of ${list.length}</b> paid in ${mName}</span>${total ? `<span class="num">${money(paidAmt)} of ${money(total)}</span>` : ""}</div>
+      <div class="bar"><i style="width:${(paidList.length / list.length) * 100}%"></i></div>`;
+    html += `<ul class="debt-list">${list.map(d => {
+      const p = paid[d.id], left = debtLeft(d);
+      const meta = [p ? `Paid ${shortDay(p.on)}` : d.day ? `Due on the ${ordinal(d.day)}` : "",
+        left === null ? "" : left <= 0 ? "Paid off! 🎉" : `${money(left)} still owed`].filter(Boolean).join(" · ");
+      return `<li class="debt${p ? " paid" : ""}${S.justPaid === d.id ? " just" : ""}"><label>
+        <input type="checkbox" id="dk-${d.id}" data-debt="${d.id}"${p ? " checked" : ""} aria-label="${esc(d.name)}${d.amount ? ", " + money(d.amount, true) : ""}${p ? ", paid" : ""}">
+        <span class="box" aria-hidden="true"></span>
+        <span class="debt-text"><span class="debt-line"><span class="debt-name">${esc(d.name)}</span><span class="num debt-amt">${d.amount ? money(d.amount, true) : ""}</span>${SCRIBBLE}</span>${meta ? `<span class="debt-meta">${meta}</span>` : ""}</span>
+      </label></li>`;
+    }).join("")}</ul>`;
+    if (paidList.length === list.length) html += `<p class="debt-done">Everything's paid for ${mName}. Well done! 🎉</p>`;
+  }
+  box.innerHTML = html;
+
+  if ($("debtsEdit")) $("debtsEdit").onclick = () => { S.editingDebts = !S.editingDebts; render(); };
+  const addDebt = () => {
+    const id = uid("d");
+    S.editingDebts = true; pendingDebtFocus = "dn-" + id;
+    saveConfig(c => { c.debts = [...(c.debts || []), { id, name: "New debt", amount: 0, day: null, catId: debtCat(), owed: 0 }]; });
+  };
+  if ($("debtAdd")) $("debtAdd").onclick = addDebt;
+  if ($("debtAddFirst")) $("debtAddFirst").onclick = addDebt;
+  box.querySelectorAll("[data-debt]").forEach(cb => (cb.onchange = () => toggleDebt(cb.dataset.debt, cb.checked)));
+  box.querySelectorAll("[data-dfield]").forEach(inp => (inp.onchange = () => {
+    const id = inp.dataset.did, f = inp.dataset.dfield, raw = inp.value.trim();
+    let v = raw;
+    if (f === "name") { if (!raw) { inp.value = (S.config.debts || []).find(x => x.id === id)?.name || ""; return; } }
+    else if (f === "amount" || f === "owed") { v = raw === "" ? 0 : parseAmount(raw); if (!(v >= 0)) { toast("Enter a number, for example 1500."); return render(); } }
+    else if (f === "day") { v = raw === "" ? null : Math.round(Number(raw)); if (v !== null && !(v >= 1 && v <= 31)) { toast("Enter a day of the month from 1 to 31."); return render(); } }
+    saveConfig(c => { const d = (c.debts || []).find(x => x.id === id); if (d) d[f] = v; });
+  }));
+  box.querySelectorAll("[data-ddel]").forEach(b => (b.onclick = () => {
+    if (!b.classList.contains("armed")) { b.classList.add("armed"); b.textContent = "Remove?"; setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Remove"; } }, 3000); return; }
+    const id = b.dataset.ddel, name = (S.config.debts || []).find(x => x.id === id)?.name;
+    saveConfig(c => { c.debts = (c.debts || []).filter(x => x.id !== id); });
+    toast(`Removed ${name} from your list. Payments already recorded stay in your envelopes.`);
+  }));
+
+  const focusId = pendingDebtFocus || activeId;
+  pendingDebtFocus = null;
+  const el = focusId && document.getElementById(focusId);
+  if (el) { el.focus(); try { if (sel != null && focusId === activeId) el.setSelectionRange(sel, sel); else if (el.select) el.select(); } catch {} }
 }
 
 function renderLedger() {
