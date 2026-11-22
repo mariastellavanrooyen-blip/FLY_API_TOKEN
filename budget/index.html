@@ -132,7 +132,20 @@ kbd { font-family: var(--f-num); font-size: 11.5px; border: 1px solid var(--line
 
 /* Ledger */
 .tx-day { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 10px 0 4px; }
-.tx { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.tx { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.tx-check { display: grid; place-items: center; width: 34px; height: 34px; margin: -4px -4px -4px -6px; border-radius: 8px; cursor: pointer; }
+.tx-check:hover { background: var(--paper); }
+.tx-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.tx-check .box { width: 22px; height: 22px; border: 2px solid var(--muted); border-radius: 6px; display: grid; place-items: center; background: var(--card); transition: background .15s, border-color .15s; }
+.tx-check input:checked + .box { background: var(--accent); border-color: var(--accent); }
+.tx-check input:checked + .box::after { content: ""; width: 6px; height: 11px; border: solid var(--accent-ink); border-width: 0 2.5px 2.5px 0; transform: translateY(-1px) rotate(45deg); }
+.tx-check input:focus-visible + .box { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tx .strike { position: absolute; left: 38px; right: 34px; top: calc(50% - 13px); height: 20px; pointer-events: none; }
+.tx .strike .scribble { left: 0; top: 0; width: 100%; height: 20px; transform: none; }
+.tx.paid .what div, .tx.paid > .num { color: var(--muted); transition: color .3s; }
+.tx.paid .scribble { opacity: 1; }
+.tx.paid .scribble path { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) { .tx.just .scribble path { animation: pen .55s cubic-bezier(.4, 0, .2, 1) .08s both; } }
 .tx:last-child { border-bottom: 0; }
 .tx .what { min-width: 0; }
 .tx .what div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -754,6 +767,8 @@ const ordinal = n => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "
 const shortDay = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
 const debtCat = () => cats().find(c => /debt/i.test(c.name))?.id || "";
 const SCRIBBLE = `<svg class="scribble" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M1 7.5 C 12 5.5, 22 8.5, 34 6.5 S 56 5, 68 7 S 88 7.5, 99 5"/></svg>`;
+// For ledger rows: through the name (upper line), then down through the amount on the right.
+const TX_SCRIBBLE = `<svg class="scribble" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M0.5 4.5 C 10 3, 22 5.5, 34 4 S 50 3.5, 58 6 C 66 9, 72 13.5, 80 13.5 S 94 12.5, 99.5 13"/></svg>`;
 let pendingDebtFocus = null;
 
 function debtLeft(d) {
@@ -863,7 +878,16 @@ function renderDebts() {
   if (el) { el.focus(); try { if (sel != null && focusId === activeId) el.setSelectionRange(sel, sel); else if (el.select) el.select(); } catch {} }
 }
 
+function tickTx(id, on) {
+  const t = S.tx.find(x => x.id === id); if (!t) return;
+  const next = { ...t };
+  if (on) { next.paid = true; next.paidOn = isoDay(new Date()); S.justTx = id; setTimeout(() => { if (S.justTx === id) S.justTx = null; }, 900); }
+  else { delete next.paid; delete next.paidOn; }
+  store.setTx(next);
+}
+
 function renderLedger() {
+  const refocus = document.activeElement && $("ledger").contains(document.activeElement) ? document.activeElement.id : null;
   let list = monthTx(S.month);
   if (S.filter) list = list.filter(t => t.catId === S.filter);
   list.sort((a, b) => (b.date + String(b.created || 0)).localeCompare(a.date + String(a.created || 0)));
@@ -871,7 +895,9 @@ function renderLedger() {
   const inn = round2(list.filter(isIn).reduce((a, t) => a + t.amount, 0));
   const shown = S.showAll ? list : list.slice(0, 25);
   const title = S.filter ? esc(catById(S.filter)?.name || "Envelope") : "Money in & out";
+  const ticked = list.filter(t => t.paid).length;
   let html = `<div class="card-head"><h2>${title}</h2><span class="num hint">${money(out, true)} out${inn ? ` · <span class="amt-in">+${money(inn, true)} in</span>` : ""}</span></div>`;
+  if (list.length) html += `<p class="hint" style="margin:-6px 0 2px">${ticked ? `<b>${ticked} of ${list.length}</b> ticked off. ` : ""}Tick an entry once it's paid and a line is drawn through it.</p>`;
   if (!list.length) html += `<p class="empty">${S.filter ? "Nothing in this envelope" : "Nothing recorded"} in ${esc(monthName(S.month, { month: "long" }))} yet. Add your first purchase above.</p>`;
   let day = "";
   for (const t of shown) {
@@ -882,13 +908,17 @@ function renderLedger() {
     }
     const c = catById(t.catId), inc = isIn(t);
     const where = inc ? (c ? "Money in · " + c.name : "Money in · Unassigned") : (c?.name || "Uncategorised");
-    html += `<div class="tx"><div class="what"><div>${esc(t.note || (inc ? "Extra money" : c?.name || "Spending"))} ${t.example ? `<span class="ex">Example</span>` : ""}</div>
+    html += `<div class="tx${t.paid ? " paid" : ""}${S.justTx === t.id ? " just" : ""}">
+      <label class="tx-check"><input type="checkbox" id="tk-${t.id}" data-txtick="${t.id}"${t.paid ? " checked" : ""} aria-label="${esc(t.note || (inc ? "Extra money" : c?.name || "Spending"))}, ${money(t.amount, true)}: ${t.paid ? "ticked off" : "tick off"}"><span class="box" aria-hidden="true"></span></label>
+      <span class="strike">${TX_SCRIBBLE}</span><div class="what"><div>${esc(t.note || (inc ? "Extra money" : c?.name || "Spending"))} ${t.example ? `<span class="ex">Example</span>` : ""}</div>
       <div class="cat"><span class="dot" style="background:var(--${inc ? "ok" : c?.group || "line"})"></span>${esc(where)}</div></div>
       <span class="num ${inc ? "amt-in" : ""}">${inc ? "+" : ""}${money(t.amount, true)}</span><button class="x" data-delt="${t.id}" aria-label="Delete ${esc(t.note || "transaction")}">×</button></div>`;
   }
   if (list.length > shown.length) html += `<button class="btn ghost" id="showAll">Show all ${list.length}</button>`;
   $("ledger").innerHTML = html;
   $("ledger").querySelectorAll("[data-delt]").forEach(b => (b.onclick = () => deleteTx(b.dataset.delt)));
+  $("ledger").querySelectorAll("[data-txtick]").forEach(cb => (cb.onchange = () => tickTx(cb.dataset.txtick, cb.checked)));
+  if (refocus && $(refocus)) $(refocus).focus();
   if ($("showAll")) $("showAll").onclick = () => { S.showAll = true; renderLedger(); };
 }
 
