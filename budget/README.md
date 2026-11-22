@@ -10,6 +10,8 @@ A single-file envelope budgeting app (`index.html`, no build step).
   Each month, tick a debt off when it's paid and a line is drawn through it. Ticking can also record
   the payment in an envelope (for example *Debt repayment*), and unticking takes it off again.
   The list starts fresh, unticked, every month and shows how much of each debt is still owed.
+- **Tick off entries**: every entry in *Money in & out* has a tick box. Tick it once it's paid and a
+  pen line is drawn through it; the list shows how many are ticked off. Tap again to untick.
 - **Decide**: see what's left to spend, a safe-to-spend-per-day figure, unassigned money,
   a pace marker on each envelope, your plan's balance against 50 / 30 / 20, and a
   six-month spending trend.
