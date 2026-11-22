@@ -6,6 +6,10 @@ A single-file envelope budgeting app (`index.html`, no build step).
   (needs / wants / savings & debt). Each month's plan carries forward until you change it.
 - **Track**: add spending in a few keystrokes (press `N`, type an amount, pick an envelope,
   Enter). Frequent envelopes appear as one-tap chips. Undo is on every add and delete.
+- **Debts to pay**: list your monthly debt payments once (amount, due day, optional total still owed).
+  Each month, tick a debt off when it's paid and a line is drawn through it. Ticking can also record
+  the payment in an envelope (for example *Debt repayment*), and unticking takes it off again.
+  The list starts fresh, unticked, every month and shows how much of each debt is still owed.
 - **Decide**: see what's left to spend, a safe-to-spend-per-day figure, unassigned money,
   a pace marker on each envelope, your plan's balance against 50 / 30 / 20, and a
   six-month spending trend.
