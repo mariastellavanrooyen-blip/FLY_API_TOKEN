@@ -47,6 +47,12 @@ A cottage-style Bible app with a Proverbs 31 progress sheet, a fasting and praye
 scripture to save and memorise, and lessons on walking with God. It lives in [`abide/`](abide/README.md).
 Open `abide/index.html` directly, or use it at `/FLY_API_TOKEN/abide/` once GitHub Pages is deployed.
 
+## 🦢 Dawn's Book: baby book & daily word
+
+A keepsake baby book and Bible companion for Michaela and baby Dawn: photo album chapters, Mommy & Me, a family tree,
+letters, Daily Word and a prayer journal. It lives in [`dawns-book/`](dawns-book/README.md).
+Use it at `/FLY_API_TOKEN/dawns-book/` once GitHub Pages is deployed.
+
 ## Features
 
 - **Dashboard** — upcoming assignments, today's habits, goals in progress, your burrow at a glance, tip of the day
