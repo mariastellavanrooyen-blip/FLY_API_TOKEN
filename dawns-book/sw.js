@@ -1,6 +1,6 @@
 // Dawn's Book service worker: lets the installed app open offline.
 // Her book is NOT stored here. It lives in the phone's own database (IndexedDB).
-const CACHE = 'dawns-book-v1';
+const CACHE = 'dawns-book-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png', './img/bg-petals.jpg','./img/bg-rainbow.jpg','./img/bg-roses.jpg','./img/cover-swan.jpg','./img/frame-carousel.jpg','./img/frame-sweets.jpg','./img/frame-teddy.jpg','./img/garden-diary.jpg','./img/icon.jpg','./img/meadow.jpg','./img/puzzle.jpg','./img/st-bear.jpg','./img/st-bible.jpg','./img/st-cross.jpg','./img/st-duck.jpg','./img/st-girl.jpg','./img/st-horse.jpg','./img/st-tea.jpg'];
 
 self.addEventListener('install', e => {

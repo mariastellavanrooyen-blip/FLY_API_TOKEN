@@ -26,7 +26,7 @@ The **Our Details** tab inside the app shows the same steps.
    with aunties, uncles and godparents
 4. **Letters**: letters to Dawn, sealed until a date if she wants
 5. **Daily Word**: verses for Mama and for Dawn (KJV), today's rhythm with a streak, encouragement, saved verses and a
-   memorise helper, all on the puzzle artwork
+   memorise helper, on a plain cream page
 6. **Prayer Journal**: prayers, answered prayers, God moments and study notes
 7. **Our Details**: names, due date, birthday, backup and restore
 
