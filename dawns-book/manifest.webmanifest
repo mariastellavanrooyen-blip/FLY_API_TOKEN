@@ -1,0 +1,17 @@
+{
+  "name": "Dawn's Book",
+  "short_name": "Dawn's Book",
+  "description": "Dawn's keepsake baby book and daily Bible companion: photo album, Mommy & Me, letters, Daily Word and a prayer journal.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F3E9E1",
+  "theme_color": "#F3E9E1",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

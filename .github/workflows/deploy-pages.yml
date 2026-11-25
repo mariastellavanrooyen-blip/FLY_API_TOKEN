@@ -1,4 +1,4 @@
-name: Deploy frontend + Book Nook + Tend + Abide to GitHub Pages
+name: Deploy frontend + Book Nook + Tend + Abide + Dawn's Book to GitHub Pages
 
 on:
   # Manual only — Maria chose to run the app locally instead of via GitHub
@@ -54,6 +54,12 @@ jobs:
         run: |
           mkdir -p frontend/dist/abide
           cp abide/index.html abide/sw.js abide/manifest.webmanifest abide/*.png frontend/dist/abide/
+
+      - name: Add Dawn's Book baby journal (served at /dawns-book/)
+        run: |
+          mkdir -p frontend/dist/dawns-book/img
+          cp dawns-book/index.html dawns-book/sw.js dawns-book/manifest.webmanifest dawns-book/*.png frontend/dist/dawns-book/
+          cp dawns-book/img/*.jpg frontend/dist/dawns-book/img/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
